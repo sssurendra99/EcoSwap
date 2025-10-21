@@ -1,0 +1,136 @@
+<!-- src/main/resources/templates/dashboard/index.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <h3 class="mb-3">Welcome to EcoSwap Dashboard</h3>
+
+        <!-- Small Boxes -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>150</h3>
+                        <p>Products</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>53</h3>
+                        <p>Users</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>120</h3>
+                        <p>Orders</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>35</h3>
+                        <p>CO₂ Saved</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Products</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>EcoBag - 20 units sold</li>
+                            <li>Reusable Bottle - 35 units sold</li>
+                            <li>Second-hand Laptop - 5 units sold</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Top Users</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>John Doe - 25 purchases</li>
+                            <li>Jane Smith - 18 purchases</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Monthly Transactions</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="transactionsChart" style="height:250px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script th:src="@{/adminlte/plugins/chart.js/Chart.min.js}"></script>
+<script th:inline="javascript">
+    const ctx = document.getElementById('transactionsChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan','Feb','Mar','Apr','May'],
+            datasets: [{
+                label: 'Orders',
+                data: [10, 20, 15, 25, 30],
+                backgroundColor: 'rgba(54, 162, 235, 0.6)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+</script>
+
+</body>
+</html>
