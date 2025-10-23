@@ -1,23 +1,57 @@
 package com.example.ecoswap.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import com.example.ecoswap.security.CustomUserDetailsService;
+import com.example.ecoswap.security.RoleBasedAuthSuccessHandler;
+import org.springframework.context.annotation.*;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@EnableWebSecurity
 public class SecurityConfig {
-    
+
+    private final CustomUserDetailsService userDetailsService;
+    private final RoleBasedAuthSuccessHandler successHandler;
+
+    public SecurityConfig(CustomUserDetailsService uds, RoleBasedAuthSuccessHandler sh) {
+        this.userDetailsService = uds;
+        this.successHandler = sh;
+    }
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authProvider() {
+        DaoAuthenticationProvider p = new DaoAuthenticationProvider();
+        p.setUserDetailsService(userDetailsService);
+        p.setPasswordEncoder(passwordEncoder());
+        return p;
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()  // Allow all requests for now
+                .requestMatchers("/css/**", "/js/**", "/adminlte/**", "/register**", "/login", "/", "/error").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/seller/**").hasRole("SELLER")
+                .requestMatchers("/customer/**").hasRole("CUSTOMER")
+                .anyRequest().authenticated()
             )
-            .csrf(csrf -> csrf.disable());  // Disable CSRF for testing
-        
+            .formLogin(form -> form
+                .loginPage("/login")
+                .successHandler(successHandler)
+                .permitAll()
+            )
+            .logout(logout -> logout.logoutUrl("/logout").permitAll())
+            .csrf(csrf -> csrf.disable());
+
+        http.authenticationProvider(authProvider());
         return http.build();
     }
 }
