@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Register - Seller</title>
+    <link th:href="@{/adminlte/dist/css/adminlte.min.css}" rel="stylesheet"/>
+</head>
+<body class="hold-transition">
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header"><h4>Seller Registration</h4></div>
+        <div class="card-body">
+            <form th:action="@{/register-seller}" method="post" th:object="${seller}">
+                <div class="mb-3">
+                    <label>Email</label>
+                    <input type="email" th:field="*{email}" class="form-control" required/>
+                </div>
+                <div class="mb-3">
+                    <label>Password</label>
+                    <input type="password" th:field="*{password}" class="form-control" required/>
+                </div>
+                <div class="mb-3">
+                    <label>Store Name</label>
+                    <input type="text" th:field="*{storeName}" class="form-control" required/>
+                </div>
+                <div class="mb-3">
+                    <label>Business Address</label>
+                    <input type="text" th:field="*{businessAddress}" class="form-control"/>
+                </div>
+                <div th:if="${error}" class="text-danger mb-2" th:text="${error}"></div>
+                <button class="btn btn-primary" type="submit">Register</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
