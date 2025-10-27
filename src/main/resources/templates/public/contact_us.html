@@ -1,151 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EcoSwap | Contact Us</title>
-    <style>
-        *{
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-    
-        }
-
-        body{
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            color:#f7f7f7;
-        }
-
-        main{
-            flex: 1;
-            padding: 40px 20px;
-        }
-
-        .content {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        h1{
-            color: #1dbf73;
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
-
-        .contact-form{
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-        }
-
-        .contact-form label{
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .contact-form input,
-        .contact-form textarea{
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-
-        .contact-form button{
-            background-color: #1dbf73;
-            color: white;
-            border: none;
-            padding: 12px 250px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-
-        .contact-form button:hover{
-            background-color: #19a463;
-        }
-
-        /* Footer Styles (same as other pages) */
-        footer{
-            background-color: #222;
-            color: #fff;
-            text-align: center;
-            padding: 40px 20px 20px;
-            margin-top: auto;
-        }
-
-        .footer-container{
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid ;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin-bottom: 30px;
-        }
-
-        .footer-section h3{
-            color: #1dbf73;
-            margin-bottom: 20px;
-            font-size:1.2rem;
-        }
-
-        .footer-section p{
-           color: #bbb;
-           line-height: 1.6;
-           margin-bottom: 15px;
-        }
-
-        .footer-links {
-            life-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-
-        .footer-links a {
-            color: #bbb;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: #1dbf73;
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid;
-            color: #888;
-        }
-
-        @media (max-width: 768px) {
-           .footer-container {
-               grid-template-columns: 1fr;
-            }
-        }
-
-    </style>
+    <link rel="stylesheet" href="../../static/css/style.css">
 </head>
-<body> 
+
+<body>
+    <div id="header"></div>
+
     <main>
         <div class="content">
-            <h1>Contact Us</h1>
-            <p>We'd love to hear from you! Please fill out the form below and we'll get back to you soon.</p>
-
-            <form class="contact-form">
+            <div class="form-container">
+                <h1>Contact Us</h1>
+                <p>We'd love to hear from you! Please fill out the form below and we'll get back to you soon.</p>
+                <form>
                     <label for="name">Your Name</label>
                     <input type="text" id="name" placeholder="Enter your name" required>
 
@@ -158,35 +29,12 @@
                     <button type="submit">Send Message</button>
                 </form>
             </div>
+        </div>
     </main>
 
-    <!--Footer (same as other pages)-->
-    <footer>
-        <div class="footer-container">
-            <div class="footer-section">
-                <h3>About EcoSwap</h3>
-                <p>EcoSwap is your sustainable marketplace for trading and swapping eco-friendly products. Join our community in making the world greener, one swap at a time.</p>
-            </div>
+    <div id="footer"></div>
 
-            <div class="footer-section">
-                <h3>Quick Links</h3>
-                <ul class="footer-links">
-                    <li><a href="default.html">Home</a></li>
-                    <li><a href="about.html">About Us</a></li>
-                    <li><a href="contact_us.html">Contact Us</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-section">
-                <h3>Contact Info</h3>
-                <p>📧 support@eco.swap.com</p>
-                <p>📞 +94 71 234 5678</p>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; 2025 EcoSwap. All rights reserved. | Designed for a sustainable future 🌱</p>
-        </div>
-    </footer>
+    <script src="script.js"></script>
 </body>
+
 </html>
