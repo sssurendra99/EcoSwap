@@ -2,52 +2,41 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Login | EcoSwap</title>
-    <link th:href="@{/adminlte/dist/css/adminlte.min.css}" rel="stylesheet">
+    <title>Login - EcoSwap</title>
+    <link th:href="@{/adminlte/dist/css/adminlte.min.css}" rel="stylesheet"/>
+    <link th:href="@{/adminlte/plugins/fontawesome-free/css/all.min.css}" rel="stylesheet"/>
 </head>
-<body class="hold-transition login-page">
-
+<body class="login-page">
 <div class="login-box">
-    <div class="login-logo">
-        <b>EcoSwap</b> Login
-    </div>
-    <div class="card">
-        <div class="card-body login-card-body">
+    <div class="card card-outline card-primary">
+        <div class="card-header text-center">
+            <a class="h1"><b>Eco</b>Swap</a>
+        </div>
+        <div class="card-body">
             <p class="login-box-msg">Sign in to start your session</p>
-
             <form th:action="@{/login}" method="post">
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Username" name="username">
-                    <div class="input-group-append">
-                        <div class="input-group-text">
-                            <span class="fas fa-user"></span>
-                        </div>
-                    </div>
+                    <input type="text" name="username" class="form-control" placeholder="Email" required/>
+                    <div class="input-group-append"><div class="input-group-text"><span class="fas fa-envelope"></span></div></div>
                 </div>
-
                 <div class="input-group mb-3">
-                    <input type="password" class="form-control" placeholder="Password" name="password">
-                    <div class="input-group-append">
-                        <div class="input-group-text">
-                            <span class="fas fa-lock"></span>
-                        </div>
-                    </div>
+                    <input type="password" name="password" class="form-control" placeholder="Password" required/>
+                    <div class="input-group-append"><div class="input-group-text"><span class="fas fa-lock"></span></div></div>
                 </div>
-
+                <div th:if="${error}" class="text-danger mb-2" th:text="${error}"></div>
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-8">
+                        <a th:href="@{/register-customer}">Register as Customer</a><br/>
+                        <a th:href="@{/register-seller}">Register as Seller</a>
+                    </div>
+                    <div class="col-4">
                         <button type="submit" class="btn btn-primary btn-block">Sign In</button>
                     </div>
                 </div>
             </form>
-
         </div>
     </div>
 </div>
-
-<script th:src="@{/adminlte/plugins/jquery/jquery.min.js}"></script>
-<script th:src="@{/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
-<script th:src="@{/adminlte/dist/js/adminlte.min.js}"></script>
-
 </body>
 </html>
+
