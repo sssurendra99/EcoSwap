@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">EcoSwap</title>
+
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+<div class="wrapper">
+
+    <!-- Header -->
+    <div th:replace="public/fragments/header :: header"></div>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <section class="content pt-3" layout:fragment="content">
+            <!-- Page-specific content will go here -->
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="public/fragments/footer :: footer"></div>
+
+</div>
+
+</body>
+</html>

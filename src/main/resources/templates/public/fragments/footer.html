@@ -1,4 +1,4 @@
-<footer>
+<footer th:fragment="footer" class="footer">
     <div class="footer-container">
         <div class="footer-section">
             <h3>About EcoSwap</h3>
@@ -9,9 +9,9 @@
         <div class="footer-section">
             <h3>Quick Links</h3>
             <ul class="footer-links">
-                <li><a href="default.html">Home</a></li>
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="contact_us.html">Contact Us</a></li>
+                <li><a th:href="@{/}">Home</a></li>
+                <li><a th:href="@{/about}">About Us</a></li>
+                <li><a th:href="@{/contactus}">Contact Us</a></li>
             </ul>
         </div>
 

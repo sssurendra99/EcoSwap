@@ -19,4 +19,10 @@ public class PublicPagesController {
         model.addAttribute("title", "EcoSwap | About");
         return "public/about";
     }
+
+    @GetMapping("/contactus")
+    public String contactus(Model model) {
+        model.addAttribute("title", "EcoSwap | Contact Us");
+        return "public/contact_us";
+    }
 }
