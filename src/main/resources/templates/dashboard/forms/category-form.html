@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title th:text="${category.id != null ? 'Edit Category' : 'Add New Category'}">Add Category - EcoSwap</title>
+    <link th:href="@{/css/categories.css}" rel="stylesheet"/>
+    <script th:src="@{/js/category-form.js}" defer></script>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1 th:text="${category.id != null ? 'Edit Category' : 'Add New Category'}">Add New Category</h1>
+                <p class="subtitle">Create and manage product categories for your marketplace</p>
+            </div>
+            <a th:href="@{/dashboard/categories}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Categories
+            </a>
+        </div>
+    </div>
+
+    <!-- Warning for editing -->
+    <div th:if="${category.id != null && productCount != null && productCount > 0}" class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>This category has <strong th:text="${productCount}">0</strong> products. Changes will affect all associated products.</span>
+    </div>
+
+    <!-- Category Form -->
+    <form th:action="${category.id != null ? '/dashboard/categories/' + category.id + '/edit' : '/dashboard/categories/add'}" 
+          method="post" 
+          th:object="${category}"
+          class="category-form">
+        
+        <div class="form-grid">
+            <!-- Left Column -->
+            <div class="form-column">
+                <!-- Basic Information Card -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="name">Category Name <span class="required">*</span></label>
+                            <input type="text" 
+                                   id="name" 
+                                   th:field="*{name}" 
+                                   class="form-control" 
+                                   placeholder="e.g., Reusable Products"
+                                   onkeyup="generateSlug()"
+                                   required>
+                            <small class="form-hint">Give your category a clear, descriptive name</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="slug">URL Slug <span class="required">*</span></label>
+                            <div class="input-group">
+                                <span class="input-prefix">/</span>
+                                <input type="text" 
+                                       id="slug" 
+                                       th:field="*{slug}" 
+                                       class="form-control" 
+                                       placeholder="reusable-products"
+                                       required>
+                            </div>
+                            <small class="form-hint">URL-friendly version (auto-generated from name)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" 
+                                      th:field="*{description}" 
+                                      class="form-control" 
+                                      rows="4"
+                                      placeholder="Describe what products belong to this category..."></textarea>
+                            <small class="form-hint">Help customers understand this category</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="displayOrder">Display Order</label>
+                            <input type="number" 
+                                   id="displayOrder" 
+                                   th:field="*{displayOrder}" 
+                                   class="form-control" 
+                                   min="0"
+                                   value="0"
+                                   placeholder="0">
+                            <small class="form-hint">Lower numbers appear first (0 = first position)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="form-column">
+                <!-- Visual Settings Card -->
+                <div class="form-card visual-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-palette"></i> Visual Settings</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Color Picker -->
+                        <div class="form-group">
+                            <label for="color">Category Color <span class="required">*</span></label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" 
+                                       id="color" 
+                                       th:field="*{color}" 
+                                       class="color-input"
+                                       value="#1dbf73"
+                                       onchange="updatePreview()"
+                                       required>
+                                <input type="text" 
+                                       id="colorHex" 
+                                       class="form-control color-hex-input" 
+                                       th:value="${category.color != null ? category.color : '#1dbf73'}"
+                                       placeholder="#1dbf73"
+                                       onchange="updateColorFromHex()">
+                            </div>
+                            <small class="form-hint">Choose a color that represents this category</small>
+                            
+                            <!-- Preset Colors -->
+                            <div class="preset-colors">
+                                <div class="color-preset" style="background: #1dbf73;" onclick="setColor('#1dbf73')" title="Primary Green"></div>
+                                <div class="color-preset" style="background: #52c41a;" onclick="setColor('#52c41a')" title="Light Green"></div>
+                                <div class="color-preset" style="background: #3b82f6;" onclick="setColor('#3b82f6')" title="Blue"></div>
+                                <div class="color-preset" style="background: #8b5cf6;" onclick="setColor('#8b5cf6')" title="Purple"></div>
+                                <div class="color-preset" style="background: #f59e0b;" onclick="setColor('#f59e0b')" title="Orange"></div>
+                                <div class="color-preset" style="background: #ef4444;" onclick="setColor('#ef4444')" title="Red"></div>
+                                <div class="color-preset" style="background: #10b981;" onclick="setColor('#10b981')" title="Emerald"></div>
+                                <div class="color-preset" style="background: #f97316;" onclick="setColor('#f97316')" title="Orange"></div>
+                            </div>
+                        </div>
+
+                        <!-- Icon Selector -->
+                        <div class="form-group">
+                            <label for="icon">Category Icon <span class="required">*</span></label>
+                            <input type="text" 
+                                   id="iconSearch" 
+                                   class="form-control" 
+                                   placeholder="Search icons..."
+                                   onkeyup="filterIcons()">
+                            <input type="hidden" 
+                                   id="icon" 
+                                   th:field="*{icon}"
+                                   value="fa-leaf"
+                                   required>
+                            
+                            <div class="icon-grid" id="iconGrid">
+                                <!-- Common eco-friendly icons -->
+                                <div class="icon-option" data-icon="fa-leaf" onclick="selectIcon('fa-leaf')">
+                                    <i class="fas fa-leaf"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-recycle" onclick="selectIcon('fa-recycle')">
+                                    <i class="fas fa-recycle"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-tree" onclick="selectIcon('fa-tree')">
+                                    <i class="fas fa-tree"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-shopping-bag" onclick="selectIcon('fa-shopping-bag')">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-bottle-water" onclick="selectIcon('fa-bottle-water')">
+                                    <i class="fas fa-bottle-water"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-tshirt" onclick="selectIcon('fa-tshirt')">
+                                    <i class="fas fa-tshirt"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-laptop" onclick="selectIcon('fa-laptop')">
+                                    <i class="fas fa-laptop"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-home" onclick="selectIcon('fa-home')">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-spa" onclick="selectIcon('fa-spa')">
+                                    <i class="fas fa-spa"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-seedling" onclick="selectIcon('fa-seedling')">
+                                    <i class="fas fa-seedling"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-solar-panel" onclick="selectIcon('fa-solar-panel')">
+                                    <i class="fas fa-solar-panel"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-wind" onclick="selectIcon('fa-wind')">
+                                    <i class="fas fa-wind"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-box" onclick="selectIcon('fa-box')">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-heart" onclick="selectIcon('fa-heart')">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-globe-americas" onclick="selectIcon('fa-globe-americas')">
+                                    <i class="fas fa-globe-americas"></i>
+                                </div>
+                                <div class="icon-option" data-icon="fa-hands-helping" onclick="selectIcon('fa-hands-helping')">
+                                    <i class="fas fa-hands-helping"></i>
+                                </div>
+                            </div>
+                            <small class="form-hint">Select an icon that best represents this category</small>
+                        </div>
+
+                        <!-- Live Preview -->
+                        <div class="form-group">
+                            <label>Preview</label>
+                            <div class="category-preview" id="categoryPreview">
+                                <div class="preview-icon-wrapper">
+                                    <i id="previewIcon" class="fas fa-leaf"></i>
+                                </div>
+                                <h4 id="previewName">Category Name</h4>
+                                <p id="previewSlug">/category-slug</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Card -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-toggle-on"></i> Status</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" th:field="*{isActive}" checked>
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-text">
+                                    <strong>Active</strong>
+                                    <small>Make this category visible to customers</small>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-large">
+                <i class="fas fa-save"></i> 
+                <span th:text="${category.id != null ? 'Update Category' : 'Add Category'}">Add Category</span>
+            </button>
+            <a th:href="@{/dashboard/categories}" class="btn btn-secondary btn-large">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<div layout:fragment="scripts">
+<!-- <script>
+// Generate slug from name
+function generateSlug() {
+    const name = document.getElementById('name').value;
+    const slug = name.toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+    
+    document.getElementById('slug').value = slug;
+    updatePreview();
+}
+
+// Update preview
+function updatePreview() {
+    const name = document.getElementById('name').value || 'Category Name';
+    const slug = document.getElementById('slug').value || 'category-slug';
+    const color = document.getElementById('color').value;
+    const icon = document.getElementById('icon').value || 'fa-leaf';
+    
+    document.getElementById('previewName').textContent = name;
+    document.getElementById('previewSlug').textContent = '/' + slug;
+    document.getElementById('categoryPreview').style.background = 
+        `linear-gradient(135deg, ${color} 0%, ${color}dd 100%)`;
+    document.getElementById('previewIcon').className = 'fas ' + icon;
+}
+
+// Set color from preset
+function setColor(color) {
+    document.getElementById('color').value = color;
+    document.getElementById('colorHex').value = color;
+    updatePreview();
+}
+
+// Update color from hex input
+function updateColorFromHex() {
+    const hexInput = document.getElementById('colorHex');
+    let hex = hexInput.value;
+    
+    // Add # if missing
+    if (!hex.startsWith('#')) {
+        hex = '#' + hex;
+    }
+    
+    // Validate hex color
+    if (/^#[0-9A-F]{6}$/i.test(hex)) {
+        document.getElementById('color').value = hex;
+        hexInput.value = hex;
+        updatePreview();
+    }
+}
+
+// Update hex input when color picker changes
+document.getElementById('color').addEventListener('input', function() {
+    document.getElementById('colorHex').value = this.value;
+});
+
+// Select icon
+function selectIcon(iconClass) {
+    document.getElementById('icon').value = iconClass;
+    
+    // Remove active class from all icons
+    document.querySelectorAll('.icon-option').forEach(opt => {
+        opt.classList.remove('active');
+    });
+    
+    // Add active class to selected icon
+    document.querySelector(`[data-icon="${iconClass}"]`).classList.add('active');
+    
+    updatePreview();
+}
+
+// Filter icons
+function filterIcons() {
+    const searchTerm = document.getElementById('iconSearch').value.toLowerCase();
+    const icons = document.querySelectorAll('.icon-option');
+    
+    icons.forEach(icon => {
+        const iconName = icon.getAttribute('data-icon').toLowerCase();
+        if (iconName.includes(searchTerm)) {
+            icon.style.display = 'flex';
+        } else {
+            icon.style.display = 'none';
+        }
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Set initial active icon
+    const currentIcon = document.getElementById('icon').value || 'fa-leaf';
+    const iconElement = document.querySelector(`[data-icon="${currentIcon}"]`);
+    if (iconElement) {
+        iconElement.classList.add('active');
+    }
+    
+    // Update preview with existing data
+    updatePreview();
+    
+    // Update hex input with current color
+    const colorInput = document.getElementById('color');
+    document.getElementById('colorHex').value = colorInput.value;
+});
+
+// Form validation
+document.querySelector('.category-form').addEventListener('submit', function(e) {
+    const name = document.getElementById('name').value.trim();
+    const slug = document.getElementById('slug').value.trim();
+    const color = document.getElementById('color').value;
+    const icon = document.getElementById('icon').value;
+    
+    if (!name || !slug || !color || !icon) {
+        e.preventDefault();
+        alert('Please fill in all required fields');
+        return false;
+    }
+    
+    // Validate slug format
+    const slugRegex = /^[a-z0-9-]+$/;
+    if (!slugRegex.test(slug)) {
+        e.preventDefault();
+        alert('Slug can only contain lowercase letters, numbers, and hyphens');
+        return false;
+    }
+});
+</script> -->
+<script type="text/javascript" th:src="@{/js/product-page.js}"></script>
+</div>
+
+</body>
+</html>

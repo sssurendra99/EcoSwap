@@ -1,0 +1,356 @@
+/* Additional Styles for Dashboard Content */
+
+.charts-section {
+    display: grid;
+    grid-template-columns: 65% 35%;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 1200px) {
+    .charts-section {
+        grid-template-columns: 60% 40%;
+    }
+}
+
+.chart-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card.large {
+    min-height: 400px;
+}
+
+.chart-card.small {
+    min-height: 400px;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.chart-header h2 {
+    color: #333;
+    font-size: 1.3rem;
+}
+
+.period-selector {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    color: #333;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.period-selector:focus {
+    outline: none;
+    border-color: #1dbf73;
+}
+
+.chart-body {
+    position: relative;
+    min-height: 300px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-card.large .chart-body {
+    height: 300px;
+}
+
+.chart-body canvas {
+    max-height: 100%;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.quick-stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.quick-stat-item {
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+}
+
+.quick-stat-item:nth-child(1) {
+    border-left-color: #1dbf73;
+}
+
+.quick-stat-item:nth-child(2) {
+    border-left-color: #3b82f6;
+}
+
+.quick-stat-item:nth-child(3) {
+    border-left-color: #f59e0b;
+}
+
+.quick-stat-item:nth-child(4) {
+    border-left-color: #ef4444;
+}
+
+.quick-stat-item:hover {
+    background: #f0f0f0;
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.quick-stat-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.quick-stat-info i {
+    font-size: 1.8rem;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+
+.stat-number {
+    color: #333;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+/* Data Cards Section */
+.data-cards-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.data-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.data-card-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.data-card-header h3 {
+    color: #333;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.data-card-header i {
+    color: #1dbf73;
+}
+
+.view-all-link {
+    color: #1dbf73;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: opacity 0.3s;
+}
+
+.view-all-link:hover {
+    opacity: 0.8;
+}
+
+.data-card-body {
+    padding: 20px 25px;
+}
+
+/* Product List */
+.product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.product-item:hover {
+    background: #f0f0f0;
+    transform: translateX(5px);
+}
+
+.product-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.product-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: white;
+}
+
+.product-icon.eco {
+    background: linear-gradient(135deg, #1dbf73 0%, #52c41a 100%);
+}
+
+.product-icon.water {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.product-icon.tech {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.product-details h4 {
+    color: #333;
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.product-details p {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.product-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.product-badge.success {
+    background: rgba(29, 191, 115, 0.1);
+    color: #1dbf73;
+}
+
+.product-badge.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+/* User List */
+.user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.user-item:hover {
+    background: #f0f0f0;
+    transform: translateX(5px);
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #1dbf73;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-info h4 {
+    color: #333;
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.user-info p {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.user-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(0, 0, 0, 0.05);
+    color: #666;
+}
+
+.user-badge.gold {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    color: #333;
+}
+
+.user-badge.silver {
+    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+    color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .charts-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .data-cards-section {
+        grid-template-columns: 1fr;
+    }
+}

@@ -12,4 +12,10 @@ public class DashboardController {
         model.addAttribute("title", "Admin Dashboard");
         return "dashboard/index";  // Just return the view name
     }
+
+    @GetMapping("/dashboard/orders")
+    public String ordersDashboard(Model model) {
+        model.addAttribute("title", "Dashboard | Orders");
+        return "dashboard/orders_page";
+    }
 }

@@ -1,7 +1,11 @@
 package com.example.ecoswap.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "customer_profiles")
 public class CustomerProfile {
@@ -21,15 +25,4 @@ public class CustomerProfile {
         this.user = user; this.fullName = fullName; this.address = address; this.phone = phone;
     }
 
-    // getters & setters...
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
 }

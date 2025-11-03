@@ -18,9 +18,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepo.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        return org.springframework.security.core.userdetails.User.withUsername(user.getEmail())
-                .password(user.getPassword())
-                .roles(user.getRole().replace("ROLE_", "")) // Spring will prefix with ROLE_
-                .build();
+        return new CustomUserDetails(user); // ✅ return your custom class
     }
 }
