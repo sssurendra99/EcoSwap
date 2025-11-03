@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} ?: 'Dashboard - EcoSwap'">Dashboard - EcoSwap</title>
+    <link th:href="@{/css/dashboard-layout.css}" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-leaf"></i>
+                    <span class="logo-text"><span class="eco">Eco</span>Swap</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item active">
+                        <a th:href="@{/seller/dashboard}" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span class="nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/dashboard/products}" class="nav-link">
+                            <i class="fas fa-box"></i>
+                            <span class="nav-text">Products</span>
+                            <span class="badge" th:text="${productCount}">24</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/dashboard/orders}" class="nav-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="nav-text">Orders</span>
+                            <span class="badge badge-warning" th:text="${pendingOrders}">5</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/dashboard/customers}" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span class="nav-text">Customers</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/dashboard/categories}" class="nav-link">
+                            <i class="fas fa-tags"></i>
+                            <span class="nav-text">Categories</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/dashboard/analytics}" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span class="nav-text">Analytics</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/dashboard/impact}" class="nav-link">
+                            <i class="fas fa-seedling"></i>
+                            <span class="nav-text">Impact Tracker</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/dashboard/reviews}" class="nav-link">
+                            <i class="fas fa-star"></i>
+                            <span class="nav-text">Reviews</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/dashboard/settings}" class="nav-link">
+                            <i class="fas fa-cog"></i>
+                            <span class="nav-text">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="sidebar-footer">
+                    <div class="impact-widget">
+                        <div class="impact-icon">
+                            <i class="fas fa-globe-americas"></i>
+                        </div>
+                        <div class="impact-info">
+                            <h4>Your Impact</h4>
+                            <p class="impact-stat" th:text="${totalCO2Saved} ?: '2.4'">2.4</p>
+                            <small>tons CO₂ saved</small>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-content" id="mainContent">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="mobile-toggle" id="mobileToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search products, orders, customers...">
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <!-- Go to Home -->
+                    <a th:href="@{/}" class="header-btn home-btn" title="Go to Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+
+                    <!-- Notifications -->
+                    <div class="notification-dropdown">
+                        <button class="header-btn notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge" th:text="${notificationCount}">3</span>
+                        </button>
+                        <div class="notification-menu">
+                            <div class="notification-header">
+                                <h3>Notifications</h3>
+                                <a href="#" class="mark-read">Mark all as read</a>
+                            </div>
+                            <div class="notification-list">
+                                <a href="#" class="notification-item unread">
+                                    <div class="notification-icon success">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <p><strong>New Order #ECO-234</strong></p>
+                                        <small>2 minutes ago</small>
+                                    </div>
+                                </a>
+                                <a href="#" class="notification-item">
+                                    <div class="notification-icon info">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <p>New review on Bamboo Toothbrush</p>
+                                        <small>1 hour ago</small>
+                                    </div>
+                                </a>
+                                <a href="#" class="notification-item">
+                                    <div class="notification-icon warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <p>Low stock alert: 3 products</p>
+                                        <small>3 hours ago</small>
+                                    </div>
+                                </a>
+                            </div>
+                            <a href="#" class="notification-footer">View all notifications</a>
+                        </div>
+                    </div>
+
+                    <!-- User Profile Dropdown -->
+                    <div class="user-dropdown">
+                        <button class="user-btn">
+                            <div class="user-avatar">
+                                <img th:src="@{${userAvatar} ?: '/images/default-avatar.png'}" alt="User Avatar">
+                            </div>
+                            <div class="user-info">
+                                <span class="user-name" th:text="${userName} ?: 'John Doe'">John Doe</span>
+                                <span class="user-role" th:text="${userRole} ?: 'Seller'">Seller</span>
+                            </div>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-menu">
+                            <a th:href="@{/dashboard/profile}" class="user-menu-item">
+                                <i class="fas fa-user"></i>
+                                <span>My Profile</span>
+                            </a>
+                            <a th:href="@{/dashboard/settings}" class="user-menu-item">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a th:href="@{/dashboard/help}" class="user-menu-item">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help & Support</span>
+                            </a>
+                            <div class="user-menu-divider"></div>
+                            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                                <button type="submit" class="user-menu-item logout-btn">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="page-content">
+                <!-- Breadcrumb -->
+                <div class="breadcrumb">
+                    <a th:href="@{/}" class="breadcrumb-item">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a th:href="@{/dashboard}" class="breadcrumb-item">Dashboard</a>
+                    <span class="breadcrumb-separator" th:if="${pageTitle}">/</span>
+                    <span class="breadcrumb-item active" th:text="${pageTitle}">Overview</span>
+                </div>
+
+                <!-- Main Content Area - This will be replaced by specific page content -->
+                <div layout:fragment="content">
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="dashboard-footer">
+                <div class="footer-content">
+                    <p>&copy; 2025 <strong>EcoSwap</strong>. Built with 💚 for a sustainable future.</p>
+                    <div class="footer-links">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Support</a>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script th:src="@{/js/dashboard-layout.js}"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <!-- Placeholder for child page scripts -->
+    <div layout:fragment="scripts"></div>
+</body>
+</html>

@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title>Products - EcoSwap</title>
+    <link th:href="@{/css/products.css}" rel="stylesheet"/>
+    <script th:src="@{/js/products-page.js}" defer></script>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1>Product Management</h1>
+                <p class="subtitle">Manage your sustainable product catalog</p>
+            </div>
+            <a th:href="@{/dashboard/products/add}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New Product
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter and Search Section -->
+    <div class="filter-section">
+        <div class="search-filter-container">
+            <div class="search-box-large">
+                <i class="fas fa-search"></i>
+                <input type="text" id="productSearch" placeholder="Search products by name, category, or SKU...">
+            </div>
+            <div class="filter-group">
+                <select id="categoryFilter" class="filter-select">
+                    <option value="">All Categories</option>
+                    <option th:each="category : ${categories}" 
+                            th:value="${category.id}"
+                            th:text="${category.name}">Category</option>
+                </select>
+                <select id="statusFilter" class="filter-select">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="out_of_stock">Out of Stock</option>
+                </select>
+                <select id="ecoRatingFilter" class="filter-select">
+                    <option value="">All Eco Ratings</option>
+                    <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                    <option value="4">⭐⭐⭐⭐ Very Good</option>
+                    <option value="3">⭐⭐⭐ Good</option>
+                    <option value="2">⭐⭐ Fair</option>
+                    <option value="1">⭐ Poor</option>
+                </select>
+                <button class="btn btn-secondary" onclick="resetFilters()">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="product-stats">
+        <div class="stat-box">
+            <div class="stat-icon blue">
+                <i class="fas fa-boxes"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Total Products</span>
+                <span class="stat-value" th:text="${totalProducts}">150</span>
+            </div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon green">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Active</span>
+                <span class="stat-value" th:text="${activeProducts}">142</span>
+            </div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon orange">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Low Stock</span>
+                <span class="stat-value" th:text="${lowStockProducts}">12</span>
+            </div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon red">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Out of Stock</span>
+                <span class="stat-value" th:text="${outOfStockProducts}">8</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success" data-auto-hide="5000">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-error" data-auto-hide="5000">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+    </div>
+
+    <!-- Products Table/Grid Toggle -->
+    <div class="view-toggle-section">
+        <div class="view-info">
+            <span class="result-count">Showing <strong th:text="${products.size()}">150</strong> products</span>
+        </div>
+        <div class="view-toggle">
+            <button class="toggle-btn active" id="gridViewBtn" onclick="switchView('grid')">
+                <i class="fas fa-th"></i> Grid
+            </button>
+            <button class="toggle-btn" id="tableViewBtn" onclick="switchView('table')">
+                <i class="fas fa-list"></i> Table
+            </button>
+        </div>
+    </div>
+
+    <!-- Products Grid View -->
+    <div id="gridView" class="products-grid">
+        <div class="product-card" th:each="product : ${products}">
+            <div class="product-image">
+                <img th:src="${product.image}" th:alt="${product.name}" 
+                     onerror="this.src='/images/product-placeholder.png'">
+                <div class="product-badges">
+                    <span class="badge badge-eco" th:if="${product.ecoScore >= 4}">
+                        <i class="fas fa-leaf"></i> Eco-Friendly
+                    </span>
+                    <span class="badge badge-new" th:if="${product.isNew}">NEW</span>
+                    <span class="badge badge-sale" th:if="${product.onSale}">SALE</span>
+                </div>
+                <div class="product-actions-overlay">
+                    <button class="action-btn-icon" th:onclick="'viewProduct(' + ${product.id} + ')'" title="Quick View">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn-icon" th:onclick="'editProduct(' + ${product.id} + ')'" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn-icon delete" th:onclick="'deleteProduct(' + ${product.id} + ', \'' + ${product.name} + '\')'" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="product-info">
+                <div class="product-category" th:text="${product.category.name}">Category</div>
+                <h3 class="product-name" th:text="${product.name}">Product Name</h3>
+                <div class="product-rating">
+                    <div class="stars">
+                        <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, product.rating)}"></i>
+                        <i class="far fa-star" th:each="i : ${#numbers.sequence(product.rating + 1, 5)}"></i>
+                    </div>
+                    <span class="rating-count" th:text="'(' + ${product.reviewCount} + ')'">(24)</span>
+                </div>
+                <div class="eco-rating">
+                    <span class="eco-label">Eco Score:</span>
+                    <div class="eco-stars">
+                        <i class="fas fa-leaf" th:each="i : ${#numbers.sequence(1, product.ecoScore)}" style="color: #1dbf73;"></i>
+                        <i class="far fa-leaf" th:each="i : ${#numbers.sequence(product.ecoScore + 1, 5)}" style="color: #ddd;"></i>
+                    </div>
+                </div>
+                <div class="product-stock">
+                    <span class="stock-badge" 
+                          th:classappend="${product.stock > 20 ? 'in-stock' : product.stock > 0 ? 'low-stock' : 'out-of-stock'}">
+                        <i class="fas fa-box"></i>
+                        <span th:text="${product.stock > 0 ? product.stock + ' in stock' : 'Out of Stock'}">24 in stock</span>
+                    </span>
+                </div>
+                <div class="product-footer">
+                    <div class="product-price">
+                        <span class="price-original" th:if="${product.originalPrice > product.price}" 
+                              th:text="'$' + ${product.originalPrice}">$29.99</span>
+                        <span class="price-current" th:text="'$' + ${product.price}">$24.99</span>
+                    </div>
+                    <div class="product-status">
+                        <span class="status-badge" 
+                              th:classappend="${product.status == 'active' ? 'active' : 'inactive'}"
+                              th:text="${product.status}">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Table View (Hidden by default) -->
+    <div id="tableView" class="products-table" style="display: none;">
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+                        <th>Image</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Eco Score</th>
+                        <th>Rating</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="product : ${products}">
+                        <td><input type="checkbox" class="product-checkbox" th:value="${product.id}"></td>
+                        <td>
+                            <img th:src="${product.image}" class="table-product-image" 
+                                 th:alt="${product.name}">
+                        </td>
+                        <td>
+                            <div class="table-product-name">
+                                <strong th:text="${product.name}">Product Name</strong>
+                                <small th:text="'SKU: ' + ${product.sku}">SKU: ECO-001</small>
+                            </div>
+                        </td>
+                        <td th:text="${product.category.name}">Category</td>
+                        <td>
+                            <strong th:text="'$' + ${product.price}">$24.99</strong>
+                            <br>
+                            <small th:if="${product.originalPrice > product.price}" 
+                                   style="text-decoration: line-through; color: #999;"
+                                   th:text="'$' + ${product.originalPrice}">$29.99</small>
+                        </td>
+                        <td>
+                            <span class="stock-badge-small" 
+                                  th:classappend="${product.stock > 20 ? 'in-stock' : product.stock > 0 ? 'low-stock' : 'out-of-stock'}"
+                                  th:text="${product.stock}">24</span>
+                        </td>
+                        <td>
+                            <div class="eco-stars-small">
+                                <i class="fas fa-leaf" th:each="i : ${#numbers.sequence(1, product.ecoScore)}" style="color: #1dbf73;"></i>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="rating-small">
+                                <i class="fas fa-star" style="color: #f59e0b;"></i>
+                                <span th:text="${product.rating}">4.5</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-badge-small" 
+                                  th:classappend="${product.status == 'active' ? 'active' : 'inactive'}"
+                                  th:text="${product.status}">Active</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view" 
+                                        th:onclick="'viewProduct(' + ${product.id} + ')'"
+                                        title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn edit" 
+                                        th:onclick="'editProduct(' + ${product.id} + ')'"
+                                        title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete" 
+                                        th:onclick="'deleteProduct(' + ${product.id} + ', \'' + ${product.name} + '\')'"
+                                        title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bulk Actions (shown when products are selected) -->
+    <div id="bulkActions" class="bulk-actions" style="display: none;">
+        <div class="bulk-info">
+            <span id="selectedCount">0</span> products selected
+        </div>
+        <div class="bulk-buttons">
+            <button class="btn btn-secondary" onclick="bulkActivate()">
+                <i class="fas fa-check"></i> Activate
+            </button>
+            <button class="btn btn-secondary" onclick="bulkDeactivate()">
+                <i class="fas fa-times"></i> Deactivate
+            </button>
+            <button class="btn btn-danger" onclick="bulkDelete()">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+            <button class="btn btn-secondary" onclick="clearSelection()">
+                <i class="fas fa-times-circle"></i> Clear
+            </button>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" th:if="${totalPages > 1}">
+        <button class="page-btn" th:disabled="${currentPage == 0}" 
+                th:onclick="'changePage(' + ${currentPage - 1} + ')'">
+            <i class="fas fa-chevron-left"></i> Previous
+        </button>
+        
+        <div class="page-numbers">
+            <button class="page-number" 
+                    th:each="page : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${page == currentPage ? 'active' : ''}"
+                    th:onclick="'changePage(' + ${page} + ')'"
+                    th:text="${page + 1}">1</button>
+        </div>
+        
+        <button class="page-btn" th:disabled="${currentPage == totalPages - 1}" 
+                th:onclick="'changePage(' + ${currentPage + 1} + ')'">
+            Next <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" th:if="${products.isEmpty()}">
+        <div class="empty-icon">
+            <i class="fas fa-box-open"></i>
+        </div>
+        <h3>No Products Found</h3>
+        <p>Start by adding your first sustainable product to the marketplace</p>
+        <a th:href="@{/dashboard/products/add}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Your First Product
+        </a>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<!-- <script>
+// View switching
+function switchView(view) {
+    const gridView = document.getElementById('gridView');
+    const tableView = document.getElementById('tableView');
+    const gridBtn = document.getElementById('gridViewBtn');
+    const tableBtn = document.getElementById('tableViewBtn');
+    
+    if (view === 'grid') {
+        gridView.style.display = 'grid';
+        tableView.style.display = 'none';
+        gridBtn.classList.add('active');
+        tableBtn.classList.remove('active');
+        localStorage.setItem('productView', 'grid');
+    } else {
+        gridView.style.display = 'none';
+        tableView.style.display = 'block';
+        tableBtn.classList.add('active');
+        gridBtn.classList.remove('active');
+        localStorage.setItem('productView', 'table');
+    }
+}
+
+// Restore view preference
+document.addEventListener('DOMContentLoaded', function() {
+    const savedView = localStorage.getItem('productView');
+    if (savedView) {
+        switchView(savedView);
+    }
+});
+
+// Search functionality
+document.getElementById('productSearch').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    filterProducts();
+});
+
+// Filter functionality
+document.querySelectorAll('.filter-select').forEach(select => {
+    select.addEventListener('change', filterProducts);
+});
+
+function filterProducts() {
+    const searchTerm = document.getElementById('productSearch').value.toLowerCase();
+    const category = document.getElementById('categoryFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    const ecoRating = document.getElementById('ecoRatingFilter').value;
+    
+    // Add AJAX call here to filter products on server side
+    console.log('Filtering:', { searchTerm, category, status, ecoRating });
+}
+
+function resetFilters() {
+    document.getElementById('productSearch').value = '';
+    document.getElementById('categoryFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('ecoRatingFilter').value = '';
+    filterProducts();
+}
+
+// Product actions
+function viewProduct(id) {
+    window.location.href = '/dashboard/products/' + id;
+}
+
+function editProduct(id) {
+    window.location.href = '/dashboard/products/' + id + '/edit';
+}
+
+function deleteProduct(id, name) {
+    if (confirm('Are you sure you want to delete "' + name + '"? This action cannot be undone.')) {
+        fetch('/dashboard/products/' + id, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Error deleting product');
+            }
+        });
+    }
+}
+
+// Select all checkbox
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+    updateBulkActions();
+}
+
+// Update bulk actions visibility
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', updateBulkActions);
+    });
+});
+
+function updateBulkActions() {
+    const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+    const bulkActions = document.getElementById('bulkActions');
+    const selectedCount = document.getElementById('selectedCount');
+    
+    if (checkedBoxes.length > 0) {
+        bulkActions.style.display = 'flex';
+        selectedCount.textContent = checkedBoxes.length;
+    } else {
+        bulkActions.style.display = 'none';
+    }
+}
+
+function clearSelection() {
+    document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    document.getElementById('selectAll').checked = false;
+    updateBulkActions();
+}
+
+// Bulk actions
+function bulkActivate() {
+    const selected = getSelectedIds();
+    if (selected.length === 0) return;
+    
+    // Add AJAX call here
+    console.log('Activating products:', selected);
+}
+
+function bulkDeactivate() {
+    const selected = getSelectedIds();
+    if (selected.length === 0) return;
+    
+    // Add AJAX call here
+    console.log('Deactivating products:', selected);
+}
+
+function bulkDelete() {
+    const selected = getSelectedIds();
+    if (selected.length === 0) return;
+    
+    if (confirm('Are you sure you want to delete ' + selected.length + ' products? This action cannot be undone.')) {
+        // Add AJAX call here
+        console.log('Deleting products:', selected);
+    }
+}
+
+function getSelectedIds() {
+    const checkboxes = document.querySelectorAll('.product-checkbox:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+// Pagination
+function changePage(page) {
+    window.location.href = '/dashboard/products?page=' + page;
+}
+</script> -->
+
+<!-- <div layout:fragment="scripts">
+    <script type="text/javascript" th:src="@{/js/products-page.js}"></script>
+</div> -->
+
+<!-- <style>
+/* Products Page Specific Styles */
+.page-header .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #1dbf73 0%, #17a05d 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(29, 191, 115, 0.3);
+}
+
+.btn-secondary {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+/* Filter Section */
+.filter-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.search-filter-container {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.search-box-large {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f9f9f9;
+    padding: 12px 20px;
+    border-radius: 8px;
+}
+
+.search-box-large input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+/* Product Stats */
+.product-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.stat-box .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.stat-icon.blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+.stat-icon.green { background: linear-gradient(135deg, #1dbf73 0%, #17a05d 100%); }
+.stat-icon.orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+.stat-icon.red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    color: #333;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+/* Alerts */
+.alert {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.alert-success {
+    background: rgba(29, 191, 115, 0.1);
+    border-left: 4px solid #1dbf73;
+    color: #17a05d;
+}
+
+.alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 4px solid #ef4444;
+    color: #dc2626;
+}
+
+.alert-close {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+.alert-close:hover {
+    opacity: 1;
+}
+
+/* View Toggle */
+.view-toggle-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.result-count {
+    color: #666;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 5px;
+    background: white;
+    padding: 5px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.toggle-btn {
+    padding: 10px 20px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toggle-btn.active {
+    background: #1dbf73;
+    color: white;
+}
+
+/* Products Grid */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.product-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.product-image {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    background: #f9f9f9;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.05);
+}
+
+.product-badges {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.badge-eco {
+    background: rgba(29, 191, 115, 0.9);
+    color: white;
+}
+
+.badge-new {
+    background: rgba(59, 130, 246, 0.9);
+    color: white;
+}
+
+.badge-sale {
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+}
+
+.product-actions-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.product-card:hover .product-actions-overlay {
+    opacity: 1;
+}
+
+.action-btn-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s;
+}
+
+.action-btn-icon:hover {
+    background: #1dbf73;
+    color: white;
+    transform: scale(1.1);
+}
+
+.action-btn-icon.delete:hover {
+    background: #ef4444;
+}
+
+.product-info {
+    padding: 20px;
+}
+
+.product-category {
+    color: #1dbf73;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.product-name {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.stars i {
+    color: #f59e0b;
+    font-size: 0.9rem;
+}
+
+.rating-count {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.eco-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.eco-label {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.eco-stars {
+    display: flex;
+    gap: 2px;
+}
+
+.product-stock {
+    margin-bottom: 15px;
+}
+
+.stock-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.stock-badge.in-stock {
+    background: rgba(29, 191, 115, 0.1);
+    color: #1dbf73;
+}
+
+.stock-badge.low-stock {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.stock-badge.out-of-stock {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.product-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-price {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.price-original {
+    color: #999;
+    text-decoration: line-through;
+    font-size: 0.9rem;
+}
+
+.price-current {
+    color: #1dbf73;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.product-status .status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.active {
+    background: rgba(29, 191, 115, 0.1);
+    color: #1dbf73;
+}
+
+.status-badge.inactive {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Table View */
+.products-table {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead {
+    background: #f9f9f9;
+}
+
+.data-table th {
+    padding: 15px;
+    text-align: left;
+    color: #666;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.data-table td {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.table-product-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.table-product-name {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.table-product-name strong {
+    color: #333;
+}
+
+.table-product-name small {
+    color: #999;
+    font-size: 0.85rem;
+}
+
+.stock-badge-small {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.stock-badge-small.in-stock {
+    background: rgba(29, 191, 115, 0.1);
+    color: #1dbf73;
+}
+
+.stock-badge-small.low-stock {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.stock-badge-small.out-of-stock {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.eco-stars-small {
+    display: flex;
+    gap: 3px;
+}
+
+.rating-small {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+}
+
+.status-badge-small {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge-small.active {
+    background: rgba(29, 191, 115, 0.1);
+    color: #1dbf73;
+}
+
+.status-badge-small.inactive {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.action-btn.view {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.action-btn.view:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.action-btn.edit {
+    background: rgba(29, 191, 115, 0.1);
+    color: #1dbf73;
+}
+
+.action-btn.edit:hover {
+    background: #1dbf73;
+    color: white;
+}
+
+.action-btn.delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.action-btn.delete:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* Bulk Actions */
+.bulk-actions {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bulk-info {
+    font-weight: 600;
+    color: #333;
+}
+
+.bulk-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.page-btn {
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #1dbf73;
+    color: white;
+    border-color: #1dbf73;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 5px;
+}
+
+.page-number {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.page-number:hover {
+    background: #f0f0f0;
+}
+
+.page-number.active {
+    background: #1dbf73;
+    color: white;
+    border-color: #1dbf73;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+    font-size: 5rem;
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .search-filter-container {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    .filter-select {
+        flex: 1;
+    }
+    
+    .product-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .view-toggle-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .bulk-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .bulk-buttons {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    
+    .table-container {
+        overflow-x: scroll;
+    }
+    
+    .data-table {
+        min-width: 900px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-stats {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+ -->
+
+</body>
+</html>

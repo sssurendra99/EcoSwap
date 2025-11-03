@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title th:text="${product.name} + ' - EcoSwap'">Product Details - EcoSwap</title>
+    <link th:href="@{/css/product-details.css}" rel="stylesheet"/>
+    <script th:src="@{/js/product-details.js}" defer></script>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <!-- Action Buttons -->
+    <div class="action-header">
+        <a th:href="@{/dashboard/products}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Products
+        </a>
+        <div class="action-buttons">
+            <a th:href="@{/dashboard/products/{id}/edit(id=${product.id})}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Product
+            </a>
+            <button class="btn btn-danger" th:onclick="'deleteProduct(' + ${product.id} + ')'">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Product Details -->
+    <div class="product-detail-container">
+        <!-- Left Column: Image & Gallery -->
+        <div class="product-image-section">
+            <div class="main-image-container">
+                <img th:src="${product.image}" 
+                     th:alt="${product.name}" 
+                     class="main-product-image"
+                     onerror="this.src='/images/product-placeholder.png'">
+                
+                <!-- Product Badges Overlay -->
+                <div class="image-badges">
+                    <span class="badge badge-eco" th:if="${product.ecoScore >= 4}">
+                        <i class="fas fa-leaf"></i> Eco-Friendly
+                    </span>
+                    <span class="badge badge-new" th:if="${product.isNew}">NEW</span>
+                    <span class="badge badge-sale" th:if="${product.onSale}">SALE</span>
+                    <span class="badge badge-featured" th:if="${product.isFeatured}">
+                        <i class="fas fa-star"></i> Featured
+                    </span>
+                </div>
+            </div>
+
+            <!-- Environmental Impact Card -->
+            <div class="impact-card">
+                <h3><i class="fas fa-globe-americas"></i> Environmental Impact</h3>
+                <div class="impact-metrics">
+                    <div class="impact-item">
+                        <div class="impact-icon co2">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <div class="impact-details">
+                            <span class="impact-value" th:text="${product.co2Saved} + ' kg'">0 kg</span>
+                            <span class="impact-label">CO₂ Saved</span>
+                        </div>
+                    </div>
+                    <div class="impact-item">
+                        <div class="impact-icon plastic">
+                            <i class="fas fa-recycle"></i>
+                        </div>
+                        <div class="impact-details">
+                            <span class="impact-value" th:text="${product.plasticSaved} + ' kg'">0 kg</span>
+                            <span class="impact-label">Plastic Reduced</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Product Information -->
+        <div class="product-info-section">
+            <!-- Product Header -->
+            <div class="product-header">
+                <div class="category-tag" th:text="${product.category.name}">Category</div>
+                <h1 class="product-title" th:text="${product.name}">Product Name</h1>
+                
+                <!-- Rating & Reviews -->
+                <div class="rating-section">
+                    <div class="stars">
+                        <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, #numbers.formatInteger(product.rating, 0))}"></i>
+                        <i class="far fa-star" th:each="i : ${#numbers.sequence(#numbers.formatInteger(product.rating, 0) + 1, 5)}"></i>
+                    </div>
+                    <span class="rating-value" th:text="${product.rating}">4.5</span>
+                    <span class="review-count" th:text="'(' + ${product.reviewCount} + ' reviews)'">(24 reviews)</span>
+                </div>
+
+                <!-- Eco Score -->
+                <div class="eco-rating-large">
+                    <span class="eco-label">Sustainability Score:</span>
+                    <div class="eco-stars-large">
+                        <i class="fas fa-leaf" th:each="i : ${#numbers.sequence(1, product.ecoScore)}" style="color: #1dbf73;"></i>
+                        <i class="far fa-leaf" th:each="i : ${#numbers.sequence(product.ecoScore + 1, 5)}" style="color: #ddd;"></i>
+                    </div>
+                    <span class="eco-score-text" th:text="${product.ecoScore} + '/5'">5/5</span>
+                </div>
+            </div>
+
+            <!-- Price Section -->
+            <div class="price-section">
+                <div class="price-container">
+                    <span class="price-label">Price:</span>
+                    <div class="price-wrapper">
+                        <span class="price-original" th:if="${product.originalPrice != null && product.originalPrice > product.price}" 
+                              th:text="'$' + ${product.originalPrice}">$29.99</span>
+                        <span class="price-current" th:text="'$' + ${product.price}">$24.99</span>
+                    </div>
+                    <span class="discount-badge" th:if="${product.originalPrice != null && product.originalPrice > product.price}">
+                        <span th:text="'-' + ${#numbers.formatInteger((1 - product.price / product.originalPrice) * 100, 0)} + '%'">-20%</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Stock & Status -->
+            <div class="stock-status-section">
+                <div class="stock-info">
+                    <span class="stock-label">Availability:</span>
+                    <span class="stock-badge" 
+                          th:classappend="${product.stock > 20 ? 'in-stock' : product.stock > 0 ? 'low-stock' : 'out-of-stock'}">
+                        <i class="fas fa-box"></i>
+                        <span th:text="${product.stock > 0 ? product.stock + ' units in stock' : 'Out of Stock'}">24 units in stock</span>
+                    </span>
+                </div>
+                <div class="status-info">
+                    <span class="status-label">Status:</span>
+                    <span class="status-badge" 
+                          th:classappend="${product.status == 'ACTIVE' ? 'active' : 'inactive'}"
+                          th:text="${product.status}">ACTIVE</span>
+                </div>
+            </div>
+
+            <!-- Product Description -->
+            <div class="description-section">
+                <h2><i class="fas fa-info-circle"></i> Product Description</h2>
+                <p class="product-description" th:text="${product.description}">
+                    This is a sustainable product description that highlights the eco-friendly features and benefits.
+                </p>
+            </div>
+
+            <!-- Product Specifications -->
+            <div class="specifications-section">
+                <h2><i class="fas fa-clipboard-list"></i> Specifications</h2>
+                <div class="spec-grid">
+                    <div class="spec-item">
+                        <span class="spec-label">SKU:</span>
+                        <span class="spec-value" th:text="${product.sku}">ECO-001</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Category:</span>
+                        <span class="spec-value" th:text="${product.category.name}">Eco Products</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Seller:</span>
+                        <span class="spec-value" th:text="${product.seller.fullName}">Green Seller</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Listed Date:</span>
+                        <span class="spec-value" th:text="${#temporals.format(product.createdAt, 'MMM dd, yyyy')}">Jan 15, 2024</span>
+                    </div>
+                    <div class="spec-item" th:if="${product.updatedAt != null}">
+                        <span class="spec-label">Last Updated:</span>
+                        <span class="spec-value" th:text="${#temporals.format(product.updatedAt, 'MMM dd, yyyy HH:mm')}">Jan 20, 2024 10:30</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Information Tabs -->
+    <div class="tabs-container">
+        <div class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab('seller')">
+                <i class="fas fa-store"></i> Seller Information
+            </button>
+            <button class="tab-btn" onclick="switchTab('analytics')">
+                <i class="fas fa-chart-line"></i> Analytics
+            </button>
+            <button class="tab-btn" onclick="switchTab('history')">
+                <i class="fas fa-history"></i> History
+            </button>
+        </div>
+
+        <!-- Seller Tab -->
+        <div id="sellerTab" class="tab-content active">
+            <div class="seller-info-card">
+                <div class="seller-header">
+                    <div class="seller-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="seller-details">
+                        <h3 th:text="${product.seller.fullName}">Seller Name</h3>
+                        <p class="seller-email" th:text="${product.seller.email}">seller@example.com</p>
+                        <p class="seller-role" th:text="${product.seller.role.displayName}">Seller</p>
+                    </div>
+                </div>
+                <div class="seller-stats">
+                    <div class="seller-stat">
+                        <i class="fas fa-box"></i>
+                        <span>Total Products</span>
+                        <strong>12</strong>
+                    </div>
+                    <div class="seller-stat">
+                        <i class="fas fa-star"></i>
+                        <span>Seller Rating</span>
+                        <strong>4.8/5</strong>
+                    </div>
+                    <div class="seller-stat">
+                        <i class="fas fa-calendar"></i>
+                        <span>Member Since</span>
+                        <strong th:text="${#temporals.format(product.seller.createdAt, 'MMM yyyy')}">Jan 2024</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analyticsTab" class="tab-content">
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <div class="analytics-icon blue">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="analytics-info">
+                        <span class="analytics-value">1,234</span>
+                        <span class="analytics-label">Total Views</span>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-icon green">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="analytics-info">
+                        <span class="analytics-value">89</span>
+                        <span class="analytics-label">Total Sales</span>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-icon orange">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="analytics-info">
+                        <span class="analytics-value">156</span>
+                        <span class="analytics-label">Favorites</span>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-icon purple">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="analytics-info">
+                        <span class="analytics-value">7.2%</span>
+                        <span class="analytics-label">Conversion Rate</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="historyTab" class="tab-content">
+            <div class="history-timeline">
+                <div class="timeline-item">
+                    <div class="timeline-icon created">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h4>Product Created</h4>
+                        <p th:text="'Product was listed on ' + ${#temporals.format(product.createdAt, 'MMMM dd, yyyy \'at\' HH:mm')}">
+                            Product was listed on January 15, 2024 at 10:30
+                        </p>
+                    </div>
+                </div>
+                <div class="timeline-item" th:if="${product.updatedAt != null}">
+                    <div class="timeline-icon updated">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h4>Last Updated</h4>
+                        <p th:text="'Product details were modified on ' + ${#temporals.format(product.updatedAt, 'MMMM dd, yyyy \'at\' HH:mm')}">
+                            Product details were modified on January 20, 2024 at 15:45
+                        </p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-icon info">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h4>Current Status</h4>
+                        <p>Product is currently <strong th:text="${product.status}">ACTIVE</strong> and available for purchase</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h2>
+            <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete this product? This action cannot be undone.</p>
+            <p><strong th:text="${product.name}">Product Name</strong></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+            <button class="btn btn-danger" onclick="confirmDelete()">
+                <i class="fas fa-trash"></i> Delete Product
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- <script th:inline="javascript">
+/*<![CDATA[*/
+const productId = /*[[${product.id}]]*/ 0;
+
+// Tab switching
+function switchTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(tabName + 'Tab').classList.add('active');
+    event.target.classList.add('active');
+}
+
+// Delete functionality
+function deleteProduct(id) {
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+}
+
+function confirmDelete() {
+    fetch('/dashboard/products/' + productId, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.href = '/dashboard/products';
+        } else {
+            alert('Error deleting product');
+            closeDeleteModal();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error deleting product');
+        closeDeleteModal();
+    });
+}
+
+// Close modal on outside click
+window.onclick = function(event) {
+    const modal = document.getElementById('deleteModal');
+    if (event.target === modal) {
+        closeDeleteModal();
+    }
+}
+/*]]>*/
+</script> -->
+<!-- 
+<style>
+/* Product Details Page Styles */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 0;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.breadcrumb a {
+    color: #1dbf73;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.breadcrumb a:hover {
+    color: #17a05d;
+}
+
+.breadcrumb i.fa-chevron-right {
+    font-size: 0.7rem;
+    color: #999;
+}
+
+.action-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #1dbf73 0%, #17a05d 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(29, 191, 115, 0.3);
+}
+
+.btn-secondary {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* Main Product Container */
+.product-detail-container {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+/* Image Section */
+.product-image-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.main-image-container {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.main-product-image {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.image-badges {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.badge {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.badge-eco {
+    background: rgba(29, 191, 115, 0.95);
+    color: white;
+}
+
+.badge-new {
+    background: rgba(59, 130, 246, 0.95);
+    color: white;
+}
+
+.badge-sale {
+    background: rgba(239, 68, 68, 0.95);
+    color: white;
+}
+
+.badge-featured {
+    background: rgba(245, 158, 11, 0.95);
+    color: white;
+}
+
+/* Environmental Impact Card */
+.impact-card {
+    background: linear-gradient(135deg, #1dbf73 0%, #17a05d 100%);
+    padding: 25px;
+    border-radius: 12px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(29, 191, 115, 0.2);
+}
+
+.impact-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.impact-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.impact-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.impact-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.impact-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.impact-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.impact-label {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+/* Product Info Section */
+.product-info-section {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.product-header {
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.category-tag {
+    display: inline-block;
+    background: rgba(29, 191, 115, 0.1);
+    color: #1dbf73;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+}
+
+.product-title {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 15px;
+    line-height: 1.3;
+}
+
+.rating-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.stars {
+    display: flex;
+    gap: 3px;
+}
+
+.stars i {
+    color: #f59e0b;
+    font-size: 1.1rem;
+}
+
+.rating-value {
+    font-weight: bold;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.review-count {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.eco-rating-large {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(29, 191, 115, 0.05);
+    padding: 12px 20px;
+    border-radius: 10px;
+}
+
+.eco-label {
+    color: #666;
+    font-weight: 600;
+}
+
+.eco-stars-large {
+    display: flex;
+    gap: 5px;
+}
+
+.eco-stars-large i {
+    font-size: 1.3rem;
+}
+
+.eco-score-text {
+    color: #1dbf73;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/* Price Section */
+.price-section {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.price-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.price-label {
+    color: #666;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.price-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.price-original {
+    color: #999;
+    text-decoration: line-through;
+    font-size: 1.3rem;
+}
+
+.price-current {
+    color: #1dbf73;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.discount-badge {
+    background: #ef4444;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Stock & Status */
+.stock-status-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.stock-info, .status-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stock-label, .status-label {
+    color: #666;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.stock-badge {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+}
+
+.stock-badge.in-stock {
+    background: rgba(29, 191, 115, 0.1);
+    color: #1dbf73;
+}
+
+.stock-badge.low-stock {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.stock-badge.out-of-stock {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.status-badge {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    width: fit-content;
+    font-size: 0.85rem;
+}
+
+.status-badge.active {
+    background: rgba(29, 191, 115, 0.1);
+    color: #1dbf73;
+}
+
+.status-badge.inactive {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Description & Specifications */
+.description-section, .specifications-section {
+    margin-bottom: 25px;
+}
+
+.description-section h2, .specifications-section h2 {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.product-description {
+    color: #666;
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+.spec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.spec-item {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.spec-label {
+    color: #999;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.spec-value {
+    color: #333;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* Tabs */
+.tabs-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.tabs-header {
+    display: flex;
+    background: #f9f9f9;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 18px 25px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 600;
+    color: #666;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 1rem;
+}
+
+.tab-btn:hover {
+    background: rgba(29, 191, 115, 0.05);
+    color: #1dbf73;
+}
+
+.tab-btn.active {
+    background: white;
+    color: #1dbf73;
+    border-bottom: 3px solid #1dbf73;
+}
+
+.tab-content {
+    padding: 30px;
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Seller Info Tab */
+.seller-info-card {
+    max-width: 600px;
+}
+
+.seller-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.seller-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1dbf73 0%, #17a05d 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: white;
+}
+
+.seller-details h3 {
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.seller-email {
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.seller-role {
+    color: #1dbf73;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.seller-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.seller-stat {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.seller-stat i {
+    font-size: 2rem;
+    color: #1dbf73;
+}
+
+.seller-stat span {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.seller-stat strong {
+    color: #333;
+    font-size: 1.3rem;
+}
+
+/* Analytics Tab */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.analytics-card {
+    background: #f9f9f9;
+    padding: 25px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s;
+}
+
+.analytics-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.analytics-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+}
+
+.analytics-icon.blue {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.analytics-icon.green {
+    background: linear-gradient(135deg, #1dbf73 0%, #17a05d 100%);
+}
+
+.analytics-icon.orange {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.analytics-icon.purple {
+    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+}
+
+.analytics-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.analytics-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.analytics-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* History Tab */
+.history-timeline {
+    max-width: 700px;
+}
+
+.timeline-item {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 50px;
+    width: 2px;
+    height: calc(100% + 10px);
+    background: #e0e0e0;
+}
+
+.timeline-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+.timeline-icon.created {
+    background: linear-gradient(135deg, #1dbf73 0%, #17a05d 100%);
+}
+
+.timeline-icon.updated {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.timeline-icon.info {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.timeline-content {
+    flex: 1;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.timeline-content h4 {
+    color: #333;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.timeline-content p {
+    color: #666;
+    line-height: 1.6;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    padding: 25px;
+    border-bottom: 2px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    color: #ef4444;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #999;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-body p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.modal-body strong {
+    color: #333;
+}
+
+.modal-footer {
+    padding: 25px;
+    border-top: 2px solid #f0f0f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .product-detail-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .main-product-image {
+        height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .action-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .product-title {
+        font-size: 1.5rem;
+    }
+    
+    .price-current {
+        font-size: 2rem;
+    }
+    
+    .impact-metrics {
+        grid-template-columns: 1fr;
+    }
+    
+    .stock-status-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .spec-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tabs-header {
+        flex-direction: column;
+    }
+    
+    .seller-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-info-section {
+        padding: 20px;
+    }
+    
+    .tab-content {
+        padding: 20px;
+    }
+    
+    .main-product-image {
+        height: 300px;
+    }
+    
+    .price-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .seller-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .timeline-item {
+        gap: 15px;
+    }
+    
+    .timeline-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .timeline-item:not(:last-child)::before {
+        left: 19px;
+    }
+}
+</style> -->
+
+</body>
+</html>
