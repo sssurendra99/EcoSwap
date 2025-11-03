@@ -9,6 +9,6 @@ public class SellerController {
     @GetMapping("/seller/dashboard")
     public String sellerDashboard(Model model) {
         model.addAttribute("title", "Seller Dashboard");
-        return "dashboard/seller"; // create simple template
+        return "dashboard/seller";
     }
 }

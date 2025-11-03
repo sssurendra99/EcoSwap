@@ -1,6 +1,7 @@
 package com.example.ecoswap.controller;
 
 import com.example.ecoswap.model.*;
+import com.example.ecoswap.model.enums.Role;
 import com.example.ecoswap.repository.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -47,7 +48,7 @@ public class RegistrationController {
             return "auth/register-customer";
         }
 
-        User u = new User(form.getEmail(), passwordEncoder.encode(form.getPassword()), "ROLE_CUSTOMER");
+        User u = new User(form.getEmail(), passwordEncoder.encode(form.getPassword()), form.getFullName(), Role.CUSTOMER);
         userRepo.save(u);
         CustomerProfile cp = new CustomerProfile(u, form.getFullName(), form.getAddress(), form.getPhone());
         customerRepo.save(cp);
@@ -61,7 +62,7 @@ public class RegistrationController {
             return "auth/register-seller";
         }
 
-        User u = new User(form.getEmail(), passwordEncoder.encode(form.getPassword()), "ROLE_SELLER");
+        User u = new User(form.getEmail(), passwordEncoder.encode(form.getPassword()), form.getFullname(), Role.SELLER);
         userRepo.save(u);
         SellerProfile sp = new SellerProfile(u, form.getStoreName(), form.getBusinessAddress());
         sellerRepo.save(sp);
@@ -88,8 +89,10 @@ public class RegistrationController {
         private String password;
         private String storeName;
         private String businessAddress;
+        private String fullname;
         // getters & setters ...
         public String getEmail(){return email;} public void setEmail(String e){this.email=e;}
+        public String getFullname(){return fullname;} public void setFullname(String f){this.fullname=f;}
         public String getPassword(){return password;} public void setPassword(String p){this.password=p;}
         public String getStoreName(){return storeName;} public void setStoreName(String s){this.storeName=s;}
         public String getBusinessAddress(){return businessAddress;} public void setBusinessAddress(String b){this.businessAddress=b;}

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title th:text="${product.id != null ? 'Edit Product' : 'Add New Product'}">Add Product - EcoSwap</title>
+    <link th:href="@{/css/productform.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1 th:text="${product.id != null ? 'Edit Product' : 'Add New Product'}">Add New Product</h1>
+                <p class="subtitle">Fill in the product details for your sustainable marketplace</p>
+            </div>
+            <a th:href="@{/dashboard/products}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Products
+            </a>
+        </div>
+    </div>
+
+    <!-- Product Form -->
+    <form th:action="${product.id != null ? '/dashboard/products/' + product.id + '/edit' : '/dashboard/products/add'}" 
+          method="post" 
+          th:object="${product}"
+          enctype="multipart/form-data"
+          class="product-form">
+        
+        <div class="form-grid">
+            <!-- Left Column -->
+            <div class="form-column">
+                <!-- Basic Information Card -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="name">Product Name <span class="required">*</span></label>
+                            <input type="text" 
+                                   id="name" 
+                                   th:field="*{name}" 
+                                   class="form-control" 
+                                   placeholder="Enter product name"
+                                   required>
+                            <small class="form-hint">Give your product a clear, descriptive name</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sku">SKU <span class="required">*</span></label>
+                            <input type="text" 
+                                   id="sku" 
+                                   th:field="*{sku}" 
+                                   class="form-control" 
+                                   placeholder="e.g., ECO-001"
+                                   required>
+                            <small class="form-hint">Unique product identifier</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category">Category <span class="required">*</span></label>
+                            <select id="category" 
+                                    th:field="*{category}" 
+                                    class="form-control"
+                                    required>
+                                <option value="">Select a category</option>
+                                <option th:each="cat : ${categories}" 
+                                        th:value="${cat.id}" 
+                                        th:text="${cat.name}">Category</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" 
+                                      th:field="*{description}" 
+                                      class="form-control" 
+                                      rows="6"
+                                      placeholder="Describe your product, its features, and sustainability benefits"></textarea>
+                            <small class="form-hint">Help customers understand what makes your product special</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing & Inventory Card -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-dollar-sign"></i> Pricing & Inventory</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="price">Selling Price <span class="required">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-prefix">$</span>
+                                    <input type="number" 
+                                           id="price" 
+                                           th:field="*{price}" 
+                                           class="form-control" 
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0.00"
+                                           required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="originalPrice">Original Price</label>
+                                <div class="input-group">
+                                    <span class="input-prefix">$</span>
+                                    <input type="number" 
+                                           id="originalPrice" 
+                                           th:field="*{originalPrice}" 
+                                           class="form-control" 
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0.00">
+                                </div>
+                                <small class="form-hint">For showing discounts</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="stock">Stock Quantity <span class="required">*</span></label>
+                            <input type="number" 
+                                   id="stock" 
+                                   th:field="*{stock}" 
+                                   class="form-control" 
+                                   min="0"
+                                   placeholder="0"
+                                   required>
+                            <small class="form-hint">Available units in inventory</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="status">Product Status</label>
+                            <select id="status" 
+                                    th:field="*{status}" 
+                                    class="form-control">
+                                <option value="ACTIVE">Active</option>
+                                <option value="INACTIVE">Inactive</option>
+                                <option value="OUT_OF_STOCK">Out of Stock</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="form-column">
+                <!-- Product Image Card -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-image"></i> Product Image</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="image-upload-area">
+                            <div class="image-preview" id="imagePreview">
+                                <img th:if="${product.image != null}" 
+                                     th:src="${product.image}" 
+                                     alt="Product Image"
+                                     id="previewImg">
+                                <div class="upload-placeholder" th:if="${product.image == null}">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Click or drag image here</p>
+                                    <span>JPG, PNG or WEBP (Max 5MB)</span>
+                                </div>
+                            </div>
+                            <input type="file" 
+                                   id="imageUpload" 
+                                   name="imageFile" 
+                                   accept="image/*"
+                                   class="file-input"
+                                   onchange="previewImage(event)">
+                            <input type="hidden" th:field="*{image}">
+                            <button type="button" class="btn btn-secondary btn-block" onclick="document.getElementById('imageUpload').click()">
+                                <i class="fas fa-upload"></i> Choose Image
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sustainability Card -->
+                <div class="form-card eco-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-leaf"></i> Sustainability Rating</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="ecoScore">Eco Score (1-5) <span class="required">*</span></label>
+                            <div class="eco-score-selector">
+                                <input type="range" 
+                                       id="ecoScore" 
+                                       th:field="*{ecoScore}" 
+                                       min="1" 
+                                       max="5" 
+                                       value="3"
+                                       class="eco-slider"
+                                       oninput="updateEcoDisplay(this.value)">
+                                <div class="eco-display" id="ecoDisplay">
+                                    <div class="eco-stars">
+                                        <i class="fas fa-leaf"></i>
+                                        <i class="fas fa-leaf"></i>
+                                        <i class="fas fa-leaf"></i>
+                                        <i class="far fa-leaf"></i>
+                                        <i class="far fa-leaf"></i>
+                                    </div>
+                                    <span class="eco-label">Good</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="co2Saved">CO₂ Saved (kg per unit)</label>
+                            <input type="number" 
+                                   id="co2Saved" 
+                                   th:field="*{co2Saved}" 
+                                   class="form-control" 
+                                   step="0.01"
+                                   min="0"
+                                   placeholder="0.00">
+                            <small class="form-hint">Carbon emissions saved compared to conventional products</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="plasticSaved">Plastic Saved (grams per unit)</label>
+                            <input type="number" 
+                                   id="plasticSaved" 
+                                   th:field="*{plasticSaved}" 
+                                   class="form-control" 
+                                   step="0.01"
+                                   min="0"
+                                   placeholder="0.00">
+                            <small class="form-hint">Single-use plastic eliminated</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Flags Card -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-flag"></i> Product Flags</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" th:field="*{isNew}">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-text">
+                                    <strong>Mark as New</strong>
+                                    <small>Show "NEW" badge on product</small>
+                                </span>
+                            </label>
+
+                            <label class="checkbox-label">
+                                <input type="checkbox" th:field="*{onSale}">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-text">
+                                    <strong>On Sale</strong>
+                                    <small>Show "SALE" badge on product</small>
+                                </span>
+                            </label>
+
+                            <label class="checkbox-label">
+                                <input type="checkbox" th:field="*{isFeatured}">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-text">
+                                    <strong>Featured Product</strong>
+                                    <small>Display prominently on homepage</small>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-large">
+                <i class="fas fa-save"></i> 
+                <span th:text="${product.id != null ? 'Update Product' : 'Add Product'}">Add Product</span>
+            </button>
+            <a th:href="@{/dashboard/products}" class="btn btn-secondary btn-large">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+<div layout:fragment="scripts">
+    <script type="text/javascript" th:src="@{/js/product-form.js}"></script>
+</div>
+</body>
+</html>

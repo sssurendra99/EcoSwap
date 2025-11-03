@@ -1,43 +1,51 @@
 package com.example.ecoswap.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
+import com.example.ecoswap.model.enums.Role;
 
+@Getter
+@Setter
+@NoArgsConstructor  // ← ADD THIS - Required by JPA/Hibernate
+@AllArgsConstructor // ← ADD THIS - For your custom constructor
 @Entity
 @Table(name = "users")
 public class User {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable=false, unique=true)
+    
+    @Column(nullable = false, unique = true)
     private String email;
-
-    @Column(nullable=false)
+    
+    @Column(nullable = false)
     private String password;
-
-    // ROLE_ADMIN, ROLE_SELLER, ROLE_CUSTOMER
-    @Column(nullable=false)
-    private String role;
-
+    
+    @Column(nullable = false)
+    private String fullName;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role; // CUSTOMER, SELLER, ADMIN
+    
+    @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    // constructors, getters, setters
-    public User() {}
-    public User(String email, String password, String role) {
+    
+    @Column(nullable = false)
+    private boolean enabled = true;
+    
+    // Custom constructor for registration
+    public User(String email, String password, String fullname, Role role) {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.fullName = fullname;
+        this.createdAt = LocalDateTime.now();
+        this.enabled = true;
     }
-    // getters and setters omitted for brevity - add them
-    // ...
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

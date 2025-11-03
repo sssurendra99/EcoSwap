@@ -1,132 +1,430 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
+      layout:decorate="~{layout/dashboard_layout}">
 <head>
-    <title>Seller Dashboard</title>
+    <title>Seller Dashboard - EcoSwap</title>
+    <link th:href="@{/css/sellerpage.css}" rel="stylesheet"/>
 </head>
 <body>
 
 <div layout:fragment="content">
-    <div class="container-fluid">
-        <h3 class="mb-3">Welcome to EcoSwap Dashboard</h3>
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Welcome to EcoSwap Dashboard</h1>
+        <p class="subtitle">Here's an overview of your sustainable marketplace performance</p>
+    </div>
 
-        <!-- Small Boxes -->
-        <div class="row">
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-info">
-                    <div class="inner">
-                        <h3>150</h3>
-                        <p>Products</p>
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <!-- Products Card -->
+        <div class="stat-card products">
+            <div class="stat-icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Products</h3>
+                <p class="stat-value">150</p>
+                <span class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> 12 new this month
+                </span>
+            </div>
+        </div>
+
+        <!-- Users Card -->
+        <div class="stat-card users">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Active Users</h3>
+                <p class="stat-value">53</p>
+                <span class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> 8 new users
+                </span>
+            </div>
+        </div>
+
+        <!-- Orders Card -->
+        <div class="stat-card orders">
+            <div class="stat-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Orders</h3>
+                <p class="stat-value">120</p>
+                <span class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> 15% from last month
+                </span>
+            </div>
+        </div>
+
+        <!-- CO2 Saved Card -->
+        <div class="stat-card revenue">
+            <div class="stat-icon">
+                <i class="fas fa-leaf"></i>
+            </div>
+            <div class="stat-content">
+                <h3>CO₂ Saved</h3>
+                <p class="stat-value">35 <span style="font-size: 1rem;">tons</span></p>
+                <span class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> Making impact!
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Environmental Impact Section -->
+    <div class="impact-section">
+        <div class="section-header">
+            <h2>🌿 Your Environmental Impact</h2>
+            <span class="eco-badge">Making a Difference</span>
+        </div>
+        <div class="impact-grid">
+            <div class="impact-card">
+                <div class="impact-icon green">
+                    <i class="fas fa-globe-americas"></i>
+                </div>
+                <h3>Carbon Footprint</h3>
+                <p class="impact-value">35 tons</p>
+                <p class="impact-desc">CO₂ emissions saved through sustainable products</p>
+            </div>
+            <div class="impact-card">
+                <div class="impact-icon blue">
+                    <i class="fas fa-recycle"></i>
+                </div>
+                <h3>Items Recycled</h3>
+                <p class="impact-value">1,247</p>
+                <p class="impact-desc">Products given a second life</p>
+            </div>
+            <div class="impact-card">
+                <div class="impact-icon emerald">
+                    <i class="fas fa-tree"></i>
+                </div>
+                <h3>Trees Equivalent</h3>
+                <p class="impact-value">156</p>
+                <p class="impact-desc">Trees needed to offset your impact</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Data Section -->
+    <div class="charts-section">
+        <!-- Monthly Transactions Chart -->
+        <div class="chart-card large">
+            <div class="chart-header">
+                <h2>Monthly Transactions</h2>
+                <select class="period-selector">
+                    <option>Last 6 Months</option>
+                    <option>Last Year</option>
+                    <option>All Time</option>
+                </select>
+            </div>
+            <div class="chart-body" style="position: relative; height: 300px;">
+                <canvas id="transactionsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="chart-card small">
+            <div class="chart-header">
+                <h2>Quick Stats</h2>
+            </div>
+            <div class="quick-stats-list">
+                <div class="quick-stat-item">
+                    <div class="quick-stat-info">
+                        <i class="fas fa-chart-line" style="color: #1dbf73;"></i>
+                        <div>
+                            <p class="stat-label">Conversion Rate</p>
+                            <p class="stat-number">3.2%</p>
+                        </div>
                     </div>
-                    <div class="icon">
-                        <i class="fas fa-box"></i>
+                </div>
+                <div class="quick-stat-item">
+                    <div class="quick-stat-info">
+                        <i class="fas fa-clock" style="color: #3b82f6;"></i>
+                        <div>
+                            <p class="stat-label">Avg. Response Time</p>
+                            <p class="stat-number">2.5 hrs</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="quick-stat-item">
+                    <div class="quick-stat-info">
+                        <i class="fas fa-star" style="color: #f59e0b;"></i>
+                        <div>
+                            <p class="stat-label">Average Rating</p>
+                            <p class="stat-number">4.8/5</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="quick-stat-item">
+                    <div class="quick-stat-info">
+                        <i class="fas fa-undo" style="color: #ef4444;"></i>
+                        <div>
+                            <p class="stat-label">Return Rate</p>
+                            <p class="stat-number">2.1%</p>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-success">
-                    <div class="inner">
-                        <h3>53</h3>
-                        <p>Users</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                </div>
+    <!-- Data Cards Section -->
+    <div class="data-cards-section">
+        <!-- Recent Products -->
+        <div class="data-card">
+            <div class="data-card-header">
+                <h3><i class="fas fa-box"></i> Recent Products</h3>
+                <a th:href="@{/dashboard/products}" class="view-all-link">View All →</a>
             </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-warning">
-                    <div class="inner">
-                        <h3>120</h3>
-                        <p>Orders</p>
+            <div class="data-card-body">
+                <div class="product-list">
+                    <div class="product-item">
+                        <div class="product-info">
+                            <div class="product-icon eco">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <div class="product-details">
+                                <h4>EcoBag</h4>
+                                <p>20 units sold</p>
+                            </div>
+                        </div>
+                        <div class="product-badge success">
+                            <i class="fas fa-check-circle"></i> Active
+                        </div>
                     </div>
-                    <div class="icon">
-                        <i class="fas fa-shopping-cart"></i>
+                    <div class="product-item">
+                        <div class="product-info">
+                            <div class="product-icon water">
+                                <i class="fas fa-bottle-water"></i>
+                            </div>
+                            <div class="product-details">
+                                <h4>Reusable Bottle</h4>
+                                <p>35 units sold</p>
+                            </div>
+                        </div>
+                        <div class="product-badge success">
+                            <i class="fas fa-check-circle"></i> Active
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-danger">
-                    <div class="inner">
-                        <h3>35</h3>
-                        <p>CO₂ Saved</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-leaf"></i>
+                    <div class="product-item">
+                        <div class="product-info">
+                            <div class="product-icon tech">
+                                <i class="fas fa-laptop"></i>
+                            </div>
+                            <div class="product-details">
+                                <h4>Second-hand Laptop</h4>
+                                <p>5 units sold</p>
+                            </div>
+                        </div>
+                        <div class="product-badge warning">
+                            <i class="fas fa-exclamation-circle"></i> Low Stock
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Cards -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Recent Products</h3>
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>EcoBag - 20 units sold</li>
-                            <li>Reusable Bottle - 35 units sold</li>
-                            <li>Second-hand Laptop - 5 units sold</li>
-                        </ul>
-                    </div>
-                </div>
+        <!-- Top Users -->
+        <div class="data-card">
+            <div class="data-card-header">
+                <h3><i class="fas fa-users"></i> Top Customers</h3>
+                <a th:href="@{/dashboard/customers}" class="view-all-link">View All →</a>
             </div>
-
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Top Users</h3>
+            <div class="data-card-body">
+                <div class="user-list">
+                    <div class="user-item">
+                        <div class="user-avatar">
+                            <img src="https://ui-avatars.com/api/?name=John+Doe&background=1dbf73&color=fff" alt="John Doe">
+                        </div>
+                        <div class="user-info">
+                            <h4>John Doe</h4>
+                            <p>25 purchases</p>
+                        </div>
+                        <div class="user-badge gold">
+                            <i class="fas fa-crown"></i> VIP
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>John Doe - 25 purchases</li>
-                            <li>Jane Smith - 18 purchases</li>
-                        </ul>
+                    <div class="user-item">
+                        <div class="user-avatar">
+                            <img src="https://ui-avatars.com/api/?name=Jane+Smith&background=3b82f6&color=fff" alt="Jane Smith">
+                        </div>
+                        <div class="user-info">
+                            <h4>Jane Smith</h4>
+                            <p>18 purchases</p>
+                        </div>
+                        <div class="user-badge silver">
+                            <i class="fas fa-star"></i> Regular
+                        </div>
+                    </div>
+                    <div class="user-item">
+                        <div class="user-avatar">
+                            <img src="https://ui-avatars.com/api/?name=Mike+Johnson&background=8b5cf6&color=fff" alt="Mike Johnson">
+                        </div>
+                        <div class="user-info">
+                            <h4>Mike Johnson</h4>
+                            <p>12 purchases</p>
+                        </div>
+                        <div class="user-badge">
+                            <i class="fas fa-user"></i> Member
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Chart -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Monthly Transactions</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="transactionsChart" style="height:250px;"></canvas>
-                    </div>
-                </div>
-            </div>
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="actions-grid">
+            <a th:href="@{/dashboard/products/add}" class="action-card">
+                <div class="action-icon">➕</div>
+                <h3>Add Product</h3>
+                <p>List a new sustainable product</p>
+            </a>
+            <a th:href="@{/dashboard/orders}" class="action-card">
+                <div class="action-icon">📦</div>
+                <h3>Manage Orders</h3>
+                <p>View and process orders</p>
+            </a>
+            <a th:href="@{/dashboard/customers}" class="action-card">
+                <div class="action-icon">👥</div>
+                <h3>View Customers</h3>
+                <p>Manage customer relationships</p>
+            </a>
+            <a th:href="@{/dashboard/reports}" class="action-card">
+                <div class="action-icon">📊</div>
+                <h3>Generate Report</h3>
+                <p>Analytics and insights</p>
+            </a>
         </div>
-
     </div>
 </div>
 
-<script th:src="@{/adminlte/plugins/chart.js/Chart.min.js}"></script>
-<script th:inline="javascript">
-    const ctx = document.getElementById('transactionsChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Jan','Feb','Mar','Apr','May'],
-            datasets: [{
-                label: 'Orders',
-                data: [10, 20, 15, 25, 30],
-                backgroundColor: 'rgba(54, 162, 235, 0.6)'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
+<!-- Chart.js Script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing chart...');
+        
+        // Check if Chart.js is loaded
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js not loaded!');
+            document.getElementById('transactionsChart').parentElement.innerHTML = 
+                '<div style="text-align: center; padding: 50px; color: #999;">Chart library failed to load. Please refresh the page.</div>';
+            return;
+        }
+        
+        // Monthly Transactions Chart
+        const ctx = document.getElementById('transactionsChart');
+        
+        if (!ctx) {
+            console.error('Canvas element not found');
+            return;
+        }
+        
+        console.log('Creating chart...');
+        
+        try {
+            const myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['January', 'February', 'March', 'April', 'May'],
+                    datasets: [{
+                        label: 'Orders',
+                        data: [10, 20, 15, 25, 30],
+                        backgroundColor: 'rgba(29, 191, 115, 0.8)',
+                        borderColor: '#1dbf73',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        hoverBackgroundColor: 'rgba(29, 191, 115, 1)',
+                        hoverBorderColor: '#17a05d',
+                        hoverBorderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                                    weight: '500'
+                                },
+                                color: '#333'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + ' orders';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    size: 12
+                                },
+                                padding: 10,
+                                stepSize: 5
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    size: 12
+                                },
+                                padding: 10
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+
+            console.log('✅ Chart initialized successfully:', myChart);
+        } catch (error) {
+            console.error('❌ Error creating chart:', error);
+            ctx.parentElement.innerHTML = 
+                '<div style="text-align: center; padding: 50px; color: #ef4444;">Error loading chart. Please check console.</div>';
         }
     });
 </script>

@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title>Categories - EcoSwap</title>
+    <link th:href="@{/css/categories.css}" rel="stylesheet"/>
+    <script th:src="@{/js/category-page.js}" defer></script>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1>Category Management</h1>
+                <p class="subtitle">Organize your sustainable product categories</p>
+            </div>
+            <a th:href="@{/dashboard/categories/add}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New Category
+            </a>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="filter-section">
+        <div class="search-filter-container">
+            <div class="search-box-large">
+                <i class="fas fa-search"></i>
+                <input type="text" 
+                       id="categorySearch" 
+                       placeholder="Search categories by name or description..."
+                       onkeyup="searchCategories()">
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="category-stats">
+        <div class="stat-box">
+            <div class="stat-icon blue">
+                <i class="fas fa-tags"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Total Categories</span>
+                <span class="stat-value" th:text="${totalCategories}">8</span>
+            </div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon green">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Active</span>
+                <span class="stat-value" th:text="${activeCategories}">7</span>
+            </div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon orange">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Total Products</span>
+                <span class="stat-value" id="totalProductsCount">150</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success" data-auto-hide="5000">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-error" data-auto-hide="5000">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+    </div>
+
+    <!-- Categories Grid -->
+    <div class="categories-grid" id="categoriesGrid">
+        <div class="category-card" th:each="category : ${categories}" th:data-category-id="${category.id}">
+            <div class="category-header" th:style="'background: linear-gradient(135deg, ' + ${category.color} + ' 0%, ' + ${category.color} + 'dd 100%);'">
+                <div class="category-icon-wrapper">
+                    <i th:class="'fas ' + ${category.icon}" class="category-icon-large"></i>
+                </div>
+                <div class="category-actions-overlay">
+                    <button class="action-btn-icon" 
+                            th:onclick="'editCategory(' + ${category.id} + ')'"
+                            title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn-icon delete" 
+                            th:onclick="'deleteCategory(' + ${category.id} + ', \'' + ${category.name} + '\', ' + ${category.productCount} + ')'"
+                            title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="category-body">
+                <h3 class="category-name" th:text="${category.name}">Category Name</h3>
+                <p class="category-slug" th:text="'/' + ${category.slug}">slug</p>
+                <p class="category-description" th:text="${category.description}">Category description goes here</p>
+                
+                <div class="category-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-box"></i>
+                        <span th:text="${category.productCount} + ' products'">0 products</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-sort"></i>
+                        <span th:text="'Order: ' + ${category.displayOrder}">Order: 0</span>
+                    </div>
+                </div>
+
+                <div class="category-footer">
+                    <span class="status-badge" 
+                          th:classappend="${category.isActive ? 'active' : 'inactive'}"
+                          th:text="${category.isActive ? 'Active' : 'Inactive'}">
+                        Active
+                    </span>
+                    <div class="toggle-switch">
+                        <input type="checkbox" 
+                               th:id="'toggle-' + ${category.id}" 
+                               th:checked="${category.isActive}"
+                               th:onchange="'toggleCategoryStatus(' + ${category.id} + ', this.checked)'">
+                        <label th:for="'toggle-' + ${category.id}"></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" th:if="${categories.isEmpty()}">
+        <div class="empty-icon">
+            <i class="fas fa-tags"></i>
+        </div>
+        <h3>No Categories Found</h3>
+        <p>Start by adding your first product category</p>
+        <a th:href="@{/dashboard/categories/add}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Your First Category
+        </a>
+    </div>
+
+    <!-- Color Legend -->
+    <div class="color-legend">
+        <h4>Suggested Colors:</h4>
+        <div class="color-palette">
+            <div class="color-sample" style="background: #1dbf73;" title="Primary Green" onclick="selectColor('#1dbf73')"></div>
+            <div class="color-sample" style="background: #52c41a;" title="Light Green" onclick="selectColor('#52c41a')"></div>
+            <div class="color-sample" style="background: #3b82f6;" title="Blue" onclick="selectColor('#3b82f6')"></div>
+            <div class="color-sample" style="background: #8b5cf6;" title="Purple" onclick="selectColor('#8b5cf6')"></div>
+            <div class="color-sample" style="background: #f59e0b;" title="Orange" onclick="selectColor('#f59e0b')"></div>
+            <div class="color-sample" style="background: #ef4444;" title="Red" onclick="selectColor('#ef4444')"></div>
+            <div class="color-sample" style="background: #10b981;" title="Emerald" onclick="selectColor('#10b981')"></div>
+            <div class="color-sample" style="background: #f97316;" title="Orange" onclick="selectColor('#f97316')"></div>
+        </div>
+    </div>
+</div>
+<div layout:fragment="scripts">
+<script>
+// Search categories
+function searchCategories() {
+    const searchTerm = document.getElementById('categorySearch').value.toLowerCase();
+    const cards = document.querySelectorAll('.category-card');
+    
+    cards.forEach(card => {
+        const name = card.querySelector('.category-name').textContent.toLowerCase();
+        const description = card.querySelector('.category-description').textContent.toLowerCase();
+        
+        if (name.includes(searchTerm) || description.includes(searchTerm)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// Edit category
+function editCategory(id) {
+    window.location.href = '/dashboard/categories/' + id + '/edit';
+}
+
+// Delete category
+function deleteCategory(id, name, productCount) {
+    if (productCount > 0) {
+        alert('Cannot delete category "' + name + '" because it has ' + productCount + ' products. Please reassign or delete the products first.');
+        return;
+    }
+    
+    if (confirm('Are you sure you want to delete the category "' + name + '"? This action cannot be undone.')) {
+        fetch('/dashboard/categories/' + id, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to delete category'));
+            }
+        })
+        .catch(error => {
+            alert('Error deleting category');
+            console.error('Error:', error);
+        });
+    }
+}
+
+// Toggle category status
+function toggleCategoryStatus(id, isActive) {
+    const action = isActive ? 'activate' : 'deactivate';
+    
+    fetch('/dashboard/categories/' + id + '/' + action, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // Update the status badge
+            const card = document.querySelector(`[data-category-id="${id}"]`);
+            const badge = card.querySelector('.status-badge');
+            badge.textContent = isActive ? 'Active' : 'Inactive';
+            badge.className = 'status-badge ' + (isActive ? 'active' : 'inactive');
+            
+            showToast(isActive ? 'Category activated!' : 'Category deactivated!', 'success');
+        } else {
+            showToast('Error updating category status', 'error');
+            // Revert checkbox
+            document.getElementById('toggle-' + id).checked = !isActive;
+        }
+    })
+    .catch(error => {
+        showToast('Error updating category status', 'error');
+        console.error('Error:', error);
+        // Revert checkbox
+        document.getElementById('toggle-' + id).checked = !isActive;
+    });
+}
+
+// Toast notification
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Auto-hide alerts
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert[data-auto-hide]');
+    alerts.forEach(alert => {
+        const delay = parseInt(alert.getAttribute('data-auto-hide')) || 5000;
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 300);
+        }, delay);
+    });
+});
+</script>
+</div>
+
+<style>
+/* Page Header */
+.page-header .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+/* Filter Section */
+.filter-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.search-filter-container {
+    display: flex;
+    gap: 15px;
+}
+
+.search-box-large {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f9f9f9;
+    padding: 12px 20px;
+    border-radius: 8px;
+}
+
+.search-box-large input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 1rem;
+}
+
+/* Category Stats */
+.category-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s;
+}
+
+.stat-box:hover {
+    transform: translateY(-3px);
+}
+
+.stat-box .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.stat-icon.blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+.stat-icon.green { background: linear-gradient(135deg, #1dbf73 0%, #17a05d 100%); }
+.stat-icon.orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+
+/* Alerts */
+.alert {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-success {
+    background: rgba(29, 191, 115, 0.1);
+    border-left: 4px solid #1dbf73;
+    color: #17a05d;
+}
+
+.alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 4px solid #ef4444;
+    color: #dc2626;
+}
+
+.alert-close {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+.alert-close:hover {
+    opacity: 1;
+}
+
+/* Categories Grid */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.category-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.category-header {
+    position: relative;
+    padding: 30px;
+    text-align: center;
+    color: white;
+}
+
+.category-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    backdrop-filter: blur(10px);
+}
+
+.category-icon-large {
+    font-size: 2.5rem;
+}
+
+.category-actions-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.category-card:hover .category-actions-overlay {
+    opacity: 1;
+}
+
+.action-btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn-icon:hover {
+    background: white;
+    transform: scale(1.1);
+}
+
+.action-btn-icon.delete:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.category-body {
+    padding: 20px;
+}
+
+.category-name {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.category-slug {
+    color: #1dbf73;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    font-family: monospace;
+}
+
+.category-description {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.category-meta {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.meta-item i {
+    color: #1dbf73;
+}
+
+.category-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-badge.active {
+    background: rgba(29, 191, 115, 0.1);
+    color: #1dbf73;
+}
+
+.status-badge.inactive {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 26px;
+}
+
+.toggle-switch label:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked + label {
+    background-color: #1dbf73;
+}
+
+.toggle-switch input:checked + label:before {
+    transform: translateX(24px);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+    font-size: 5rem;
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+/* Color Legend */
+.color-legend {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.color-legend h4 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.color-palette {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.color-sample {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.color-sample:hover {
+    transform: scale(1.1);
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s;
+    z-index: 10000;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-success {
+    border-left: 4px solid #1dbf73;
+    color: #17a05d;
+}
+
+.toast-error {
+    border-left: 4px solid #ef4444;
+    color: #dc2626;
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #1dbf73 0%, #17a05d 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(29, 191, 115, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .category-stats {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+</body>
+</html>
