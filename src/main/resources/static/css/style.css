@@ -21,6 +21,8 @@ header {
     position: sticky;
     top: 0;
     z-index: 1000;
+    width:auto;
+    
 }
 
 nav {
@@ -62,7 +64,7 @@ main {
 }
 
 .content {
-    max-width: 1200px;
+    /*   */
     margin: 0 auto;
 }
 
