@@ -1,41 +1,106 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/public_layout}">
 <head>
     <meta charset="UTF-8">
-    <title>Register - Seller</title>
-    <link th:href="@{/adminlte/dist/css/adminlte.min.css}" rel="stylesheet"/>
+    <title>Seller Registration - EcoSwap</title>
+    <link th:href="@{/css/styles.css}" rel="stylesheet"/>
 </head>
-<body class="hold-transition">
-<div class="container mt-5">
-    <div class="card">
-        <div class="card-header"><h4>Seller Registration</h4></div>
-        <div class="card-body">
+<body layout:fragment="content">
+    <main>
+        <div class="form-container">
+            <h1><span style="color: #1dbf73;">Eco</span>Swap</h1>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">Create your seller account</p>
+            
             <form th:action="@{/register-seller}" method="post" th:object="${seller}">
-                <div class="mb-3">
-                    <label>Email</label>
-                    <input type="email" th:field="*{email}" class="form-control" required/>
+                <label for="email">Email</label>
+                <input type="email" 
+                       id="email" 
+                       th:field="*{email}" 
+                       placeholder="Enter your email" 
+                       required/>
+                
+                <label for="fullname">Full Name</label>
+                <input type="text" 
+                       id="fullname" 
+                       th:field="*{fullname}" 
+                       placeholder="Enter your full name" 
+                       required/>
+                
+                <label for="password">Password</label>
+                <input type="password" 
+                       id="password" 
+                       th:field="*{password}" 
+                       placeholder="Create a password" 
+                       required/>
+                
+                <label for="storeName">Store Name</label>
+                <input type="text" 
+                       id="storeName" 
+                       th:field="*{storeName}" 
+                       placeholder="Enter your store name" 
+                       required/>
+                
+                <label for="businessAddress">Business Address</label>
+                <textarea id="businessAddress" 
+                          th:field="*{businessAddress}" 
+                          rows="3" 
+                          placeholder="Enter your business address"></textarea>
+                
+                <div th:if="${error}" 
+                     style="color: #dc3545; 
+                            background-color: #f8d7da; 
+                            border: 1px solid #f5c6cb; 
+                            padding: 12px; 
+                            border-radius: 6px; 
+                            margin-bottom: 20px; 
+                            text-align: center;">
+                    <span th:text="${error}"></span>
                 </div>
-                <div class="mb-3">
-                    <label>Full Name</label>
-                    <input type="text" th:field="*{fullname}" class="form-control" required/>
+                
+                <button type="submit">Register as Seller</button>
+                
+                <p style="margin-top: 30px; margin-bottom: 10px;">Already have an account?</p>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <a th:href="@{/login}" 
+                       style="color: #1dbf73; 
+                              text-decoration: none; 
+                              font-weight: 500;
+                              padding: 8px 16px;
+                              border: 2px solid #1dbf73;
+                              border-radius: 6px;
+                              transition: all 0.3s;
+                              display: inline-block;">
+                        Sign In
+                    </a>
+                    <a th:href="@{/register-customer}" 
+                       style="color: #1dbf73; 
+                              text-decoration: none; 
+                              font-weight: 500;
+                              padding: 8px 16px;
+                              border: 2px solid #1dbf73;
+                              border-radius: 6px;
+                              transition: all 0.3s;
+                              display: inline-block;">
+                        Register as Customer
+                    </a>
                 </div>
-                <div class="mb-3">
-                    <label>Password</label>
-                    <input type="password" th:field="*{password}" class="form-control" required/>
-                </div>
-                <div class="mb-3">
-                    <label>Store Name</label>
-                    <input type="text" th:field="*{storeName}" class="form-control" required/>
-                </div>
-                <div class="mb-3">
-                    <label>Business Address</label>
-                    <input type="text" th:field="*{businessAddress}" class="form-control"/>
-                </div>
-                <div th:if="${error}" class="text-danger mb-2" th:text="${error}"></div>
-                <button class="btn btn-primary" type="submit">Register</button>
             </form>
         </div>
-    </div>
-</div>
+    </main>
+
+    <style>
+        /* Additional hover effect for registration links */
+        .form-container a[style*="border"] {
+            transition: all 0.3s;
+        }
+        
+        .form-container a[style*="border"]:hover {
+            background-color: #1dbf73;
+            color: white !important;
+            text-decoration: none !important;
+        }
+    </style>
 </body>
 </html>
