@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title>Checkout - EcoSwap</title>
+    <link th:href="@{/css/checkout.css}" rel="stylesheet"/>
+    <script th:src="@{/js/checkout.js}" defer></script>
+</head>
+<body>
+
+<div layout:fragment="content" class="checkout-page">
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="flash-message success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="flash-message error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Checkout</h1>
+        <p>Complete your order</p>
+    </div>
+
+    <!-- Checkout Grid -->
+    <div class="checkout-grid">
+        <!-- Checkout Form -->
+        <div class="checkout-form-section">
+            <form th:action="@{/cart/place-order}" method="post" onsubmit="return handleCheckoutSubmit(event)">
+
+                <!-- Shipping Information -->
+                <div class="form-section">
+                    <h2><i class="fas fa-shipping-fast"></i> Shipping Information</h2>
+
+                    <div class="form-group">
+                        <label for="customerName">Full Name *</label>
+                        <input type="text" id="customerName" name="customerName"
+                               th:value="${userName}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerEmail">Email Address *</label>
+                        <input type="email" id="customerEmail" name="customerEmail"
+                               th:value="${userEmail}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerPhone">Phone Number *</label>
+                        <input type="tel" id="customerPhone" name="customerPhone"
+                               placeholder="+1 (555) 123-4567" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="shippingAddress">Street Address *</label>
+                        <input type="text" id="shippingAddress" name="shippingAddress"
+                               placeholder="123 Main Street" required>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="shippingCity">City *</label>
+                            <input type="text" id="shippingCity" name="shippingCity" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="shippingState">State/Province *</label>
+                            <input type="text" id="shippingState" name="shippingState" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="shippingZipCode">ZIP/Postal Code *</label>
+                            <input type="text" id="shippingZipCode" name="shippingZipCode" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="shippingCountry">Country *</label>
+                            <input type="text" id="shippingCountry" name="shippingCountry"
+                                   value="USA" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="form-section">
+                    <h2><i class="fas fa-credit-card"></i> Payment Method</h2>
+
+                    <div class="payment-method">
+                        <label class="payment-option selected">
+                            <input type="radio" name="paymentMethod" value="COD" checked>
+                            <div>
+                                <i class="fas fa-money-bill-wave"></i>
+                                <div>Cash on Delivery</div>
+                            </div>
+                        </label>
+
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="CARD">
+                            <div>
+                                <i class="fas fa-credit-card"></i>
+                                <div>Credit/Debit Card</div>
+                            </div>
+                        </label>
+                    </div>
+                    <small style="display: block; margin-top: 10px; color: #6b7280;">
+                        <i class="fas fa-info-circle"></i> Card payment will be available soon
+                    </small>
+                </div>
+
+                <!-- Order Notes -->
+                <div class="form-section">
+                    <h2><i class="fas fa-comment"></i> Order Notes (Optional)</h2>
+
+                    <div class="form-group">
+                        <label for="orderNotes">Special instructions for your order</label>
+                        <textarea id="orderNotes" name="orderNotes" rows="4"
+                                  placeholder="e.g., Leave package at front door"></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="place-order-btn">
+                    <i class="fas fa-check-circle"></i> Place Order
+                </button>
+
+                <a th:href="@{/cart}" class="back-to-cart">
+                    <i class="fas fa-arrow-left"></i> Back to Cart
+                </a>
+            </form>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary-section">
+            <h2 style="font-size: 1.25rem; margin-bottom: 20px;">Order Summary</h2>
+
+            <!-- Order Items -->
+            <div style="margin-bottom: 20px;">
+                <div class="order-item" th:each="item : ${cartItems}">
+                    <img th:src="${item.product.image ?: '/images/placeholder.png'}"
+                         class="order-item-image" alt="Product">
+
+                    <div class="order-item-details">
+                        <h4 th:text="${item.product.name}">Product Name</h4>
+                        <p>Qty: <span th:text="${item.quantity}">1</span></p>
+                        <p class="order-item-price">
+                            $<span th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)}">0.00</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Summary -->
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 15px;">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>$<span th:text="${#numbers.formatDecimal(subtotal, 1, 2)}">0.00</span></span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Shipping:</span>
+                    <span>$10.00</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Tax (10%):</span>
+                    <span>$<span th:text="${#numbers.formatDecimal(subtotal * 0.1, 1, 2)}">0.00</span></span>
+                </div>
+
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span>$<span th:text="${#numbers.formatDecimal(subtotal + 10 + (subtotal * 0.1), 1, 2)}">0.00</span></span>
+                </div>
+            </div>
+
+            <!-- Secure Checkout Badge -->
+            <div class="secure-checkout-badge">
+                <i class="fas fa-lock"></i>
+                <span>Secure Checkout</span>
+            </div>
+
+            <!-- Environmental Impact -->
+            <div style="margin-top: 20px; padding: 15px; background: #f0fdf4; border-radius: 8px; border-left: 4px solid #10b981;">
+                <h3 style="font-size: 0.95rem; color: #065f46; margin-bottom: 8px;">
+                    <i class="fas fa-leaf"></i> Eco-Friendly Order
+                </h3>
+                <p style="font-size: 0.875rem; color: #6b7280;">
+                    This order supports sustainable practices!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!--
+    PRODUCT CARD FRAGMENT
+    Reusable product card component
+
+    Usage:
+    <div th:replace="~{public/fragments/product-card :: product-card(product=${product})}"></div>
+
+    Or in a loop:
+    <div th:each="product : ${products}"
+         th:replace="~{public/fragments/product-card :: product-card(product=${product})}"></div>
+-->
+
+<body>
+
+<!-- Product Card Fragment -->
+<a th:fragment="product-card(product)"
+   th:href="@{/product/{id}(id=${product.id})}"
+   class="product-card">
+
+    <!-- Product Image Section -->
+    <div class="product-image-wrapper">
+        <img th:if="${product.image != null and product.image != ''}"
+             th:src="${product.image}"
+             th:alt="${product.name}"
+             class="product-image"
+             loading="lazy"/>
+
+        <!-- Eco Badge Overlay (Optional) -->
+        <span class="eco-badge-overlay"
+              th:if="${showEcoBadge != null and showEcoBadge}">
+            🌱 Eco-Friendly
+        </span>
+    </div>
+
+    <!-- Product Info Section -->
+    <div class="product-info">
+        <!-- Category -->
+        <p class="product-category"
+           th:if="${product.category != null}"
+           th:text="${product.category.name}">
+            Category
+        </p>
+
+        <!-- Product Name -->
+        <h3 class="product-name" th:text="${product.name}">
+            Product Name
+        </h3>
+
+        <!-- Product Description -->
+        <p class="product-description"
+           th:if="${product.description != null and product.description != ''}"
+           th:text="${product.description}">
+            Product description goes here
+        </p>
+
+        <!-- Environmental Impact (Optional) -->
+        <div class="environmental-impact"
+             th:if="${product.co2Saved != null or product.plasticSaved != null}">
+            <span th:if="${product.co2Saved != null}" class="impact-badge">
+                🌍 <span th:text="${product.co2Saved}">0</span>kg CO₂ Saved
+            </span>
+            <span th:if="${product.plasticSaved != null}" class="impact-badge">
+                ♻️ <span th:text="${product.plasticSaved}">0</span>g Plastic Saved
+            </span>
+        </div>
+
+        <!-- Product Footer (Price & Stock) -->
+        <div class="product-footer">
+            <span class="product-price">
+                $<span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span>
+            </span>
+
+            <span th:if="${product.stock != null and product.stock > 0}"
+                  class="stock-status">
+                In Stock (<span th:text="${product.stock}">0</span>)
+            </span>
+            <span th:if="${product.stock != null and product.stock <= 0}"
+                  class="stock-status out-of-stock">
+                Out of Stock
+            </span>
+        </div>
+    </div>
+</a>
+
+<!--
+    SIMPLIFIED PRODUCT CARD (Minimal version for related products, etc.)
+
+    Usage:
+    <div th:replace="~{public/fragments/product-card :: product-card-simple(product=${product})}"></div>
+-->
+
+
+</body>
+</html>

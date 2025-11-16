@@ -24,23 +24,23 @@
             </div>
             <div class="stat-content">
                 <h3>Total Products</h3>
-                <p class="stat-value">150</p>
+                <p class="stat-value" th:text="${totalProducts}">150</p>
                 <span class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i> 12 new this month
+                    <i class="fas fa-check-circle"></i> <span th:text="${activeProducts}">0</span> active
                 </span>
             </div>
         </div>
 
-        <!-- Users Card -->
+        <!-- Revenue Card -->
         <div class="stat-card users">
             <div class="stat-icon">
-                <i class="fas fa-users"></i>
+                <i class="fas fa-dollar-sign"></i>
             </div>
             <div class="stat-content">
-                <h3>Active Users</h3>
-                <p class="stat-value">53</p>
+                <h3>Total Revenue</h3>
+                <p class="stat-value">$<span th:text="${#numbers.formatDecimal(totalRevenue, 1, 2)}">0.00</span></p>
                 <span class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i> 8 new users
+                    <i class="fas fa-arrow-up"></i> Lifetime earnings
                 </span>
             </div>
         </div>
@@ -52,9 +52,9 @@
             </div>
             <div class="stat-content">
                 <h3>Total Orders</h3>
-                <p class="stat-value">120</p>
-                <span class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i> 15% from last month
+                <p class="stat-value" th:text="${totalOrders}">120</p>
+                <span class="stat-change" th:classappend="${pendingOrders > 0 ? 'positive' : ''}">
+                    <i class="fas fa-clock"></i> <span th:text="${pendingOrders}">0</span> pending
                 </span>
             </div>
         </div>
@@ -66,7 +66,7 @@
             </div>
             <div class="stat-content">
                 <h3>CO₂ Saved</h3>
-                <p class="stat-value">35 <span style="font-size: 1rem;">tons</span></p>
+                <p class="stat-value"><span th:text="${#numbers.formatDecimal(totalCo2Saved, 1, 2)}">35</span> <span style="font-size: 1rem;">kg</span></p>
                 <span class="stat-change positive">
                     <i class="fas fa-arrow-up"></i> Making impact!
                 </span>
@@ -86,24 +86,24 @@
                     <i class="fas fa-globe-americas"></i>
                 </div>
                 <h3>Carbon Footprint</h3>
-                <p class="impact-value">35 tons</p>
+                <p class="impact-value"><span th:text="${#numbers.formatDecimal(totalCo2Saved, 1, 2)}">0</span> kg</p>
                 <p class="impact-desc">CO₂ emissions saved through sustainable products</p>
             </div>
             <div class="impact-card">
                 <div class="impact-icon blue">
                     <i class="fas fa-recycle"></i>
                 </div>
-                <h3>Items Recycled</h3>
-                <p class="impact-value">1,247</p>
-                <p class="impact-desc">Products given a second life</p>
+                <h3>Items Sold</h3>
+                <p class="impact-value" th:text="${itemsRecycled ?: 0}">0</p>
+                <p class="impact-desc">Products sold to customers</p>
             </div>
             <div class="impact-card">
                 <div class="impact-icon emerald">
-                    <i class="fas fa-tree"></i>
+                    <i class="fas fa-recycle"></i>
                 </div>
-                <h3>Trees Equivalent</h3>
-                <p class="impact-value">156</p>
-                <p class="impact-desc">Trees needed to offset your impact</p>
+                <h3>Plastic Saved</h3>
+                <p class="impact-value"><span th:text="${#numbers.formatDecimal(totalPlasticSaved, 1, 2)}">0</span> kg</p>
+                <p class="impact-desc">Plastic waste prevented</p>
             </div>
         </div>
     </div>
@@ -173,102 +173,62 @@
 
     <!-- Data Cards Section -->
     <div class="data-cards-section">
-        <!-- Recent Products -->
+        <!-- Low Stock Products -->
         <div class="data-card">
             <div class="data-card-header">
-                <h3><i class="fas fa-box"></i> Recent Products</h3>
+                <h3><i class="fas fa-exclamation-triangle"></i> Low Stock Products</h3>
                 <a th:href="@{/dashboard/products}" class="view-all-link">View All →</a>
             </div>
             <div class="data-card-body">
-                <div class="product-list">
-                    <div class="product-item">
+                <div th:if="${lowStockProducts.isEmpty()}" style="text-align: center; padding: 30px; color: #6b7280;">
+                    <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 10px; color: #10b981;"></i>
+                    <p>All products have sufficient stock!</p>
+                </div>
+                <div th:if="${!lowStockProducts.isEmpty()}" class="product-list">
+                    <div class="product-item" th:each="product : ${lowStockProducts}" th:if="${productStat.index < 3}">
                         <div class="product-info">
-                            <div class="product-icon eco">
-                                <i class="fas fa-shopping-bag"></i>
+                            <div class="product-icon" th:classappend="${product.stock == 0 ? 'danger' : 'warning'}">
+                                <i class="fas fa-box"></i>
                             </div>
                             <div class="product-details">
-                                <h4>EcoBag</h4>
-                                <p>20 units sold</p>
+                                <h4 th:text="${product.name}">Product Name</h4>
+                                <p><span th:text="${product.stock}">0</span> units remaining</p>
                             </div>
                         </div>
-                        <div class="product-badge success">
-                            <i class="fas fa-check-circle"></i> Active
-                        </div>
-                    </div>
-                    <div class="product-item">
-                        <div class="product-info">
-                            <div class="product-icon water">
-                                <i class="fas fa-bottle-water"></i>
-                            </div>
-                            <div class="product-details">
-                                <h4>Reusable Bottle</h4>
-                                <p>35 units sold</p>
-                            </div>
-                        </div>
-                        <div class="product-badge success">
-                            <i class="fas fa-check-circle"></i> Active
-                        </div>
-                    </div>
-                    <div class="product-item">
-                        <div class="product-info">
-                            <div class="product-icon tech">
-                                <i class="fas fa-laptop"></i>
-                            </div>
-                            <div class="product-details">
-                                <h4>Second-hand Laptop</h4>
-                                <p>5 units sold</p>
-                            </div>
-                        </div>
-                        <div class="product-badge warning">
-                            <i class="fas fa-exclamation-circle"></i> Low Stock
+                        <div class="product-badge" th:classappend="${product.stock == 0 ? 'danger' : 'warning'}">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span th:text="${product.stock == 0 ? 'Out of Stock' : 'Low Stock'}">Low Stock</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Top Users -->
+        <!-- Recent Orders -->
         <div class="data-card">
             <div class="data-card-header">
-                <h3><i class="fas fa-users"></i> Top Customers</h3>
-                <a th:href="@{/dashboard/customers}" class="view-all-link">View All →</a>
+                <h3><i class="fas fa-shopping-cart"></i> Recent Orders</h3>
+                <a th:href="@{/dashboard/orders}" class="view-all-link">View All →</a>
             </div>
             <div class="data-card-body">
-                <div class="user-list">
-                    <div class="user-item">
-                        <div class="user-avatar">
-                            <img src="https://ui-avatars.com/api/?name=John+Doe&background=1dbf73&color=fff" alt="John Doe">
+                <div th:if="${recentOrders.isEmpty()}" style="text-align: center; padding: 30px; color: #6b7280;">
+                    <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                    <p>No orders yet</p>
+                </div>
+                <div th:if="${!recentOrders.isEmpty()}" class="user-list">
+                    <div class="user-item" th:each="order : ${recentOrders}">
+                        <div class="user-avatar" style="background: #1dbf73; color: white; display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 50%; font-weight: bold;">
+                            <i class="fas fa-shopping-bag"></i>
                         </div>
                         <div class="user-info">
-                            <h4>John Doe</h4>
-                            <p>25 purchases</p>
+                            <h4 th:text="${order.orderNumber}">ORD-123</h4>
+                            <p>
+                                <span th:text="${order.customer.fullName}">Customer</span> -
+                                $<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span>
+                            </p>
                         </div>
-                        <div class="user-badge gold">
-                            <i class="fas fa-crown"></i> VIP
-                        </div>
-                    </div>
-                    <div class="user-item">
-                        <div class="user-avatar">
-                            <img src="https://ui-avatars.com/api/?name=Jane+Smith&background=3b82f6&color=fff" alt="Jane Smith">
-                        </div>
-                        <div class="user-info">
-                            <h4>Jane Smith</h4>
-                            <p>18 purchases</p>
-                        </div>
-                        <div class="user-badge silver">
-                            <i class="fas fa-star"></i> Regular
-                        </div>
-                    </div>
-                    <div class="user-item">
-                        <div class="user-avatar">
-                            <img src="https://ui-avatars.com/api/?name=Mike+Johnson&background=8b5cf6&color=fff" alt="Mike Johnson">
-                        </div>
-                        <div class="user-info">
-                            <h4>Mike Johnson</h4>
-                            <p>12 purchases</p>
-                        </div>
-                        <div class="user-badge">
-                            <i class="fas fa-user"></i> Member
+                        <div class="user-badge" th:classappend="${order.status.name() == 'PENDING' ? 'warning' : (order.status.name() == 'DELIVERED' ? 'success' : '')}">
+                            <span th:text="${order.status.displayName}">Pending</span>
                         </div>
                     </div>
                 </div>

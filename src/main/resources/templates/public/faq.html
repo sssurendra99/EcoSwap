@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/public_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - EcoSwap</title>
+    <link th:href="@{/css/faq.css}" rel="stylesheet"/>
+    <script th:src="@{/js/faq.js}" defer></script>
+</head>
+
+<body>
+    <main layout:fragment="content" class="faq-content">
+        <!-- Hero Section -->
+        <section class="faq-hero">
+            <h1>Frequently Asked <span class="highlight">Questions</span></h1>
+            <p>Find answers to common questions about EcoSwap, our sustainable marketplace platform.</p>
+        </section>
+
+        <!-- FAQ Sections -->
+        <section class="faq-section">
+            <!-- Getting Started -->
+            <div class="faq-category">
+                <h2 class="category-title">
+                    <span class="category-icon">🚀</span>
+                    Getting Started
+                </h2>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What is EcoSwap?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>EcoSwap is a sustainable e-commerce marketplace dedicated to eco-friendly products. We connect conscious buyers with verified sellers offering sustainable, environmentally responsible products. Every transaction on our platform contributes to reducing waste and promoting a circular economy.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How do I create an account?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Creating an account is simple and free! Click on "Register" and choose whether you want to sign up as a Customer or Seller. Fill in your details, and you'll be ready to start shopping or selling sustainable products in minutes.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What's the difference between Customer and Seller accounts?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Customer accounts allow you to browse and purchase eco-friendly products, track orders, and manage your shopping cart. Seller accounts enable you to list and sell your sustainable products, manage inventory, and track sales. You can always upgrade from a Customer to a Seller account later.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shopping -->
+            <div class="faq-category">
+                <h2 class="category-title">
+                    <span class="category-icon">🛒</span>
+                    Shopping
+                </h2>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How do I purchase products?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Browse our shop, select products you like, and click "Add to Cart". When you're ready to checkout, review your cart, enter your shipping information, choose a payment method, and confirm your order. You'll receive an order confirmation and tracking information via email.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What payment methods do you accept?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We currently accept cash on delivery (COD) and major credit/debit cards. We're continuously working to add more payment options including digital wallets and eco-friendly payment solutions.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Can I track my order?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes! Once your order is shipped, you'll receive a tracking number via email. You can also view your order status anytime by logging into your account and visiting the "My Orders" section in your dashboard.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What is your return policy?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We want you to be completely satisfied with your purchase. If you're not happy with a product, you can request a return within 30 days of delivery. The product must be unused and in its original packaging. Contact the seller or our support team to initiate a return.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selling -->
+            <div class="faq-category">
+                <h2 class="category-title">
+                    <span class="category-icon">💼</span>
+                    Selling on EcoSwap
+                </h2>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How do I become a seller?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Register for a Seller account by providing your business information and store details. Our admin team will review your application to ensure your products meet our sustainability standards. Once approved, you can start listing products immediately.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What products can I sell?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>You can sell any eco-friendly, sustainable products including:</p>
+                        <ul>
+                            <li>Organic and natural products</li>
+                            <li>Recycled or upcycled items</li>
+                            <li>Zero-waste products</li>
+                            <li>Renewable energy products</li>
+                            <li>Eco-friendly fashion and accessories</li>
+                            <li>Sustainable home and garden items</li>
+                        </ul>
+                        <p>All products must meet our environmental standards and be verified by our team.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Are there any fees for selling?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Creating a seller account and listing products is completely free! We only charge a small commission on successful sales to maintain and improve our platform. Detailed fee information will be provided during the seller registration process.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How do I manage my inventory?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Your seller dashboard provides comprehensive tools to manage products, track inventory levels, update prices, and monitor stock. You'll receive automatic low-stock alerts and can easily add, edit, or deactivate products anytime.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sustainability -->
+            <div class="faq-category">
+                <h2 class="category-title">
+                    <span class="category-icon">🌱</span>
+                    Sustainability
+                </h2>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How do you verify products are eco-friendly?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Every seller and product goes through our rigorous verification process. We check for sustainable materials, ethical production methods, environmental certifications, and overall eco-impact. Products display metrics like CO₂ saved and plastic reduced to provide transparency.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What do the eco-metrics mean?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Each product shows environmental impact metrics including Eco Score (overall sustainability rating), CO₂ Saved (carbon emissions reduced), and Plastic Saved (plastic waste prevented). These metrics help you make informed choices and see the real impact of your purchases.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How does EcoSwap reduce environmental impact?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We promote sustainable consumption by connecting conscious buyers with eco-friendly sellers, encouraging product reuse through our swap features, using minimal packaging, partnering with carbon-neutral shipping providers, and tracking the collective environmental impact of our community.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account & Support -->
+            <div class="faq-category">
+                <h2 class="category-title">
+                    <span class="category-icon">💬</span>
+                    Account & Support
+                </h2>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How do I reset my password?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>If you've forgotten your password, click "Forgot Password" on the login page. Enter your email address, and we'll send you instructions to reset your password securely. You can also change your password anytime from your profile settings.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How do I contact customer support?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Our support team is here to help! You can reach us through the Contact Us page, email us directly, or use the live chat feature on our website. We typically respond within 24 hours during business days.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Can I delete my account?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes, you can request account deletion at any time from your account settings or by contacting our support team. Please note that this action is permanent and will remove all your data from our platform.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <h2>Still Have Questions?</h2>
+            <p>Our team is here to help. Reach out and we'll get back to you as soon as possible.</p>
+            <div class="contact-links">
+                <a href="/contactus" class="contact-btn">
+                    📧 Contact Us
+                </a>
+                <a href="/about" class="contact-btn">
+                    🌍 About EcoSwap
+                </a>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

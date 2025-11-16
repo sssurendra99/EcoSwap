@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title>Seller Approvals - EcoSwap</title>
+    <link th:href="@{/css/admin-users.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1>Seller Approvals</h1>
+                <p class="subtitle">Review and approve seller applications</p>
+            </div>
+            <a th:href="@{/admin/users}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </a>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon pending">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Pending Approvals</span>
+                <span class="stat-value" th:text="${totalPending}">0</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon approved">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Approved Sellers</span>
+                <span class="stat-value" th:text="${allSellerProfiles.?[status == 'APPROVED'].size()}">0</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon rejected">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Rejected Applications</span>
+                <span class="stat-value" th:text="${allSellerProfiles.?[status == 'REJECTED'].size()}">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Approvals -->
+    <div class="approvals-card" th:if="${!pendingApprovals.isEmpty()}">
+        <div class="card-header">
+            <h3><i class="fas fa-clock"></i> Pending Applications</h3>
+            <span class="badge-count" th:text="${totalPending}">0</span>
+        </div>
+        <div class="card-body">
+            <div class="approvals-grid">
+                <div class="approval-card" th:each="profile : ${pendingApprovals}">
+                    <div class="approval-header">
+                        <div class="seller-info">
+                            <div class="seller-avatar">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <div class="seller-details">
+                                <h4 th:text="${profile.businessName}">Business Name</h4>
+                                <p class="seller-owner" th:text="${profile.user.fullName}">Owner Name</p>
+                            </div>
+                        </div>
+                        <span class="status-badge pending">Pending</span>
+                    </div>
+
+                    <div class="approval-body">
+                        <div class="info-row">
+                            <i class="fas fa-envelope"></i>
+                            <span th:text="${profile.user.email}">email@example.com</span>
+                        </div>
+                        <div class="info-row">
+                            <i class="fas fa-phone"></i>
+                            <span th:text="${profile.businessPhone}">+1234567890</span>
+                        </div>
+                        <div class="info-row">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span th:text="${profile.businessAddress}">Business Address</span>
+                        </div>
+                        <div class="info-row full-width" th:if="${profile.businessDescription != null and profile.businessDescription != ''}">
+                            <i class="fas fa-info-circle"></i>
+                            <p class="description" th:text="${profile.businessDescription}">Business description</p>
+                        </div>
+                        <div class="info-row" th:if="${profile.taxId != null and profile.taxId != ''}">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Tax ID: <strong th:text="${profile.taxId}">123456789</strong></span>
+                        </div>
+                        <div class="info-row">
+                            <i class="fas fa-calendar"></i>
+                            <span>Applied: <strong th:text="${#temporals.format(profile.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="approval-actions">
+                        <form th:action="@{/admin/users/seller-approvals/{id}/approve(id=${profile.id})}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                        </form>
+                        <form th:action="@{/admin/users/seller-approvals/{id}/reject(id=${profile.id})}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to reject this application?')">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State for Pending -->
+    <div class="approvals-card" th:if="${pendingApprovals.isEmpty()}">
+        <div class="card-body">
+            <div class="empty-state">
+                <i class="fas fa-check-circle"></i>
+                <h3>No Pending Applications</h3>
+                <p>All seller applications have been processed!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Seller Applications History -->
+    <div class="approvals-card">
+        <div class="card-header">
+            <h3><i class="fas fa-history"></i> Application History</h3>
+        </div>
+        <div class="card-body">
+            <div class="history-table">
+                <div class="table-header">
+                    <div class="table-col">Business Name</div>
+                    <div class="table-col">Owner</div>
+                    <div class="table-col">Applied Date</div>
+                    <div class="table-col">Status</div>
+                    <div class="table-col">Action Date</div>
+                </div>
+
+                <div class="table-row" th:each="profile : ${allSellerProfiles}">
+                    <div class="table-col">
+                        <strong th:text="${profile.businessName}">Business Name</strong>
+                    </div>
+                    <div class="table-col">
+                        <span th:text="${profile.user.fullName}">Owner Name</span>
+                    </div>
+                    <div class="table-col">
+                        <span th:text="${#temporals.format(profile.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</span>
+                    </div>
+                    <div class="table-col">
+                        <span class="status-badge"
+                              th:classappend="${profile.status == 'APPROVED'} ? 'active' : (${profile.status == 'PENDING'} ? 'pending' : 'inactive')"
+                              th:text="${profile.status}">Pending</span>
+                    </div>
+                    <div class="table-col">
+                        <span th:if="${profile.approvedAt != null}" th:text="${#temporals.format(profile.approvedAt, 'MMM dd, yyyy')}">Jan 05, 2024</span>
+                        <span th:unless="${profile.approvedAt != null}">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
