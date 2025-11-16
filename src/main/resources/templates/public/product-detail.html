@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/public_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.name} + ' | EcoSwap'">Product | EcoSwap</title>
+    <link th:href="@{/css/product-detail.css}" rel="stylesheet"/>
+</head>
+
+<body>
+    <main layout:fragment="content" class="main-content">
+        <!-- Breadcrumb -->
+        <section class="breadcrumb-section">
+            <div class="container">
+                <nav class="breadcrumb">
+                    <a href="/" class="breadcrumb-link">Home</a>
+                    <span class="breadcrumb-separator">›</span>
+                    <a href="/shop" class="breadcrumb-link">Shop</a>
+                    <span class="breadcrumb-separator">›</span>
+                    <a th:href="@{/shop(categoryId=${product.category.id})}"
+                       class="breadcrumb-link"
+                       th:text="${product.category.name}">Category</a>
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-current" th:text="${product.name}">Product Name</span>
+                </nav>
+            </div>
+        </section>
+
+        <!-- Product Detail -->
+        <section class="product-detail-section">
+            <div class="container">
+                <div class="product-detail-grid">
+                    <!-- Product Images -->
+                    <div class="product-images">
+                        <div class="main-image-wrapper">
+                            <img th:src="${product.image != null and product.image != ''} ? ${product.image} : 'https://via.placeholder.com/600x600/11998e/ffffff?text=No+Image'"
+                                 th:alt="${product.name}"
+                                 class="main-image"
+                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/600x600/11998e/ffffff?text=No+Image'"/>
+                            <span class="eco-badge">🌱 Eco-Friendly</span>
+                        </div>
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="product-info">
+                        <div class="product-category-badge">
+                            <a th:href="@{/shop(categoryId=${product.category.id})}"
+                               th:text="${product.category.name}">Category</a>
+                        </div>
+
+                        <h1 class="product-title" th:text="${product.name}">Product Name</h1>
+
+                        <div class="product-price-section">
+                            <div class="price-wrapper">
+                                <span class="current-price">
+                                    $<span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span>
+                                </span>
+                                <span th:if="${product.originalPrice != null and product.originalPrice > product.price}"
+                                      class="original-price">
+                                    $<span th:text="${#numbers.formatDecimal(product.originalPrice, 1, 2)}">0.00</span>
+                                </span>
+                                <span th:if="${product.originalPrice != null and product.originalPrice > product.price}"
+                                      class="discount-badge">
+                                    <span th:text="${#numbers.formatDecimal((1 - product.price / product.originalPrice) * 100, 0, 0)}">0</span>% OFF
+                                </span>
+                            </div>
+                            <div class="stock-info">
+                                <span th:if="${product.stock > 0}" class="in-stock">
+                                    ✓ In Stock (<span th:text="${product.stock}">0</span> available)
+                                </span>
+                                <span th:if="${product.stock <= 0}" class="out-of-stock">
+                                    ✗ Out of Stock
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="product-description">
+                            <h3>Description</h3>
+                            <p th:text="${product.description}">Product description goes here</p>
+                        </div>
+
+                        <!-- Environmental Impact -->
+                        <div class="environmental-impact" th:if="${product.co2Saved != null or product.plasticSaved != null}">
+                            <h3>🌍 Environmental Impact</h3>
+                            <div class="impact-stats">
+                                <div th:if="${product.co2Saved != null}" class="impact-stat">
+                                    <div class="impact-icon">🌍</div>
+                                    <div class="impact-info">
+                                        <span class="impact-value" th:text="${product.co2Saved}">0</span>
+                                        <span class="impact-label">kg CO₂ Saved</span>
+                                    </div>
+                                </div>
+                                <div th:if="${product.plasticSaved != null}" class="impact-stat">
+                                    <div class="impact-icon">♻️</div>
+                                    <div class="impact-info">
+                                        <span class="impact-value" th:text="${product.plasticSaved}">0</span>
+                                        <span class="impact-label">g Plastic Saved</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Eco Score -->
+                        <div class="eco-score-section" th:if="${product.ecoScore != null}">
+                            <h3>Eco Score</h3>
+                            <div class="eco-score-bar">
+                                <div class="eco-score-fill"
+                                     th:style="'width: ' + ${product.ecoScore} + '%'"
+                                     th:classappend="${product.ecoScore >= 80} ? 'excellent' : (${product.ecoScore >= 60} ? 'good' : (${product.ecoScore >= 40} ? 'moderate' : 'low'))">
+                                </div>
+                            </div>
+                            <span class="eco-score-value" th:text="${product.ecoScore} + '/100'">0/100</span>
+                        </div>
+
+                        <!-- Add to Cart Form -->
+                        <form th:action="@{/cart/add}" method="post" class="add-to-cart-form">
+                            <input type="hidden" name="productId" th:value="${product.id}"/>
+                            <div class="quantity-selector">
+                                <label for="quantity">Quantity:</label>
+                                <div class="quantity-controls">
+                                    <button type="button" class="quantity-btn" onclick="decrementQuantity()">-</button>
+                                    <input type="number"
+                                           id="quantity"
+                                           name="quantity"
+                                           value="1"
+                                           min="1"
+                                           th:max="${product.stock}"
+                                           class="quantity-input"/>
+                                    <button type="button" class="quantity-btn" onclick="incrementQuantity()">+</button>
+                                </div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button type="submit"
+                                        class="btn btn-add-to-cart"
+                                        th:disabled="${product.stock <= 0}">
+                                    <span th:if="${product.stock > 0}">🛒 Add to Cart</span>
+                                    <span th:if="${product.stock <= 0}">Out of Stock</span>
+                                </button>
+                                <a href="/shop" class="btn btn-secondary">Continue Shopping</a>
+                            </div>
+                        </form>
+
+                        <!-- Seller Info -->
+                        <div class="seller-info">
+                            <h3>Sold By</h3>
+                            <div class="seller-card">
+                                <div class="seller-details">
+                                    <p class="seller-name" th:text="${product.seller.fullName}">Seller Name</p>
+                                    <p class="seller-business" th:if="${product.seller.sellerProfile != null}"
+                                       th:text="${product.seller.sellerProfile.businessName}">Business Name</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related Products -->
+        <section class="related-products-section" th:if="${relatedProducts != null and !relatedProducts.isEmpty()}">
+            <div class="container">
+                <h2 class="section-title">Related Products</h2>
+                <div class="products-grid">
+                    <th:block th:each="relatedProduct : ${relatedProducts}">
+                        <span th:if="${relatedProduct.id != product.id}"
+                              th:replace="~{public/fragments/product-card :: product-card-simple(product=${relatedProduct})}"></span>
+                    </th:block>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script th:src="@{/js/product-detail.js}" defer></script>
+</body>
+</html>

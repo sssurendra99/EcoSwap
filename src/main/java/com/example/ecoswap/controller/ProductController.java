@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.ecoswap.model.Product;
@@ -15,6 +16,7 @@ import com.example.ecoswap.model.enums.Role;
 import com.example.ecoswap.security.CustomUserDetails;
 import com.example.ecoswap.services.CategoryService;
 import com.example.ecoswap.services.ProductService;
+import com.example.ecoswap.services.ImageStorageService;
 
 import java.util.List;
 
@@ -24,9 +26,12 @@ public class ProductController {
     
     @Autowired
     private ProductService productService;
-    
+
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private ImageStorageService imageStorageService;
     
     /**
      * List all products (with pagination and filtering)
@@ -121,18 +126,31 @@ public class ProductController {
     public String saveProduct(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @ModelAttribute Product product,
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
             RedirectAttributes redirectAttributes
     ) {
         User user = userDetails.getUser();
         product.setSeller(user);
-        
+
         try {
+            // Handle image upload
+            if (imageFile != null && !imageFile.isEmpty()) {
+                try {
+                    imageStorageService.validateImageSize(imageFile);
+                    String filename = imageStorageService.storeImage(imageFile);
+                    product.setImage("/uploads/products/" + filename);
+                } catch (IllegalArgumentException e) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Image upload failed: " + e.getMessage());
+                    return "redirect:/dashboard/products/add";
+                }
+            }
+
             productService.saveProduct(product);
             redirectAttributes.addFlashAttribute("successMessage", "Product added successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error adding product: " + e.getMessage());
         }
-        
+
         return "redirect:/dashboard/products";
     }
     
@@ -158,15 +176,43 @@ public class ProductController {
     public String updateProduct(
             @PathVariable Long id,
             @ModelAttribute Product product,
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
             RedirectAttributes redirectAttributes
     ) {
         try {
+            // Get existing product to check for old image
+            Product existingProduct = productService.getProductById(id)
+                    .orElseThrow(() -> new RuntimeException("Product not found"));
+
+            // Handle image upload
+            if (imageFile != null && !imageFile.isEmpty()) {
+                try {
+                    imageStorageService.validateImageSize(imageFile);
+
+                    // Delete old image if exists
+                    if (existingProduct.getImage() != null && !existingProduct.getImage().isEmpty()) {
+                        String oldFilename = existingProduct.getImage().replace("/uploads/products/", "");
+                        imageStorageService.deleteImage(oldFilename);
+                    }
+
+                    // Store new image
+                    String filename = imageStorageService.storeImage(imageFile);
+                    product.setImage("/uploads/products/" + filename);
+                } catch (IllegalArgumentException e) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Image upload failed: " + e.getMessage());
+                    return "redirect:/dashboard/products/" + id + "/edit";
+                }
+            } else {
+                // Keep existing image if no new image uploaded
+                product.setImage(existingProduct.getImage());
+            }
+
             productService.updateProduct(id, product);
             redirectAttributes.addFlashAttribute("successMessage", "Product updated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating product: " + e.getMessage());
         }
-        
+
         return "redirect:/dashboard/products";
     }
     
