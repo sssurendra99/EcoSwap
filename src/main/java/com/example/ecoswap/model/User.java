@@ -28,14 +28,23 @@ public class User {
     
     @Column(nullable = false)
     private String fullName;
-    
+
+    @Column
+    private String phoneNumber;
+
+    @Column(length = 500)
+    private String address;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role; // CUSTOMER, SELLER, ADMIN
-    
+
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
-    
+
+    @Column
+    private LocalDateTime lastLogin;
+
     @Column(nullable = false)
     private boolean enabled = true;
     

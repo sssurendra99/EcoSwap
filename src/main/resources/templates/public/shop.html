@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/public_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop | EcoSwap</title>
+    <link th:href="@{/css/shop.css}" rel="stylesheet"/>
+    <script th:src="@{/js/shop.js}" defer></script>
+</head>
+
+<body>
+    <main layout:fragment="content" class="main-content">
+        <!-- Minimal Header -->
+        <section class="minimal-shop-header">
+            <div class="shop-header-content">
+                <h1>Sustainable Products</h1>
+                <p>Discover eco-friendly items that make a difference</p>
+            </div>
+        </section>
+
+        <!-- Shop Content -->
+        <section class="minimal-shop-section">
+            <div class="shop-container">
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <!-- Search -->
+                    <div class="search-wrapper">
+                        <form th:action="@{/shop}" method="get" class="inline-search-form">
+                            <input type="text"
+                                   name="search"
+                                   th:value="${searchQuery}"
+                                   placeholder="Search products..."
+                                   class="minimal-search-input"/>
+                            <button type="submit" class="minimal-search-btn">Search</button>
+                        </form>
+                    </div>
+
+                    <!-- Category Pills -->
+                    <div class="category-pills">
+                        <a th:href="@{/shop}"
+                           class="category-pill"
+                           th:classappend="${selectedCategory == null} ? 'active' : ''">
+                            All
+                        </a>
+                        <a th:each="category : ${categories}"
+                           th:href="@{/shop(categoryId=${category.id})}"
+                           class="category-pill"
+                           th:classappend="${selectedCategory != null and selectedCategory == category.id} ? 'active' : ''">
+                            <span th:text="${category.name}">Category</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Results Info -->
+                <div class="minimal-results-info" th:if="${totalItems > 0}">
+                    <span th:text="${totalItems}">0</span> products found
+                </div>
+
+                <!-- Products Grid -->
+                <div class="minimal-products-grid" th:if="${totalItems > 0}">
+                    <th:block th:each="product : ${products}">
+                        <span th:replace="~{public/fragments/product-card :: product-card(product=${product})}"></span>
+                    </th:block>
+                </div>
+
+                <!-- Empty State -->
+                <div class="minimal-empty-state" th:if="${totalItems == 0}">
+                    <div class="empty-icon">🌱</div>
+                    <h3>No Products Found</h3>
+                    <p th:if="${searchQuery != null and !searchQuery.isEmpty()}">
+                        Try adjusting your search "<strong th:text="${searchQuery}">search term</strong>"
+                    </p>
+                    <p th:if="${searchQuery == null or searchQuery.isEmpty()}">
+                        No products in this category yet
+                    </p>
+                    <a href="/shop" class="minimal-btn">Browse All</a>
+                </div>
+
+                <!-- Minimal Pagination -->
+                <div class="minimal-pagination" th:if="${totalPages > 1}">
+                    <a th:href="@{/shop(page=${currentPage - 1}, search=${searchQuery}, categoryId=${selectedCategory})}"
+                       class="page-arrow"
+                       th:classappend="${currentPage == 0} ? 'disabled' : ''"
+                       th:if="${currentPage > 0}">
+                        ← Prev
+                    </a>
+
+                    <div class="page-numbers">
+                        <span th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                              th:if="${pageNum >= currentPage - 2 and pageNum <= currentPage + 2}">
+                            <a th:href="@{/shop(page=${pageNum}, search=${searchQuery}, categoryId=${selectedCategory})}"
+                               class="page-num"
+                               th:classappend="${pageNum == currentPage} ? 'active' : ''"
+                               th:text="${pageNum + 1}">1</a>
+                        </span>
+                    </div>
+
+                    <a th:href="@{/shop(page=${currentPage + 1}, search=${searchQuery}, categoryId=${selectedCategory})}"
+                       class="page-arrow"
+                       th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''"
+                       th:if="${currentPage < totalPages - 1}">
+                        Next →
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

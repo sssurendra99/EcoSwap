@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title>Edit Profile - EcoSwap</title>
+    <link th:href="@{/css/profile.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1>Edit Profile</h1>
+                <p class="subtitle">Update your personal information</p>
+            </div>
+            <a th:href="@{/profile}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Profile
+            </a>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div class="profile-container">
+        <!-- Personal Information Form -->
+        <div class="profile-card">
+            <div class="card-header">
+                <h3><i class="fas fa-user"></i> Personal Information</h3>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/profile/update}" method="post" class="profile-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="fullName">Full Name <span class="required">*</span></label>
+                            <input type="text"
+                                   id="fullName"
+                                   name="fullName"
+                                   th:value="${user.fullName}"
+                                   class="form-control"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address <span class="required">*</span></label>
+                            <input type="email"
+                                   id="email"
+                                   name="email"
+                                   th:value="${user.email}"
+                                   class="form-control"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phoneNumber">Phone Number <span class="required">*</span></label>
+                            <input type="tel"
+                                   id="phoneNumber"
+                                   name="phoneNumber"
+                                   th:value="${user.phoneNumber}"
+                                   class="form-control"
+                                   required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="address">Address</label>
+                            <textarea id="address"
+                                      name="address"
+                                      class="form-control"
+                                      rows="3"
+                                      th:text="${user.address}"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <a th:href="@{/profile}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Business Information Form (Only for Sellers) -->
+        <div class="profile-card" th:if="${user.role.name() == 'SELLER'}">
+            <div class="card-header">
+                <h3><i class="fas fa-store"></i> Business Information</h3>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/profile/update-business}" method="post" class="profile-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="businessName">Business Name <span class="required">*</span></label>
+                            <input type="text"
+                                   id="businessName"
+                                   name="businessName"
+                                   th:value="${sellerProfile != null} ? ${sellerProfile.businessName} : ''"
+                                   class="form-control"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="businessPhone">Business Phone <span class="required">*</span></label>
+                            <input type="tel"
+                                   id="businessPhone"
+                                   name="businessPhone"
+                                   th:value="${sellerProfile != null} ? ${sellerProfile.businessPhone} : ''"
+                                   class="form-control"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="businessEmail">Business Email</label>
+                            <input type="email"
+                                   id="businessEmail"
+                                   name="businessEmail"
+                                   th:value="${sellerProfile != null} ? ${sellerProfile.businessEmail} : ''"
+                                   class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taxId">Tax ID</label>
+                            <input type="text"
+                                   id="taxId"
+                                   name="taxId"
+                                   th:value="${sellerProfile != null} ? ${sellerProfile.taxId} : ''"
+                                   class="form-control">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="businessDescription">Business Description <span class="required">*</span></label>
+                            <textarea id="businessDescription"
+                                      name="businessDescription"
+                                      class="form-control"
+                                      rows="4"
+                                      required
+                                      th:text="${sellerProfile != null} ? ${sellerProfile.businessDescription} : ''"></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="businessAddress">Business Address <span class="required">*</span></label>
+                            <textarea id="businessAddress"
+                                      name="businessAddress"
+                                      class="form-control"
+                                      rows="3"
+                                      required
+                                      th:text="${sellerProfile != null} ? ${sellerProfile.businessAddress} : ''"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Business Info
+                        </button>
+                        <a th:href="@{/profile}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

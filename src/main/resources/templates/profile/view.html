@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title>My Profile - EcoSwap</title>
+    <link th:href="@{/css/profile.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1>My Profile</h1>
+                <p class="subtitle">Manage your personal information and settings</p>
+            </div>
+            <div class="header-actions">
+                <a th:href="@{/profile/edit}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </a>
+                <a th:href="@{/profile/change-password}" class="btn btn-secondary">
+                    <i class="fas fa-lock"></i> Change Password
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div class="profile-container">
+        <!-- Personal Information Card -->
+        <div class="profile-card">
+            <div class="card-header">
+                <h3><i class="fas fa-user"></i> Personal Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="profile-grid">
+                    <div class="profile-item">
+                        <span class="profile-label">Full Name</span>
+                        <span class="profile-value" th:text="${user.fullName}">John Doe</span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Email Address</span>
+                        <span class="profile-value" th:text="${user.email}">john@example.com</span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Phone Number</span>
+                        <span class="profile-value" th:text="${user.phoneNumber}">+1234567890</span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Account Role</span>
+                        <span class="profile-value">
+                            <span class="role-badge" th:classappend="${user.role.name()}" th:text="${user.role.displayName}">Customer</span>
+                        </span>
+                    </div>
+                    <div class="profile-item full-width" th:if="${user.address != null and user.address != ''}">
+                        <span class="profile-label">Address</span>
+                        <span class="profile-value" th:text="${user.address}">123 Main St, City</span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Account Status</span>
+                        <span class="profile-value">
+                            <span th:if="${user.enabled}" class="status-badge active">Active</span>
+                            <span th:unless="${user.enabled}" class="status-badge inactive">Inactive</span>
+                        </span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Member Since</span>
+                        <span class="profile-value" th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seller Business Profile (Only for Sellers) -->
+        <div class="profile-card" th:if="${user.role.name() == 'SELLER' and sellerProfile != null}">
+            <div class="card-header">
+                <h3><i class="fas fa-store"></i> Business Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="profile-grid">
+                    <div class="profile-item">
+                        <span class="profile-label">Business Name</span>
+                        <span class="profile-value" th:text="${sellerProfile.businessName}">My Business</span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Business Phone</span>
+                        <span class="profile-value" th:text="${sellerProfile.businessPhone}">+1234567890</span>
+                    </div>
+                    <div class="profile-item full-width" th:if="${sellerProfile.businessEmail != null and sellerProfile.businessEmail != ''}">
+                        <span class="profile-label">Business Email</span>
+                        <span class="profile-value" th:text="${sellerProfile.businessEmail}">business@example.com</span>
+                    </div>
+                    <div class="profile-item full-width" th:if="${sellerProfile.businessDescription != null and sellerProfile.businessDescription != ''}">
+                        <span class="profile-label">Business Description</span>
+                        <span class="profile-value" th:text="${sellerProfile.businessDescription}">Business description</span>
+                    </div>
+                    <div class="profile-item full-width" th:if="${sellerProfile.businessAddress != null and sellerProfile.businessAddress != ''}">
+                        <span class="profile-label">Business Address</span>
+                        <span class="profile-value" th:text="${sellerProfile.businessAddress}">123 Business St</span>
+                    </div>
+                    <div class="profile-item" th:if="${sellerProfile.taxId != null and sellerProfile.taxId != ''}">
+                        <span class="profile-label">Tax ID</span>
+                        <span class="profile-value" th:text="${sellerProfile.taxId}">123456789</span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Seller Status</span>
+                        <span class="profile-value">
+                            <span class="status-badge"
+                                  th:classappend="${sellerProfile.status == 'APPROVED'} ? 'active' : (${sellerProfile.status == 'PENDING'} ? 'pending' : 'inactive')"
+                                  th:text="${sellerProfile.status}">Active</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders (Only for Customers) -->
+        <div class="profile-card" th:if="${user.role.name() == 'CUSTOMER' and recentOrders != null}">
+            <div class="card-header">
+                <div class="card-header-content">
+                    <h3><i class="fas fa-shopping-bag"></i> Recent Orders</h3>
+                    <a th:href="@{/profile/orders}" class="btn-link">View All Orders</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="orders-summary">
+                    <div class="summary-stat">
+                        <span class="stat-label">Total Orders</span>
+                        <span class="stat-value" th:text="${totalOrders}">0</span>
+                    </div>
+                </div>
+
+                <div class="orders-list" th:if="${!recentOrders.isEmpty()}">
+                    <div class="order-item" th:each="order : ${recentOrders}">
+                        <div class="order-header">
+                            <div>
+                                <span class="order-number">Order #<span th:text="${order.orderNumber}">12345</span></span>
+                                <span class="order-date" th:text="${#temporals.format(order.orderDate, 'MMM dd, yyyy')}">Jan 01, 2024</span>
+                            </div>
+                            <span class="order-status"
+                                  th:classappend="${order.status}"
+                                  th:text="${order.status}">Pending</span>
+                        </div>
+                        <div class="order-details">
+                            <span class="order-items" th:text="${order.orderItems.size()} + ' items'">3 items</span>
+                            <span class="order-total">$<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span></span>
+                        </div>
+                        <a th:href="@{/dashboard/orders/{id}(id=${order.id})}" class="btn-view-order">View Details</a>
+                    </div>
+                </div>
+
+                <div class="empty-state" th:if="${recentOrders.isEmpty()}">
+                    <i class="fas fa-shopping-bag"></i>
+                    <p>No orders yet</p>
+                    <a href="/shop" class="btn btn-primary">Start Shopping</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

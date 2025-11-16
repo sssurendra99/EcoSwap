@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title>Shopping Cart - EcoSwap</title>
+    <link th:href="@{/css/cart.css}" rel="stylesheet"/>
+    <script th:src="@{/js/cart.js}" defer></script>
+</head>
+<body>
+
+<div layout:fragment="content" class="cart-page">
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="flash-message success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="flash-message error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Shopping Cart</h1>
+        <p><span th:text="${cartItemCount}">0</span> items in your cart</p>
+    </div>
+
+    <!-- Empty Cart -->
+    <div th:if="${cartItems.isEmpty()}" class="empty-cart">
+        <i class="fas fa-shopping-cart"></i>
+        <h3>Your cart is empty</h3>
+        <p>Start adding eco-friendly products to your cart!</p>
+        <a href="/" class="browse-btn">
+            <i class="fas fa-leaf"></i> Browse Products
+        </a>
+    </div>
+
+    <!-- Cart Content -->
+    <div th:if="${!cartItems.isEmpty()}" class="cart-grid">
+        <!-- Cart Items -->
+        <div class="cart-items-section">
+            <div class="cart-item" th:each="item : ${cartItems}">
+                <img th:src="${item.product.image ?: '/images/placeholder.png'}"
+                     class="cart-item-image" alt="Product">
+
+                <div class="cart-item-details">
+                    <h3 th:text="${item.product.name}">Product Name</h3>
+                    <p>
+                        <span class="eco-badge" th:if="${item.product.ecoScore != null}">
+                            Eco Score: <span th:text="${item.product.ecoScore}">5</span>/5
+                        </span>
+                    </p>
+                    <p>Price: $<span th:text="${#numbers.formatDecimal(item.product.price, 1, 2)}">0.00</span></p>
+                    <p th:if="${item.product.stock < item.quantity}" class="stock-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Only <span th:text="${item.product.stock}">0</span> left in stock
+                    </p>
+                    <p>Seller: <span th:text="${item.product.seller.fullName}">Seller Name</span></p>
+                </div>
+
+                <div class="cart-item-actions">
+                    <div class="cart-item-price">
+                        $<span th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)}">0.00</span>
+                    </div>
+
+                    <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post" class="quantity-control">
+                        <button type="button" class="quantity-btn" onclick="decrementQuantity(this)">-</button>
+                        <input type="number" name="quantity" th:value="${item.quantity}"
+                               min="1" th:max="${item.product.stock}" class="quantity-input"
+                               onchange="this.form.submit()">
+                        <button type="button" class="quantity-btn" onclick="incrementQuantity(this)">+</button>
+                    </form>
+
+                    <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post" style="display: inline;">
+                        <button type="submit" class="remove-btn" onclick="return confirm('Remove this item from cart?')">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Summary -->
+        <div class="cart-summary-section">
+            <h2 style="font-size: 1.25rem; margin-bottom: 20px;">Order Summary</h2>
+
+            <div class="summary-row">
+                <span>Subtotal (<span th:text="${cartItemCount}">0</span> items):</span>
+                <span>$<span th:text="${#numbers.formatDecimal(cartTotal, 1, 2)}">0.00</span></span>
+            </div>
+
+            <div class="summary-row">
+                <span>Shipping:</span>
+                <span>Calculated at checkout</span>
+            </div>
+
+            <div class="summary-row">
+                <span>Tax:</span>
+                <span>Calculated at checkout</span>
+            </div>
+
+            <div class="summary-row total">
+                <span>Total:</span>
+                <span>$<span th:text="${#numbers.formatDecimal(cartTotal, 1, 2)}">0.00</span></span>
+            </div>
+
+            <a th:href="@{/cart/checkout}" class="checkout-btn">
+                <i class="fas fa-lock"></i> Proceed to Checkout
+            </a>
+
+            <a href="/" class="continue-shopping">
+                <i class="fas fa-arrow-left"></i> Continue Shopping
+            </a>
+
+            <!-- Environmental Impact -->
+            <div class="impact-box">
+                <h3>
+                    <i class="fas fa-leaf"></i> Your Environmental Impact
+                </h3>
+                <p>
+                    By shopping sustainable products, you're helping reduce waste and carbon emissions!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

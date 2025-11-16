@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title>User Management - EcoSwap</title>
+    <link th:href="@{/css/admin-users.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1>User Management</h1>
+                <p class="subtitle">Manage users and their permissions</p>
+            </div>
+            <a th:href="@{/admin/users/seller-approvals}" class="btn btn-primary">
+                <i class="fas fa-user-check"></i> Seller Approvals
+                <span th:if="${totalPending != null and totalPending > 0}" class="badge" th:text="${totalPending}">0</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon all-users">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Total Users</span>
+                <span class="stat-value" th:text="${totalUsers}">0</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon admins">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Admins</span>
+                <span class="stat-value" th:text="${totalAdmins}">0</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon sellers">
+                <i class="fas fa-store"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Sellers</span>
+                <span class="stat-value" th:text="${totalSellers}">0</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon customers">
+                <i class="fas fa-shopping-bag"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Customers</span>
+                <span class="stat-value" th:text="${totalCustomers}">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-section">
+        <form th:action="@{/admin/users}" method="get" class="filters-form">
+            <div class="filter-group">
+                <label for="search">Search Users</label>
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text"
+                           id="search"
+                           name="search"
+                           th:value="${searchQuery}"
+                           placeholder="Search by name or email..."
+                           class="search-input">
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label for="role">Filter by Role</label>
+                <select id="role" name="role" class="filter-select">
+                    <option value="ALL" th:selected="${selectedRole == null or selectedRole == 'ALL'}">All Roles</option>
+                    <option value="ADMIN" th:selected="${selectedRole == 'ADMIN'}">Admin</option>
+                    <option value="SELLER" th:selected="${selectedRole == 'SELLER'}">Seller</option>
+                    <option value="CUSTOMER" th:selected="${selectedRole == 'CUSTOMER'}">Customer</option>
+                </select>
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Apply Filters
+                </button>
+                <a th:href="@{/admin/users}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Clear
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Users Table -->
+    <div class="users-card">
+        <div class="card-header">
+            <h3><i class="fas fa-users"></i> Users List</h3>
+            <span class="results-count">Showing <strong th:text="${users.size()}">0</strong> of <strong th:text="${totalItems}">0</strong> users</span>
+        </div>
+        <div class="card-body">
+            <div class="users-table">
+                <div class="table-header">
+                    <div class="table-col">User</div>
+                    <div class="table-col">Email</div>
+                    <div class="table-col">Role</div>
+                    <div class="table-col">Status</div>
+                    <div class="table-col">Joined</div>
+                    <div class="table-col">Actions</div>
+                </div>
+
+                <div class="table-row" th:each="user : ${users}">
+                    <div class="table-col">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-details">
+                                <span class="user-name" th:text="${user.fullName}">John Doe</span>
+                                <span class="user-phone" th:text="${user.phoneNumber}">+1234567890</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-col">
+                        <span th:text="${user.email}">john@example.com</span>
+                    </div>
+                    <div class="table-col">
+                        <span class="role-badge" th:classappend="${user.role.name()}" th:text="${user.role.displayName}">Customer</span>
+                    </div>
+                    <div class="table-col">
+                        <span th:if="${user.enabled}" class="status-badge active">Active</span>
+                        <span th:unless="${user.enabled}" class="status-badge inactive">Inactive</span>
+                    </div>
+                    <div class="table-col">
+                        <span th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</span>
+                    </div>
+                    <div class="table-col">
+                        <a th:href="@{/admin/users/{id}(id=${user.id})}" class="btn-action btn-view" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" th:if="${users.isEmpty()}">
+                <i class="fas fa-users"></i>
+                <h3>No Users Found</h3>
+                <p th:if="${searchQuery != null and !searchQuery.isEmpty()}">
+                    No users match your search "<strong th:text="${searchQuery}">term</strong>"
+                </p>
+                <p th:if="${searchQuery == null or searchQuery.isEmpty()}">
+                    No users available at the moment.
+                </p>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" th:if="${totalPages > 1 and (searchQuery == null or searchQuery.isEmpty())}">
+                <a th:href="@{/admin/users(page=${currentPage - 1}, role=${selectedRole})}"
+                   class="pagination-btn"
+                   th:classappend="${currentPage == 0} ? 'disabled' : ''"
+                   th:if="${currentPage > 0}">
+                    ← Previous
+                </a>
+
+                <div class="pagination-numbers">
+                    <span th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                          th:if="${pageNum >= currentPage - 2 and pageNum <= currentPage + 2}">
+                        <a th:href="@{/admin/users(page=${pageNum}, role=${selectedRole})}"
+                           class="pagination-number"
+                           th:classappend="${pageNum == currentPage} ? 'active' : ''"
+                           th:text="${pageNum + 1}">1</a>
+                    </span>
+                </div>
+
+                <a th:href="@{/admin/users(page=${currentPage + 1}, role=${selectedRole})}"
+                   class="pagination-btn"
+                   th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''"
+                   th:if="${currentPage < totalPages - 1}">
+                    Next →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -6,24 +6,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoSwap | About</title>
-    <link rel="stylesheet" href="../../static/css/style.css">
+    <title>About Us - EcoSwap</title>
+    <link th:href="@{/css/about.css}" rel="stylesheet"/>
 </head>
 
 <body>
-    
+    <main layout:fragment="content" class="about-content">
+        <!-- Hero Section -->
+        <section class="about-hero">
+            <h1>About <span class="highlight">EcoSwap</span></h1>
+            <p>We're on a mission to create a sustainable future by making eco-friendly products accessible to everyone through our innovative marketplace platform.</p>
+        </section>
 
-    <main layout:fragment="content">
-        <div class="content">
-            <h1>About EcoSwap</h1>
-            <p>Learn more about our mission to create a sustainable future by promoting the exchange of eco-friendly
-            products.</p>
-        </div>
+        <!-- Mission & Vision -->
+        <section class="about-section">
+            <div class="mission-vision-grid">
+                <div class="mission-card">
+                    <div class="mission-icon">🎯</div>
+                    <h3>Our Mission</h3>
+                    <p>To empower individuals and businesses to participate in the circular economy by providing a trusted platform for buying, selling, and swapping sustainable products. We believe every transaction should contribute to a healthier planet.</p>
+                </div>
+                <div class="mission-card">
+                    <div class="mission-icon">🌍</div>
+                    <h3>Our Vision</h3>
+                    <p>To become the world's leading marketplace for sustainable commerce, where eco-conscious choices are the norm, not the exception. We envision a future where every product traded makes a positive environmental impact.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Highlight -->
+        <section class="stats-highlight">
+            <h2 style="margin-bottom: 1rem; font-size: 2.5rem;">Our Growing Impact</h2>
+            <p style="opacity: 0.95; max-width: 700px; margin: 0 auto 3rem;">Together with our community, we're making a real difference</p>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">15K+</div>
+                    <div class="stat-label">Products Traded</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">8.5K+</div>
+                    <div class="stat-label">Active Members</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">25T</div>
+                    <div class="stat-label">Waste Reduced</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">Satisfaction Rate</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Our Values -->
+        <section class="about-section white-bg">
+            <h2 class="section-title">Our Core Values</h2>
+            <p class="section-subtitle">These principles guide everything we do at EcoSwap</p>
+            <div class="values-grid">
+                <div class="value-item">
+                    <div class="value-icon">♻️</div>
+                    <h4>Sustainability First</h4>
+                    <p>Every decision we make prioritizes environmental impact and the health of our planet for future generations.</p>
+                </div>
+                <div class="value-item">
+                    <div class="value-icon">🤝</div>
+                    <h4>Community Driven</h4>
+                    <p>We believe in the power of collective action. Our community members are partners in creating positive change.</p>
+                </div>
+                <div class="value-item">
+                    <div class="value-icon">✨</div>
+                    <h4>Transparency</h4>
+                    <p>Honest communication and clear information about product origins, materials, and environmental impact.</p>
+                </div>
+                <div class="value-item">
+                    <div class="value-icon">🔒</div>
+                    <h4>Trust & Safety</h4>
+                    <p>We verify all sellers and products to ensure our marketplace remains a safe, reliable space for sustainable commerce.</p>
+                </div>
+                <div class="value-item">
+                    <div class="value-icon">💡</div>
+                    <h4>Innovation</h4>
+                    <p>Continuously improving our platform with new features and technologies that make sustainable shopping easier.</p>
+                </div>
+                <div class="value-item">
+                    <div class="value-icon">🌱</div>
+                    <h4>Education</h4>
+                    <p>Empowering our community with knowledge about sustainable living and the impact of conscious consumption.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- What Makes Us Different -->
+        <section class="about-section">
+            <h2 class="section-title">What Makes Us Different</h2>
+            <p class="section-subtitle">EcoSwap isn't just another marketplace. We're a movement towards conscious consumption and sustainable living.</p>
+            <div class="mission-vision-grid">
+                <div class="mission-card">
+                    <div class="mission-icon">✅</div>
+                    <h3>Verified Sustainability</h3>
+                    <p>Every product meets our strict environmental standards. We track CO₂ saved, plastic reduced, and overall eco-impact for full transparency.</p>
+                </div>
+                <div class="mission-card">
+                    <div class="mission-icon">🌐</div>
+                    <h3>Global Community</h3>
+                    <p>Connect with thousands of like-minded individuals who share your passion for sustainability and environmental responsibility.</p>
+                </div>
+                <div class="mission-card">
+                    <div class="mission-icon">📊</div>
+                    <h3>Impact Tracking</h3>
+                    <p>See the real difference you're making. Track your personal environmental impact with every purchase and swap you complete.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="cta-section">
+            <h2>Join the Sustainable Revolution</h2>
+            <p>Be part of a community that's changing the way we consume. Every product you buy or sell makes a difference.</p>
+            <a href="/register-customer" class="btn-primary">Get Started Today</a>
+        </section>
     </main>
-
-    
-
-    <script src="script.js"></script>
 </body>
 
 </html>

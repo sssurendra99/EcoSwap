@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title>User Details - EcoSwap</title>
+    <link th:href="@{/css/admin-users.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1>User Details</h1>
+                <p class="subtitle" th:text="${user.fullName}">User Name</p>
+            </div>
+            <div class="header-actions">
+                <form th:action="@{/admin/users/{id}/toggle-status(id=${user.id})}" method="post" style="display: inline;">
+                    <button type="submit" class="btn" th:classappend="${user.enabled} ? 'btn-warning' : 'btn-success'">
+                        <i th:class="${user.enabled} ? 'fas fa-ban' : 'fas fa-check'"></i>
+                        <span th:text="${user.enabled} ? 'Disable User' : 'Enable User'">Toggle Status</span>
+                    </button>
+                </form>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                    <i class="fas fa-trash"></i> Delete User
+                </button>
+                <a th:href="@{/admin/users}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div class="detail-container">
+        <!-- Personal Information -->
+        <div class="detail-card">
+            <div class="card-header">
+                <h3><i class="fas fa-user"></i> Personal Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Full Name</span>
+                        <span class="detail-value" th:text="${user.fullName}">John Doe</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email Address</span>
+                        <span class="detail-value" th:text="${user.email}">john@example.com</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Phone Number</span>
+                        <span class="detail-value" th:text="${user.phoneNumber}">+1234567890</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">User ID</span>
+                        <span class="detail-value" th:text="${user.id}">123</span>
+                    </div>
+                    <div class="detail-item full-width" th:if="${user.address != null and user.address != ''}">
+                        <span class="detail-label">Address</span>
+                        <span class="detail-value" th:text="${user.address}">123 Main St, City</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Information -->
+        <div class="detail-card">
+            <div class="card-header">
+                <h3><i class="fas fa-info-circle"></i> Account Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Account Role</span>
+                        <span class="role-badge" th:classappend="${user.role.name()}" th:text="${user.role.displayName}">Customer</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Account Status</span>
+                        <span th:if="${user.enabled}" class="status-badge active">Active</span>
+                        <span th:unless="${user.enabled}" class="status-badge inactive">Inactive</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Member Since</span>
+                        <span class="detail-value" th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 10:30</span>
+                    </div>
+                    <div class="detail-item" th:if="${user.lastLogin != null}">
+                        <span class="detail-label">Last Login</span>
+                        <span class="detail-value" th:text="${#temporals.format(user.lastLogin, 'MMM dd, yyyy HH:mm')}">Jan 15, 2024 14:25</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seller Business Profile (Only for Sellers) -->
+        <div class="detail-card" th:if="${user.role.name() == 'SELLER' and sellerProfile != null}">
+            <div class="card-header">
+                <h3><i class="fas fa-store"></i> Business Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Business Name</span>
+                        <span class="detail-value" th:text="${sellerProfile.businessName}">My Business</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Business Phone</span>
+                        <span class="detail-value" th:text="${sellerProfile.businessPhone}">+1234567890</span>
+                    </div>
+                    <div class="detail-item" th:if="${sellerProfile.businessEmail != null and sellerProfile.businessEmail != ''}">
+                        <span class="detail-label">Business Email</span>
+                        <span class="detail-value" th:text="${sellerProfile.businessEmail}">business@example.com</span>
+                    </div>
+                    <div class="detail-item" th:if="${sellerProfile.taxId != null and sellerProfile.taxId != ''}">
+                        <span class="detail-label">Tax ID</span>
+                        <span class="detail-value" th:text="${sellerProfile.taxId}">123456789</span>
+                    </div>
+                    <div class="detail-item full-width" th:if="${sellerProfile.businessDescription != null and sellerProfile.businessDescription != ''}">
+                        <span class="detail-label">Business Description</span>
+                        <span class="detail-value" th:text="${sellerProfile.businessDescription}">Business description</span>
+                    </div>
+                    <div class="detail-item full-width" th:if="${sellerProfile.businessAddress != null and sellerProfile.businessAddress != ''}">
+                        <span class="detail-label">Business Address</span>
+                        <span class="detail-value" th:text="${sellerProfile.businessAddress}">123 Business St</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Seller Status</span>
+                        <span class="status-badge"
+                              th:classappend="${sellerProfile.status == 'APPROVED'} ? 'active' : (${sellerProfile.status == 'PENDING'} ? 'pending' : 'inactive')"
+                              th:text="${sellerProfile.status}">Active</span>
+                    </div>
+                    <div class="detail-item" th:if="${sellerProfile.approvedAt != null}">
+                        <span class="detail-label">Approved On</span>
+                        <span class="detail-value" th:text="${#temporals.format(sellerProfile.approvedAt, 'MMM dd, yyyy')}">Jan 05, 2024</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Form (Hidden) -->
+    <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post" id="deleteForm" style="display: none;">
+    </form>
+</div>
+
+<script>
+function confirmDelete() {
+    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+        document.getElementById('deleteForm').submit();
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,325 @@
+/* ========================================
+   MINIMAL SHOP PAGE STYLES
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.main-content {
+    background: #ffffff;
+    min-height: 100vh;
+}
+
+/* Minimal Header */
+.minimal-shop-header {
+    background: #f9fafb;
+    padding: 4rem 2rem 3rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.shop-header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.shop-header-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+}
+
+.shop-header-content p {
+    font-size: 1.125rem;
+    color: #6b7280;
+}
+
+/* Shop Section */
+.minimal-shop-section {
+    padding: 3rem 2rem;
+}
+
+.shop-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Filter Bar */
+.filter-bar {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.search-wrapper {
+    flex: 0 0 auto;
+    min-width: 300px;
+}
+
+.inline-search-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.minimal-search-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.minimal-search-input:focus {
+    outline: none;
+    border-color: #11998e;
+    box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.1);
+}
+
+.minimal-search-btn {
+    padding: 0.75rem 1.5rem;
+    background: #11998e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.minimal-search-btn:hover {
+    background: #0e8072;
+    transform: translateY(-1px);
+}
+
+/* Category Pills */
+.category-pills {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.category-pill {
+    padding: 0.625rem 1.25rem;
+    border-radius: 20px;
+    text-decoration: none;
+    color: #4b5563;
+    background: #f3f4f6;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    white-space: nowrap;
+}
+
+.category-pill:hover {
+    background: #e5e7eb;
+    color: #1f2937;
+}
+
+.category-pill.active {
+    background: #11998e;
+    color: white;
+    border-color: #11998e;
+}
+
+/* Results Info */
+.minimal-results-info {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    font-weight: 500;
+}
+
+.minimal-results-info span {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+/* Products Grid */
+.minimal-products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+/* Empty State */
+.minimal-empty-state {
+    text-align: center;
+    padding: 6rem 2rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    margin-top: 2rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.4;
+}
+
+.minimal-empty-state h3 {
+    font-size: 1.75rem;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.minimal-empty-state p {
+    color: #6b7280;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.minimal-btn {
+    display: inline-block;
+    padding: 0.875rem 2rem;
+    background: #11998e;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.minimal-btn:hover {
+    background: #0e8072;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(17, 153, 142, 0.2);
+}
+
+/* Minimal Pagination */
+.minimal-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 4rem;
+    flex-wrap: wrap;
+}
+
+.page-arrow,
+.page-num {
+    padding: 0.625rem 1rem;
+    background: white;
+    color: #4b5563;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    min-width: 44px;
+    text-align: center;
+}
+
+.page-arrow:hover:not(.disabled),
+.page-num:hover {
+    background: #f3f4f6;
+    border-color: #11998e;
+    color: #11998e;
+}
+
+.page-num.active {
+    background: #11998e;
+    color: white;
+    border-color: #11998e;
+}
+
+.page-arrow.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .minimal-products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .shop-header-content h1 {
+        font-size: 2rem;
+    }
+
+    .shop-header-content p {
+        font-size: 1rem;
+    }
+
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.5rem;
+    }
+
+    .search-wrapper {
+        min-width: 100%;
+    }
+
+    .category-pills {
+        justify-content: flex-start;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 0.5rem;
+    }
+
+    .minimal-products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .minimal-pagination {
+        gap: 0.375rem;
+    }
+
+    .page-arrow,
+    .page-num {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        min-width: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .minimal-shop-header {
+        padding: 3rem 1.5rem 2rem;
+    }
+
+    .minimal-shop-section {
+        padding: 2rem 1.5rem;
+    }
+
+    .shop-header-content h1 {
+        font-size: 1.75rem;
+    }
+
+    .minimal-products-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .minimal-empty-state {
+        padding: 4rem 1.5rem;
+    }
+}
