@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Seller Dashboard</title>
+    <link th:href="@{/css/settings.css}" rel="stylesheet"/>
+    <script th:src="@{/js/settings.js}" defer></script>
+</head>
+
+<body>
+    <main layout:fragment="content" class="settings-page">
+        <div class="page-header">
+            <h1>⚙️ Seller Settings</h1>
+            <p>Manage your seller profile and preferences</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <span>✓</span>
+            <span th:text="${successMessage}">Success message</span>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <span>✗</span>
+            <span th:text="${errorMessage}">Error message</span>
+        </div>
+
+        <!-- Settings Tabs -->
+        <div class="settings-form">
+            <!-- Tab Navigation -->
+            <div class="settings-tabs">
+                <button type="button" class="tab-btn active" data-tab="business">
+                    <span class="tab-icon">🏢</span>
+                    Business Profile
+                </button>
+                <button type="button" class="tab-btn" data-tab="account">
+                    <span class="tab-icon">👤</span>
+                    Account
+                </button>
+                <button type="button" class="tab-btn" data-tab="password">
+                    <span class="tab-icon">🔒</span>
+                    Password
+                </button>
+                <button type="button" class="tab-btn" data-tab="notifications">
+                    <span class="tab-icon">🔔</span>
+                    Notifications
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="settings-content">
+
+                <!-- Business Profile Tab -->
+                <div class="tab-pane active" id="business">
+                    <h2>Business Profile</h2>
+
+                    <form th:action="@{/seller/settings/update-profile}" method="post">
+                        <div class="form-group">
+                            <label for="businessName">Business Name *</label>
+                            <input type="text" id="businessName" name="businessName"
+                                   th:value="${sellerProfile.businessName}" required
+                                   placeholder="Enter your business name"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="businessDescription">Business Description</label>
+                            <textarea id="businessDescription" name="businessDescription" rows="4"
+                                      th:text="${sellerProfile.businessDescription}"
+                                      placeholder="Describe your business..."></textarea>
+                            <small>Tell customers about your business and products</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="businessAddress">Business Address *</label>
+                            <textarea id="businessAddress" name="businessAddress" rows="3"
+                                      th:text="${sellerProfile.businessAddress}" required
+                                      placeholder="Enter your complete business address"></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="businessPhone">Business Phone *</label>
+                                <input type="tel" id="businessPhone" name="businessPhone"
+                                       th:value="${sellerProfile.businessPhone}" required
+                                       placeholder="+1 (555) 123-4567"/>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="taxId">Tax ID / Business Registration</label>
+                                <input type="text" id="taxId" name="taxId"
+                                       th:value="${sellerProfile.taxId}"
+                                       placeholder="Your tax ID or business registration number"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Payment Information</h3>
+                            <small>This information is used for receiving payments</small>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bankAccountName">Account Name</label>
+                                <input type="text" id="bankAccountName" name="bankAccountName"
+                                       th:value="${sellerProfile.bankAccountName}"
+                                       placeholder="Account holder name"/>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="bankAccountNumber">Account Number</label>
+                                <input type="text" id="bankAccountNumber" name="bankAccountNumber"
+                                       th:value="${sellerProfile.bankAccountNumber}"
+                                       placeholder="Bank account number"/>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <span>💾</span>
+                                Save Business Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Account Information Tab -->
+                <div class="tab-pane" id="account">
+                    <h2>Account Information</h2>
+
+                    <form th:action="@{/seller/settings/update-account}" method="post">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">First Name *</label>
+                                <input type="text" id="firstName" name="firstName"
+                                       th:value="${user.firstName}" required
+                                       placeholder="First name"/>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="lastName">Last Name *</label>
+                                <input type="text" id="lastName" name="lastName"
+                                       th:value="${user.lastName}" required
+                                       placeholder="Last name"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email"
+                                   th:value="${user.email}" required
+                                   placeholder="your@email.com"/>
+                            <small>Used for login and notifications</small>
+                        </div>
+
+                        <div class="info-box">
+                            <strong>Account Status:</strong>
+                            <span th:if="${sellerProfile.approved}" style="color: #059669;">
+                                ✓ Approved
+                            </span>
+                            <span th:unless="${sellerProfile.approved}" style="color: #f59e0b;">
+                                ⏳ Pending Approval
+                            </span>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <span>💾</span>
+                                Save Account Info
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Password Tab -->
+                <div class="tab-pane" id="password">
+                    <h2>Change Password</h2>
+
+                    <form th:action="@{/seller/settings/change-password}" method="post">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password *</label>
+                            <input type="password" id="currentPassword" name="currentPassword" required
+                                   placeholder="Enter your current password"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="newPassword">New Password *</label>
+                            <input type="password" id="newPassword" name="newPassword" required
+                                   placeholder="Enter new password (min. 6 characters)"
+                                   minlength="6"/>
+                            <small>Password must be at least 6 characters long</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password *</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required
+                                   placeholder="Re-enter new password"
+                                   minlength="6"/>
+                        </div>
+
+                        <div class="warning-box">
+                            <strong>⚠️ Security Tips:</strong>
+                            <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                                <li>Use a strong, unique password</li>
+                                <li>Don't share your password with anyone</li>
+                                <li>Change your password regularly</li>
+                            </ul>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <span>🔒</span>
+                                Change Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div class="tab-pane" id="notifications">
+                    <h2>Notification Preferences</h2>
+
+                    <form th:action="@{/seller/settings/update-notifications}" method="post">
+                        <p style="margin-bottom: 2rem; color: #6b7280;">
+                            Choose which email notifications you want to receive
+                        </p>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="emailNewOrder" checked/>
+                                <span>New Order Notifications</span>
+                            </label>
+                            <small style="margin-left: 2rem;">Receive email when you receive a new order</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="emailProductApproved" checked/>
+                                <span>Product Approval Notifications</span>
+                            </label>
+                            <small style="margin-left: 2rem;">Get notified when your products are approved</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="emailLowStock" checked/>
+                                <span>Low Stock Alerts</span>
+                            </label>
+                            <small style="margin-left: 2rem;">Alert when product stock is running low</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="emailNewReview" checked/>
+                                <span>New Review Notifications</span>
+                            </label>
+                            <small style="margin-left: 2rem;">Get notified about new product reviews</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <span>💾</span>
+                                Save Preferences
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

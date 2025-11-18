@@ -1,6 +1,7 @@
 package com.example.ecoswap.repository;
 
 import com.example.ecoswap.model.Order;
+import com.example.ecoswap.model.User;
 import com.example.ecoswap.model.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // Find by order number
     Optional<Order> findByOrderNumber(String orderNumber);
+
+    // Find all orders by customer
+    @Query("SELECT o FROM Order o WHERE o.customer = :customer ORDER BY o.createdAt DESC")
+    List<Order> findByCustomer(@Param("customer") User customer);
 
     // Find by customer
     @Query("SELECT o FROM Order o WHERE o.customer.id = :customerId ORDER BY o.createdAt DESC")

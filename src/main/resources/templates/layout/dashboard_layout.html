@@ -24,58 +24,107 @@
 
             <nav class="sidebar-nav">
                 <ul class="nav-list">
+                    <!-- Dashboard - All Roles -->
                     <li class="nav-item active">
-                        <a th:href="@{/seller/dashboard}" class="nav-link">
+                        <a th:href="@{${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/dashboard' : (#authorization.expression('hasRole(''SELLER'')') ? '/seller/dashboard' : '/customer/dashboard')}}" class="nav-link">
                             <i class="fas fa-home"></i>
                             <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
-                    <li class="nav-item">
+
+                    <!-- Products - Admin & Seller -->
+                    <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'SELLER')">
                         <a th:href="@{/dashboard/products}" class="nav-link">
                             <i class="fas fa-box"></i>
-                            <span class="nav-text">Products</span>
+                            <span class="nav-text" sec:authorize="hasRole('ADMIN')">All Products</span>
+                            <span class="nav-text" sec:authorize="hasRole('SELLER')">My Products</span>
                             <span class="badge" th:text="${productCount}">24</span>
                         </a>
                     </li>
+
+                    <!-- Orders - All Roles -->
                     <li class="nav-item">
                         <a th:href="@{/dashboard/orders}" class="nav-link">
                             <i class="fas fa-shopping-cart"></i>
-                            <span class="nav-text">Orders</span>
-                            <span class="badge badge-warning" th:text="${pendingOrders}">5</span>
+                            <span class="nav-text" sec:authorize="hasAnyRole('ADMIN', 'SELLER')">Orders</span>
+                            <span class="nav-text" sec:authorize="hasRole('CUSTOMER')">My Orders</span>
+                            <span class="badge badge-warning" th:text="${pendingOrders}" sec:authorize="hasAnyRole('ADMIN', 'SELLER')">5</span>
                         </a>
                     </li>
-                    <li class="nav-item">
+
+                    <!-- Wishlist - Customer Only -->
+                    <li class="nav-item" sec:authorize="hasRole('CUSTOMER')">
+                        <a th:href="@{/customer/wishlist}" class="nav-link">
+                            <i class="fas fa-heart"></i>
+                            <span class="nav-text">My Wishlist</span>
+                        </a>
+                    </li>
+
+                    <!-- Customers - Admin Only -->
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                         <a th:href="@{/dashboard/customers}" class="nav-link">
                             <i class="fas fa-users"></i>
                             <span class="nav-text">Customers</span>
                         </a>
                     </li>
-                    <li class="nav-item">
+
+                    <!-- Categories - Admin & Seller -->
+                    <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'SELLER')">
                         <a th:href="@{/dashboard/categories}" class="nav-link">
                             <i class="fas fa-tags"></i>
                             <span class="nav-text">Categories</span>
                         </a>
                     </li>
-                    <li class="nav-item">
+
+                    <!-- Analytics - Admin & Seller -->
+                    <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'SELLER')">
                         <a th:href="@{/dashboard/analytics}" class="nav-link">
                             <i class="fas fa-chart-line"></i>
                             <span class="nav-text">Analytics</span>
                         </a>
                     </li>
+
+                    <!-- Impact Tracker - All Roles -->
                     <li class="nav-item">
                         <a th:href="@{/dashboard/impact}" class="nav-link">
                             <i class="fas fa-seedling"></i>
                             <span class="nav-text">Impact Tracker</span>
                         </a>
                     </li>
-                    <li class="nav-item">
+
+                    <!-- Reviews - Admin & Seller -->
+                    <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'SELLER')">
                         <a th:href="@{/dashboard/reviews}" class="nav-link">
                             <i class="fas fa-star"></i>
                             <span class="nav-text">Reviews</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a th:href="@{/dashboard/settings}" class="nav-link">
+
+                    <!-- Profile - Customer Only -->
+                    <li class="nav-item" sec:authorize="hasRole('CUSTOMER')">
+                        <a th:href="@{/customer/profile}" class="nav-link">
+                            <i class="fas fa-user"></i>
+                            <span class="nav-text">My Profile</span>
+                        </a>
+                    </li>
+
+                    <!-- Settings - Admin -->
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{/admin/settings}" class="nav-link">
+                            <i class="fas fa-cog"></i>
+                            <span class="nav-text">Settings</span>
+                        </a>
+                    </li>
+                    <!-- Settings - Seller -->
+                    <li class="nav-item" sec:authorize="hasRole('SELLER')">
+                        <a th:href="@{/seller/settings}" class="nav-link">
+                            <i class="fas fa-cog"></i>
+                            <span class="nav-text">Settings</span>
+                        </a>
+                    </li>
+                    <!-- Settings - Customer -->
+                    <li class="nav-item" sec:authorize="hasRole('CUSTOMER')">
+                        <a th:href="@{/customer/settings}" class="nav-link">
                             <i class="fas fa-cog"></i>
                             <span class="nav-text">Settings</span>
                         </a>

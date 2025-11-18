@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} ?: 'Checkout - EcoSwap'">Checkout - EcoSwap</title>
+
+    <!-- Common Styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Checkout Layout Styles -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Checkout Header */
+        .checkout-header {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .checkout-header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .checkout-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .checkout-logo i {
+            font-size: 2rem;
+            color: #1dbf73;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .checkout-logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .checkout-logo-text .eco {
+            color: #1dbf73;
+        }
+
+        .checkout-security {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #10b981;
+            font-size: 0.9rem;
+        }
+
+        .checkout-security i {
+            font-size: 1.2rem;
+        }
+
+        /* Progress Steps */
+        .checkout-progress {
+            background: white;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .checkout-progress-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+
+        .progress-step.active {
+            color: #1dbf73;
+        }
+
+        .progress-step.completed {
+            color: #10b981;
+        }
+
+        .progress-step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .progress-step.active .progress-step-number {
+            background: #1dbf73;
+            color: white;
+        }
+
+        .progress-step.completed .progress-step-number {
+            background: #10b981;
+            color: white;
+        }
+
+        .progress-separator {
+            width: 80px;
+            height: 2px;
+            background: #e5e7eb;
+        }
+
+        .progress-step.completed ~ .progress-separator {
+            background: #10b981;
+        }
+
+        /* Main Content */
+        .checkout-main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        /* Footer */
+        .checkout-footer {
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 1.5rem 0;
+            margin-top: auto;
+        }
+
+        .checkout-footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .checkout-footer-text {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .checkout-footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .checkout-footer-links a {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .checkout-footer-links a:hover {
+            color: #1dbf73;
+        }
+
+        .trust-badges {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f9fafb;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .trust-badge i {
+            color: #10b981;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .checkout-header-content,
+            .checkout-progress-content,
+            .checkout-main,
+            .checkout-footer-content {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .progress-steps {
+                gap: 1rem;
+            }
+
+            .progress-separator {
+                width: 40px;
+            }
+
+            .progress-step-text {
+                display: none;
+            }
+
+            .checkout-footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .trust-badges {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Checkout Header -->
+    <header class="checkout-header">
+        <div class="checkout-header-content">
+            <a th:href="@{/}" class="checkout-logo">
+                <i class="fas fa-leaf"></i>
+                <span class="checkout-logo-text">
+                    <span class="eco">Eco</span>Swap
+                </span>
+            </a>
+            <div class="checkout-security">
+                <i class="fas fa-lock"></i>
+                <span>Secure Checkout</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Progress Steps (optional, can be shown based on page) -->
+    <div class="checkout-progress" th:if="${showProgress}">
+        <div class="checkout-progress-content">
+            <div class="progress-steps">
+                <div class="progress-step" th:classappend="${currentStep == 'cart' ? 'active' : (currentStep != 'cart' ? 'completed' : '')}">
+                    <div class="progress-step-number">1</div>
+                    <span class="progress-step-text">Cart</span>
+                </div>
+                <div class="progress-separator"></div>
+                <div class="progress-step" th:classappend="${currentStep == 'checkout' ? 'active' : (currentStep == 'confirmation' ? 'completed' : '')}">
+                    <div class="progress-step-number">2</div>
+                    <span class="progress-step-text">Checkout</span>
+                </div>
+                <div class="progress-separator"></div>
+                <div class="progress-step" th:classappend="${currentStep == 'confirmation' ? 'active' : ''}">
+                    <div class="progress-step-number">3</div>
+                    <span class="progress-step-text">Confirmation</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="checkout-main">
+        <div layout:fragment="content">
+            <!-- Page content will be inserted here -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="checkout-footer">
+        <div class="checkout-footer-content">
+            <div class="checkout-footer-text">
+                &copy; 2025 <strong>EcoSwap</strong>. Secure Shopping.
+            </div>
+            <div class="trust-badges">
+                <div class="trust-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Secure Payment</span>
+                </div>
+                <div class="trust-badge">
+                    <i class="fas fa-lock"></i>
+                    <span>SSL Encrypted</span>
+                </div>
+                <div class="trust-badge">
+                    <i class="fas fa-undo"></i>
+                    <span>30-Day Returns</span>
+                </div>
+            </div>
+            <div class="checkout-footer-links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Help</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Placeholder for page-specific scripts -->
+    <div layout:fragment="scripts"></div>
+</body>
+</html>

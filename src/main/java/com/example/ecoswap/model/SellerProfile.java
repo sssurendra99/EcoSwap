@@ -3,14 +3,17 @@ package com.example.ecoswap.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "seller_profiles")
 public class SellerProfile {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
@@ -39,6 +42,12 @@ public class SellerProfile {
     private String taxId;
 
     @Column
+    private String bankAccountName;
+
+    @Column
+    private String bankAccountNumber;
+
+    @Column
     private String status = "PENDING"; // PENDING / APPROVED / REJECTED
 
     @Column
@@ -47,13 +56,10 @@ public class SellerProfile {
     @Column
     private LocalDateTime approvedAt;
 
-    public SellerProfile() {}
-
     public SellerProfile(User user, String storeName, String businessAddress) {
         this.user = user;
         this.storeName = storeName;
         this.businessAddress = businessAddress;
         this.createdAt = LocalDateTime.now();
     }
-
 }

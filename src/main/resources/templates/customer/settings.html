@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Customer Dashboard</title>
+    <link th:href="@{/css/settings.css}" rel="stylesheet"/>
+    <script th:src="@{/js/settings.js}" defer></script>
+</head>
+
+<body>
+    <main layout:fragment="content" class="settings-page">
+        <div class="page-header">
+            <h1>⚙️ Account Settings</h1>
+            <p>Manage your account and preferences</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <span>✓</span>
+            <span th:text="${successMessage}">Success message</span>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <span>✗</span>
+            <span th:text="${errorMessage}">Error message</span>
+        </div>
+
+        <!-- Settings Tabs -->
+        <div class="settings-form">
+            <!-- Tab Navigation -->
+            <div class="settings-tabs">
+                <button type="button" class="tab-btn active" data-tab="profile">
+                    <span class="tab-icon">👤</span>
+                    Profile
+                </button>
+                <button type="button" class="tab-btn" data-tab="account">
+                    <span class="tab-icon">📧</span>
+                    Account
+                </button>
+                <button type="button" class="tab-btn" data-tab="password">
+                    <span class="tab-icon">🔒</span>
+                    Password
+                </button>
+                <button type="button" class="tab-btn" data-tab="notifications">
+                    <span class="tab-icon">🔔</span>
+                    Notifications
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="settings-content">
+
+                <!-- Profile Tab -->
+                <div class="tab-pane active" id="profile">
+                    <h2>Personal Information</h2>
+
+                    <form th:action="@{/customer/settings/update-profile}" method="post">
+                        <div class="form-group">
+                            <label for="phoneNumber">Phone Number *</label>
+                            <input type="tel" id="phoneNumber" name="phoneNumber"
+                                   th:value="${customerProfile.phoneNumber}" required
+                                   placeholder="+1 (555) 123-4567"/>
+                        </div>
+
+                        <div class="form-group">
+                            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Shipping Address</h3>
+                            <small>Default address for order deliveries</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="shippingAddress">Street Address</label>
+                            <textarea id="shippingAddress" name="shippingAddress" rows="2"
+                                      th:text="${customerProfile.shippingAddress}"
+                                      placeholder="123 Main Street, Apt 4B"></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="city">City</label>
+                                <input type="text" id="city" name="city"
+                                       th:value="${customerProfile.city}"
+                                       placeholder="City name"/>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="state">State/Province</label>
+                                <input type="text" id="state" name="state"
+                                       th:value="${customerProfile.state}"
+                                       placeholder="State or Province"/>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="zipCode">ZIP/Postal Code</label>
+                                <input type="text" id="zipCode" name="zipCode"
+                                       th:value="${customerProfile.zipCode}"
+                                       placeholder="12345"/>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="country">Country</label>
+                                <input type="text" id="country" name="country"
+                                       th:value="${customerProfile.country}"
+                                       placeholder="Country"/>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <span>💾</span>
+                                Save Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Account Information Tab -->
+                <div class="tab-pane" id="account">
+                    <h2>Account Information</h2>
+
+                    <form th:action="@{/customer/settings/update-account}" method="post">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">First Name *</label>
+                                <input type="text" id="firstName" name="firstName"
+                                       th:value="${user.firstName}" required
+                                       placeholder="First name"/>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="lastName">Last Name *</label>
+                                <input type="text" id="lastName" name="lastName"
+                                       th:value="${user.lastName}" required
+                                       placeholder="Last name"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email"
+                                   th:value="${user.email}" required
+                                   placeholder="your@email.com"/>
+                            <small>Used for login and order notifications</small>
+                        </div>
+
+                        <div class="info-box">
+                            <div style="margin-bottom: 0.5rem;">
+                                <strong>Member Since:</strong>
+                                <span th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</span>
+                            </div>
+                            <div>
+                                <strong>Account Status:</strong>
+                                <span style="color: #059669;">✓ Active</span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <span>💾</span>
+                                Save Account Info
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Password Tab -->
+                <div class="tab-pane" id="password">
+                    <h2>Change Password</h2>
+
+                    <form th:action="@{/customer/settings/change-password}" method="post">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password *</label>
+                            <input type="password" id="currentPassword" name="currentPassword" required
+                                   placeholder="Enter your current password"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="newPassword">New Password *</label>
+                            <input type="password" id="newPassword" name="newPassword" required
+                                   placeholder="Enter new password (min. 6 characters)"
+                                   minlength="6"/>
+                            <small>Password must be at least 6 characters long</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password *</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required
+                                   placeholder="Re-enter new password"
+                                   minlength="6"/>
+                        </div>
+
+                        <div class="warning-box">
+                            <strong>⚠️ Security Tips:</strong>
+                            <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                                <li>Use a strong, unique password</li>
+                                <li>Don't share your password with anyone</li>
+                                <li>Change your password regularly</li>
+                            </ul>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <span>🔒</span>
+                                Change Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div class="tab-pane" id="notifications">
+                    <h2>Notification Preferences</h2>
+
+                    <form th:action="@{/customer/settings/update-notifications}" method="post">
+                        <p style="margin-bottom: 2rem; color: #6b7280;">
+                            Choose which email notifications you want to receive
+                        </p>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="emailOrderStatus" checked/>
+                                <span>Order Status Updates</span>
+                            </label>
+                            <small style="margin-left: 2rem;">Get notified about your order status changes</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="emailPromotions" checked/>
+                                <span>Promotional Emails</span>
+                            </label>
+                            <small style="margin-left: 2rem;">Receive special offers and discounts</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="emailNewProducts" checked/>
+                                <span>New Product Alerts</span>
+                            </label>
+                            <small style="margin-left: 2rem;">Get notified when new products are added</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="emailNewsletter"/>
+                                <span>Newsletter</span>
+                            </label>
+                            <small style="margin-left: 2rem;">Receive our weekly newsletter with eco tips</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <span>💾</span>
+                                Save Preferences
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
