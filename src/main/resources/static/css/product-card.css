@@ -47,6 +47,15 @@ a.product-card:active {
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
 }
 
+/* Product Card Link Wrapper */
+.product-card-link {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
 /* Product Image Section */
 .product-card .product-image-wrapper,
 .product-image-wrapper {
@@ -258,6 +267,54 @@ a.product-card:active {
     font-weight: 600;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     z-index: 2;
+}
+
+/* Add to Cart Button */
+.add-to-cart-btn {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    background: #11998e;
+    color: white;
+    border: none;
+    border-radius: 0 0 12px 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    margin-top: auto;
+}
+
+.add-to-cart-btn:hover {
+    background: #0e8072;
+}
+
+.add-to-cart-btn:active {
+    transform: scale(0.98);
+}
+
+.add-to-cart-btn.adding {
+    background: #fbbf24;
+    pointer-events: none;
+}
+
+.add-to-cart-btn.added {
+    background: #059669;
+    pointer-events: none;
+}
+
+.add-to-cart-btn.out-of-stock-btn {
+    background: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.add-to-cart-btn i {
+    font-size: 1rem;
 }
 
 /* Responsive Adjustments */

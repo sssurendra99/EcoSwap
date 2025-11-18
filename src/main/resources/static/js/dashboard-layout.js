@@ -371,6 +371,103 @@ document.addEventListener('DOMContentLoaded', function() {
         showToast('Table exported successfully!', 'success');
     };
 
+    // ===== NOTIFICATIONS =====
+    const notificationBtn = document.getElementById('notificationBtn');
+    const notificationMenu = document.getElementById('notificationMenu');
+    const markAllReadBtn = document.getElementById('markAllRead');
+    const notificationBadge = document.querySelector('.notification-badge');
+
+    // Toggle notification dropdown
+    if (notificationBtn && notificationMenu) {
+        notificationBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            notificationMenu.style.opacity = '1';
+            notificationMenu.style.visibility = 'visible';
+            notificationMenu.style.transform = 'translateY(0)';
+
+            // Close when clicking outside
+            document.addEventListener('click', closeNotifications);
+        });
+
+        function closeNotifications(e) {
+            if (!notificationMenu.contains(e.target) && e.target !== notificationBtn) {
+                notificationMenu.style.opacity = '0';
+                notificationMenu.style.visibility = 'hidden';
+                notificationMenu.style.transform = 'translateY(-10px)';
+                document.removeEventListener('click', closeNotifications);
+            }
+        }
+    }
+
+    // Mark all as read
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            fetch('/notifications/read-all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI
+                    document.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+                    });
+
+                    // Update badge
+                    if (notificationBadge) {
+                        notificationBadge.style.display = 'none';
+                    }
+
+                    showToast('All notifications marked as read', 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Error marking notifications as read:', error);
+                showToast('Failed to mark notifications as read', 'error');
+            });
+        });
+    }
+
+    // Handle notification item click
+    document.querySelectorAll('.notification-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            const notificationId = this.getAttribute('data-notification-id');
+
+            if (notificationId && this.classList.contains('unread')) {
+                // Mark as read
+                fetch(`/notifications/${notificationId}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.classList.remove('unread');
+
+                        // Update badge
+                        if (notificationBadge && data.unreadCount !== undefined) {
+                            if (data.unreadCount > 0) {
+                                notificationBadge.textContent = data.unreadCount;
+                            } else {
+                                notificationBadge.style.display = 'none';
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error marking notification as read:', error);
+                });
+            }
+        });
+    });
+
     console.log('Dashboard Layout Initialized ✅');
 });
 

@@ -80,8 +80,11 @@ body {
     border-radius: 3px;
 }
 
-.sidebar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+/* Webkit scrollbar thumb hover - Firefox doesn't support pseudo-element on pseudo-element */
+@supports selector(::-webkit-scrollbar-thumb:hover) {
+    .sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
 }
 
 /* Sidebar Header */
@@ -510,13 +513,45 @@ body {
 }
 
 .notification-footer {
-    display: block;
     padding: 15px;
     text-align: center;
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 600;
     border-top: 1px solid #f0f0f0;
+}
+
+.notification-footer .view-all {
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+/* Empty Notifications */
+.empty-notifications {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-light);
+}
+
+.empty-notifications i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.empty-notifications p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* Notification Time */
+.notification-time {
+    display: block;
+    margin-top: 5px;
+    color: var(--text-light);
+    font-size: 0.75rem !important;
+}
+
+.notification-icon.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
 }
 
 /* User Dropdown */

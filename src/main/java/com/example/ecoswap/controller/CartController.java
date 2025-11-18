@@ -4,10 +4,13 @@ import com.example.ecoswap.model.Cart;
 import com.example.ecoswap.model.CartItem;
 import com.example.ecoswap.model.Order;
 import com.example.ecoswap.model.OrderItem;
+import com.example.ecoswap.model.Product;
 import com.example.ecoswap.model.User;
+import com.example.ecoswap.repository.ProductRepository;
 import com.example.ecoswap.security.CustomUserDetails;
 import com.example.ecoswap.services.CartService;
 import com.example.ecoswap.services.OrderService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -16,11 +19,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
 @RequestMapping("/cart")
 public class CartController {
+
+    private static final String SESSION_CART_KEY = "guestCart";
 
     @Autowired
     private CartService cartService;
@@ -28,41 +35,77 @@ public class CartController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private com.example.ecoswap.services.EmailService emailService;
+
     /**
-     * View cart
+     * View cart - supports both authenticated and anonymous users
      */
     @GetMapping
-    public String viewCart(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        User user = userDetails.getUser();
+    public String viewCart(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpSession session,
+            Model model
+    ) {
+        Cart cart;
+        List<CartItem> cartItems;
+        BigDecimal cartTotal = BigDecimal.ZERO;
+        int cartItemCount = 0;
 
-        Optional<Cart> cartOpt = cartService.getCartByUserId(user.getId());
-        Cart cart = cartOpt.orElse(new Cart());
+        if (userDetails != null) {
+            // Authenticated user - use database cart
+            User user = userDetails.getUser();
+            Optional<Cart> cartOpt = cartService.getCartByUserId(user.getId());
+            cart = cartOpt.orElse(new Cart());
+            cartItems = cart.getCartItems();
+            cartTotal = cart.getTotal();
+            cartItemCount = cart.getTotalItems();
 
-        model.addAttribute("cart", cart);
-        model.addAttribute("cartItems", cart.getCartItems());
-        model.addAttribute("cartTotal", cart.getTotal());
-        model.addAttribute("cartItemCount", cart.getTotalItems());
+            model.addAttribute("userName", user.getFullName());
+            model.addAttribute("userRole", user.getRole().getDisplayName());
+        } else {
+            // Anonymous user - use session cart
+            cartItems = getSessionCart(session);
+            for (CartItem item : cartItems) {
+                cartTotal = cartTotal.add(item.getSubtotal());
+                cartItemCount += item.getQuantity();
+            }
+
+            model.addAttribute("userName", "Guest");
+            model.addAttribute("userRole", "Guest");
+        }
+
+        model.addAttribute("cartItems", cartItems);
+        model.addAttribute("cartTotal", cartTotal);
+        model.addAttribute("cartItemCount", cartItemCount);
         model.addAttribute("pageTitle", "Shopping Cart");
-        model.addAttribute("userName", user.getFullName());
-        model.addAttribute("userRole", user.getRole().getDisplayName());
 
         return "cart/cart";
     }
 
     /**
-     * Add item to cart
+     * Add item to cart - supports both authenticated and anonymous users
      */
     @PostMapping("/add")
     public String addToCart(
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpSession session,
             @RequestParam Long productId,
             @RequestParam(defaultValue = "1") Integer quantity,
             RedirectAttributes redirectAttributes
     ) {
-        User user = userDetails.getUser();
-
         try {
-            cartService.addToCart(user, productId, quantity);
+            if (userDetails != null) {
+                // Authenticated user - use database cart
+                User user = userDetails.getUser();
+                cartService.addToCart(user, productId, quantity);
+            } else {
+                // Anonymous user - use session cart
+                addToSessionCart(session, productId, quantity);
+            }
             redirectAttributes.addFlashAttribute("successMessage", "Product added to cart successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -73,23 +116,37 @@ public class CartController {
     }
 
     /**
-     * Add item to cart via AJAX
+     * Add item to cart via AJAX - supports both authenticated and anonymous users
      */
     @PostMapping("/add-ajax")
     @ResponseBody
-    public String addToCartAjax(
+    public java.util.Map<String, Object> addToCartAjax(
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpSession session,
             @RequestParam Long productId,
             @RequestParam(defaultValue = "1") Integer quantity
     ) {
-        User user = userDetails.getUser();
-
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
         try {
-            Cart cart = cartService.addToCart(user, productId, quantity);
-            return "{\"success\": true, \"itemCount\": " + cart.getTotalItems() + ", \"message\": \"Product added to cart\"}";
+            int itemCount;
+            if (userDetails != null) {
+                // Authenticated user
+                User user = userDetails.getUser();
+                Cart cart = cartService.addToCart(user, productId, quantity);
+                itemCount = cart.getTotalItems();
+            } else {
+                // Anonymous user
+                addToSessionCart(session, productId, quantity);
+                itemCount = getSessionCartItemCount(session);
+            }
+            response.put("success", true);
+            response.put("itemCount", itemCount);
+            response.put("message", "Product added to cart");
         } catch (Exception e) {
-            return "{\"success\": false, \"message\": \"" + e.getMessage() + "\"}";
+            response.put("success", false);
+            response.put("message", e.getMessage());
         }
+        return response;
     }
 
     /**
@@ -195,14 +252,79 @@ public class CartController {
     }
 
     /**
-     * Get cart count (for navbar badge)
+     * Get cart count (for navbar badge) - supports both authenticated and anonymous users
      */
     @GetMapping("/count")
     @ResponseBody
-    public String getCartCount(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        User user = userDetails.getUser();
-        int count = cartService.getCartItemCount(user.getId());
+    public String getCartCount(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpSession session
+    ) {
+        int count;
+        if (userDetails != null) {
+            // Authenticated user
+            User user = userDetails.getUser();
+            count = cartService.getCartItemCount(user.getId());
+        } else {
+            // Anonymous user
+            count = getSessionCartItemCount(session);
+        }
         return "{\"count\": " + count + "}";
+    }
+
+    // ===== Session Cart Helper Methods =====
+
+    /**
+     * Get cart items from session
+     */
+    @SuppressWarnings("unchecked")
+    private List<CartItem> getSessionCart(HttpSession session) {
+        List<CartItem> cart = (List<CartItem>) session.getAttribute(SESSION_CART_KEY);
+        if (cart == null) {
+            cart = new ArrayList<>();
+            session.setAttribute(SESSION_CART_KEY, cart);
+        }
+        return cart;
+    }
+
+    /**
+     * Add product to session cart
+     */
+    private void addToSessionCart(HttpSession session, Long productId, Integer quantity) {
+        List<CartItem> cart = getSessionCart(session);
+
+        // Find product
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // Check if product already in cart
+        Optional<CartItem> existingItem = cart.stream()
+                .filter(item -> item.getProduct().getId().equals(productId))
+                .findFirst();
+
+        if (existingItem.isPresent()) {
+            // Update quantity
+            CartItem item = existingItem.get();
+            item.setQuantity(item.getQuantity() + quantity);
+            // Note: subtotal is calculated dynamically via getSubtotal()
+        } else {
+            // Add new item
+            CartItem newItem = new CartItem();
+            newItem.setProduct(product);
+            newItem.setQuantity(quantity);
+            // Note: subtotal is calculated dynamically via getSubtotal()
+            cart.add(newItem);
+        }
+
+        session.setAttribute(SESSION_CART_KEY, cart);
+    }
+
+    /**
+     * Get total number of items in session cart
+     */
+    private int getSessionCartItemCount(HttpSession session) {
+        List<CartItem> cart = getSessionCart(session);
+        return cart.stream().mapToInt(CartItem::getQuantity).sum();
     }
 
     /**
@@ -292,8 +414,12 @@ public class CartController {
             order.setPaymentMethod(paymentMethod);
             order.setOrderNotes(orderNotes);
 
-            // Calculate totals
+            // Calculate totals with null safety
             BigDecimal subtotal = cart.getTotal();
+            if (subtotal == null) {
+                subtotal = BigDecimal.ZERO;
+            }
+
             BigDecimal shippingCost = new BigDecimal("10.00"); // Fixed shipping for now
             BigDecimal tax = subtotal.multiply(new BigDecimal("0.10")); // 10% tax
 
@@ -304,22 +430,36 @@ public class CartController {
 
             // Create order items from cart items
             for (CartItem cartItem : cart.getCartItems()) {
+                Product product = cartItem.getProduct();
+
+                // Skip if product is null or invalid
+                if (product == null) {
+                    continue;
+                }
+
                 OrderItem orderItem = new OrderItem();
                 orderItem.setOrder(order);
-                orderItem.setProduct(cartItem.getProduct());
-                orderItem.setSeller(cartItem.getProduct().getSeller());
+                orderItem.setProduct(product);
+                orderItem.setSeller(product.getSeller());
                 orderItem.setQuantity(cartItem.getQuantity());
-                orderItem.setPrice(cartItem.getProduct().getPrice());
-                orderItem.setProductName(cartItem.getProduct().getName());
-                orderItem.setProductSku(cartItem.getProduct().getSku());
-                orderItem.setProductImage(cartItem.getProduct().getImage());
+
+                // Set price with null safety
+                BigDecimal itemPrice = product.getPrice();
+                if (itemPrice == null) {
+                    itemPrice = BigDecimal.ZERO;
+                }
+                orderItem.setPrice(itemPrice);
+
+                orderItem.setProductName(product.getName() != null ? product.getName() : "Unknown Product");
+                orderItem.setProductSku(product.getSku() != null ? product.getSku() : "N/A");
+                orderItem.setProductImage(product.getImage());
 
                 order.addOrderItem(orderItem);
 
                 // Update product stock
-                cartItem.getProduct().setStock(
-                    cartItem.getProduct().getStock() - cartItem.getQuantity()
-                );
+                int currentStock = product.getStock() != null ? product.getStock() : 0;
+                int newStock = Math.max(0, currentStock - cartItem.getQuantity());
+                product.setStock(newStock);
             }
 
             // Save order
@@ -328,8 +468,16 @@ public class CartController {
             // Clear cart
             cartService.clearCart(user);
 
+            // Send order confirmation email
+            try {
+                emailService.sendOrderConfirmation(savedOrder);
+            } catch (Exception emailException) {
+                // Log error but don't fail the order
+                System.err.println("Failed to send order confirmation email: " + emailException.getMessage());
+            }
+
             redirectAttributes.addFlashAttribute("successMessage",
-                "Order placed successfully! Order number: " + savedOrder.getOrderNumber());
+                "Order placed successfully! Order number: " + savedOrder.getOrderNumber() + ". A confirmation email has been sent to " + savedOrder.getCustomerEmail());
 
             return "redirect:/dashboard/orders/" + savedOrder.getId();
 

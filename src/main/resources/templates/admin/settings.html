@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Admin Dashboard</title>
+    <link th:href="@{/css/settings.css}" rel="stylesheet"/>
+    <script th:src="@{/js/settings.js}" defer></script>
+</head>
+
+<body>
+    <main layout:fragment="content" class="settings-page">
+        <div class="page-header">
+            <h1>⚙️ Settings</h1>
+            <p>Configure your EcoSwap marketplace settings</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <span>✓</span>
+            <span th:text="${successMessage}">Success message</span>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <span>✗</span>
+            <span th:text="${errorMessage}">Error message</span>
+        </div>
+
+        <!-- Settings Form -->
+        <form th:action="@{/admin/settings/update}" method="post" th:object="${settings}" class="settings-form">
+
+            <!-- Tab Navigation -->
+            <div class="settings-tabs">
+                <button type="button" class="tab-btn active" data-tab="general">
+                    <span class="tab-icon">🏪</span>
+                    General
+                </button>
+                <button type="button" class="tab-btn" data-tab="currency">
+                    <span class="tab-icon">💰</span>
+                    Currency
+                </button>
+                <button type="button" class="tab-btn" data-tab="products">
+                    <span class="tab-icon">📦</span>
+                    Products
+                </button>
+                <button type="button" class="tab-btn" data-tab="orders">
+                    <span class="tab-icon">🛒</span>
+                    Orders
+                </button>
+                <button type="button" class="tab-btn" data-tab="email">
+                    <span class="tab-icon">📧</span>
+                    Email
+                </button>
+                <button type="button" class="tab-btn" data-tab="appearance">
+                    <span class="tab-icon">🎨</span>
+                    Appearance
+                </button>
+                <button type="button" class="tab-btn" data-tab="social">
+                    <span class="tab-icon">🌐</span>
+                    Social Media
+                </button>
+                <button type="button" class="tab-btn" data-tab="seo">
+                    <span class="tab-icon">🔍</span>
+                    SEO
+                </button>
+                <button type="button" class="tab-btn" data-tab="maintenance">
+                    <span class="tab-icon">🔧</span>
+                    Maintenance
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="settings-content">
+
+                <!-- General Settings Tab -->
+                <div class="tab-pane active" id="general">
+                    <h2>General Settings</h2>
+
+                    <div class="form-group">
+                        <label for="shopName">Shop Name *</label>
+                        <input type="text" id="shopName" th:field="*{shopName}" required
+                               placeholder="e.g., EcoSwap"/>
+                        <small>The name of your marketplace</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="shopTagline">Shop Tagline</label>
+                        <input type="text" id="shopTagline" th:field="*{shopTagline}"
+                               placeholder="e.g., Your sustainable marketplace"/>
+                        <small>A short description or slogan</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="shopDescription">Shop Description</label>
+                        <textarea id="shopDescription" th:field="*{shopDescription}" rows="4"
+                                  placeholder="Describe your marketplace..."></textarea>
+                        <small>Detailed description of your marketplace</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contactEmail">Contact Email</label>
+                            <input type="email" id="contactEmail" th:field="*{contactEmail}"
+                                   placeholder="support@ecoswap.com"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="supportPhone">Support Phone</label>
+                            <input type="tel" id="supportPhone" th:field="*{supportPhone}"
+                                   placeholder="+1 (555) 123-4567"/>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Business Address</label>
+                        <textarea id="address" th:field="*{address}" rows="3"
+                                  placeholder="123 Main Street, City, Country"></textarea>
+                    </div>
+                </div>
+
+                <!-- Currency Settings Tab -->
+                <div class="tab-pane" id="currency">
+                    <h2>Currency Settings</h2>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="currencyCode">Currency Code *</label>
+                            <select id="currencyCode" th:field="*{currencyCode}" required>
+                                <option value="USD">USD - US Dollar</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GBP">GBP - British Pound</option>
+                                <option value="JPY">JPY - Japanese Yen</option>
+                                <option value="INR">INR - Indian Rupee</option>
+                                <option value="AUD">AUD - Australian Dollar</option>
+                                <option value="CAD">CAD - Canadian Dollar</option>
+                                <option value="CHF">CHF - Swiss Franc</option>
+                                <option value="CNY">CNY - Chinese Yuan</option>
+                                <option value="LKR">LKR - Sri Lankan Rupee</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="currencySymbol">Currency Symbol *</label>
+                            <input type="text" id="currencySymbol" th:field="*{currencySymbol}" required
+                                   placeholder="$" maxlength="5"/>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="currencyPosition">Symbol Position</label>
+                            <select id="currencyPosition" th:field="*{currencyPosition}">
+                                <option value="before">Before amount (e.g., $100)</option>
+                                <option value="after">After amount (e.g., 100$)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="decimalPlaces">Decimal Places</label>
+                            <input type="number" id="decimalPlaces" th:field="*{decimalPlaces}"
+                                   min="0" max="4" value="2"/>
+                        </div>
+                    </div>
+
+                    <div class="preview-box">
+                        <strong>Preview:</strong>
+                        <span id="pricePreview" class="price-preview">$99.99</span>
+                    </div>
+                </div>
+
+                <!-- Product Settings Tab -->
+                <div class="tab-pane" id="products">
+                    <h2>Product Settings</h2>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productsPerPage">Products Per Page</label>
+                            <input type="number" id="productsPerPage" th:field="*{productsPerPage}"
+                                   min="4" max="100" value="12"/>
+                            <small>Number of products to display per page</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lowStockThreshold">Low Stock Threshold</label>
+                            <input type="number" id="lowStockThreshold" th:field="*{lowStockThreshold}"
+                                   min="0" max="100" value="5"/>
+                            <small>Show low stock warning below this quantity</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" th:field="*{allowReviews}"/>
+                            <span>Allow product reviews</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" th:field="*{autoApproveProducts}"/>
+                            <span>Auto-approve new products</span>
+                        </label>
+                        <small>If disabled, products require admin approval before going live</small>
+                    </div>
+                </div>
+
+                <!-- Order Settings Tab -->
+                <div class="tab-pane" id="orders">
+                    <h2>Order Settings</h2>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="orderPrefix">Order Number Prefix</label>
+                            <input type="text" id="orderPrefix" th:field="*{orderPrefix}"
+                                   placeholder="ECO" maxlength="10"/>
+                            <small>Prefix for order numbers (e.g., ECO-12345)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="minimumOrderAmount">Minimum Order Amount</label>
+                            <input type="number" id="minimumOrderAmount" th:field="*{minimumOrderAmount}"
+                                   min="0" step="0.01" placeholder="0.00"/>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taxRate">Tax Rate (%)</label>
+                            <input type="number" id="taxRate" th:field="*{taxRate}"
+                                   min="0" max="100" step="0.01" placeholder="0.00"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="shippingFee">Shipping Fee</label>
+                            <input type="number" id="shippingFee" th:field="*{shippingFee}"
+                                   min="0" step="0.01" placeholder="0.00"/>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="freeShippingThreshold">Free Shipping Threshold</label>
+                        <input type="number" id="freeShippingThreshold" th:field="*{freeShippingThreshold}"
+                               min="0" step="0.01" placeholder="100.00"/>
+                        <small>Free shipping for orders above this amount (0 = no free shipping)</small>
+                    </div>
+                </div>
+
+                <!-- Email Settings Tab -->
+                <div class="tab-pane" id="email">
+                    <h2>Email Settings</h2>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" th:field="*{emailNotificationsEnabled}"/>
+                            <span>Enable email notifications</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adminNotificationEmail">Admin Notification Email</label>
+                        <input type="email" id="adminNotificationEmail" th:field="*{adminNotificationEmail}"
+                               placeholder="admin@ecoswap.com"/>
+                        <small>Email address to receive admin notifications</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" th:field="*{sendOrderConfirmation}"/>
+                            <span>Send order confirmation emails</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" th:field="*{sendShippingNotification}"/>
+                            <span>Send shipping notification emails</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Appearance Settings Tab -->
+                <div class="tab-pane" id="appearance">
+                    <h2>Appearance Settings</h2>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="primaryColor">Primary Color</label>
+                            <div class="color-input-group">
+                                <input type="color" id="primaryColor" th:field="*{primaryColor}"/>
+                                <input type="text" th:field="*{primaryColor}" placeholder="#11998e" maxlength="7"/>
+                            </div>
+                            <small>Main brand color</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="secondaryColor">Secondary Color</label>
+                            <div class="color-input-group">
+                                <input type="color" id="secondaryColor" th:field="*{secondaryColor}"/>
+                                <input type="text" th:field="*{secondaryColor}" placeholder="#38ef7d" maxlength="7"/>
+                            </div>
+                            <small>Accent color</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="logoUrl">Logo URL</label>
+                        <input type="url" id="logoUrl" th:field="*{logoUrl}"
+                               placeholder="https://example.com/logo.png"/>
+                        <small>URL to your site logo</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="faviconUrl">Favicon URL</label>
+                        <input type="url" id="faviconUrl" th:field="*{faviconUrl}"
+                               placeholder="https://example.com/favicon.ico"/>
+                        <small>URL to your site favicon</small>
+                    </div>
+                </div>
+
+                <!-- Social Media Tab -->
+                <div class="tab-pane" id="social">
+                    <h2>Social Media Links</h2>
+
+                    <div class="form-group">
+                        <label for="facebookUrl">Facebook URL</label>
+                        <input type="url" id="facebookUrl" th:field="*{facebookUrl}"
+                               placeholder="https://facebook.com/yourpage"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="twitterUrl">Twitter/X URL</label>
+                        <input type="url" id="twitterUrl" th:field="*{twitterUrl}"
+                               placeholder="https://twitter.com/yourhandle"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="instagramUrl">Instagram URL</label>
+                        <input type="url" id="instagramUrl" th:field="*{instagramUrl}"
+                               placeholder="https://instagram.com/yourhandle"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="linkedinUrl">LinkedIn URL</label>
+                        <input type="url" id="linkedinUrl" th:field="*{linkedinUrl}"
+                               placeholder="https://linkedin.com/company/yourcompany"/>
+                    </div>
+                </div>
+
+                <!-- SEO Settings Tab -->
+                <div class="tab-pane" id="seo">
+                    <h2>SEO Settings</h2>
+
+                    <div class="form-group">
+                        <label for="metaTitle">Meta Title</label>
+                        <input type="text" id="metaTitle" th:field="*{metaTitle}"
+                               placeholder="EcoSwap - Sustainable Marketplace" maxlength="60"/>
+                        <small>Recommended: 50-60 characters</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="metaDescription">Meta Description</label>
+                        <textarea id="metaDescription" th:field="*{metaDescription}" rows="3"
+                                  placeholder="Buy and sell eco-friendly products..." maxlength="160"></textarea>
+                        <small>Recommended: 150-160 characters</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="metaKeywords">Meta Keywords</label>
+                        <input type="text" id="metaKeywords" th:field="*{metaKeywords}"
+                               placeholder="eco-friendly, sustainable, marketplace"/>
+                        <small>Comma-separated keywords</small>
+                    </div>
+                </div>
+
+                <!-- Maintenance Tab -->
+                <div class="tab-pane" id="maintenance">
+                    <h2>Maintenance Mode</h2>
+
+                    <div class="warning-box">
+                        <strong>⚠️ Warning:</strong> Enabling maintenance mode will make the site inaccessible to regular users.
+                        Only administrators will be able to access the site.
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" th:field="*{maintenanceMode}"/>
+                            <span>Enable Maintenance Mode</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maintenanceMessage">Maintenance Message</label>
+                        <textarea id="maintenanceMessage" th:field="*{maintenanceMessage}" rows="4"
+                                  placeholder="We are currently performing maintenance..."></textarea>
+                        <small>Message shown to users during maintenance</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <span>💾</span>
+                    Save Settings
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="window.location.reload()">
+                    <span>↻</span>
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </main>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Platform Impact - EcoSwap</title>
+    <link th:href="@{/css/impact.css}" rel="stylesheet"/>
+</head>
+<body>
+    <main layout:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">🌍 Platform Environmental Impact</h1>
+                <p class="page-description">Track the collective impact of the entire EcoSwap community</p>
+            </div>
+        </div>
+
+        <!-- Platform Impact Hero -->
+        <div class="hero-impact">
+            <div class="hero-content">
+                <h2>Together, We've Made a Difference</h2>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-icon">🌍</div>
+                        <div class="hero-value">
+                            <span th:text="${#numbers.formatDecimal(totalCo2, 1, 1)}">0</span>
+                            <small>kg CO₂ Saved</small>
+                        </div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-icon">♻️</div>
+                        <div class="hero-value">
+                            <span th:text="${#numbers.formatDecimal(totalPlastic / 1000, 1, 2)}">0</span>
+                            <small>kg Plastic Prevented</small>
+                        </div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-icon">👥</div>
+                        <div class="hero-value">
+                            <span th:text="${totalCustomers}">0</span>
+                            <small>Eco-Conscious Users</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Platform Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-box highlight">
+                <div class="stat-icon">🌲</div>
+                <div class="stat-content">
+                    <span class="stat-value" th:text="${#numbers.formatDecimal(totalCo2 / 21, 1, 0)}">0</span>
+                    <span class="stat-label">Trees Equivalent</span>
+                    <small>Annual CO₂ absorption</small>
+                </div>
+            </div>
+            <div class="stat-box highlight">
+                <div class="stat-icon">🚗</div>
+                <div class="stat-content">
+                    <span class="stat-value" th:text="${#numbers.formatDecimal(totalCo2 / 0.4, 1, 0)}">0</span>
+                    <span class="stat-label">Car Miles Offset</span>
+                    <small>In CO₂ emissions</small>
+                </div>
+            </div>
+            <div class="stat-box highlight">
+                <div class="stat-icon">🏭</div>
+                <div class="stat-content">
+                    <span class="stat-value" th:text="${#numbers.formatDecimal(totalPlastic / 28, 1, 0)}">0</span>
+                    <span class="stat-label">Plastic Bottles</span>
+                    <small>Prevented from waste</small>
+                </div>
+            </div>
+            <div class="stat-box highlight">
+                <div class="stat-icon">💧</div>
+                <div class="stat-content">
+                    <span class="stat-value" th:text="${#numbers.formatDecimal((totalPlastic / 1000) * 1000, 1, 0)}">0</span>
+                    <span class="stat-label">Liters Water</span>
+                    <small>Conserved</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Platform Metrics -->
+        <div class="platform-metrics">
+            <div class="metrics-card">
+                <h3>📊 Platform Statistics</h3>
+                <div class="metrics-list">
+                    <div class="metric-row">
+                        <span class="metric-label">Total Products</span>
+                        <span class="metric-value" th:text="${totalProducts}">0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Total Items Sold</span>
+                        <span class="metric-value" th:text="${totalItemsSold}">0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Completed Orders</span>
+                        <span class="metric-value" th:text="${totalOrders}">0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Active Customers</span>
+                        <span class="metric-value" th:text="${totalCustomers}">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metrics-card">
+                <h3>📈 Growth Metrics</h3>
+                <div class="metrics-list">
+                    <div class="metric-row">
+                        <span class="metric-label">CO₂ Saved (30 days)</span>
+                        <span class="metric-value success" th:text="${#numbers.formatDecimal(monthlyCo2, 1, 1)} + ' kg'">0 kg</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Avg per Order</span>
+                        <span class="metric-value" th:text="${totalOrders > 0 ? #numbers.formatDecimal(totalCo2 / totalOrders, 1, 2) : '0'} + ' kg'">0 kg</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Potential Impact</span>
+                        <span class="metric-value" th:text="${#numbers.formatDecimal(potentialCo2, 1, 1)} + ' kg'">0 kg</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Impact Efficiency</span>
+                        <span class="metric-value" th:text="${potentialCo2 > 0 ? #numbers.formatDecimal(totalCo2 / potentialCo2 * 100, 1, 0) : '0'} + '%'">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Impact Comparison Chart -->
+        <div class="impact-chart-section">
+            <h3>Impact Visualization</h3>
+            <div class="impact-bars">
+                <div class="impact-bar-item">
+                    <div class="bar-label">
+                        <span>Actual Impact</span>
+                        <span class="bar-value" th:text="${#numbers.formatDecimal(totalCo2, 1, 1)} + ' kg CO₂'">0 kg</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill success" th:style="'width: ' + ${(totalCo2 / (potentialCo2 > 0 ? potentialCo2 : 1) * 100)} + '%;'"></div>
+                    </div>
+                </div>
+                <div class="impact-bar-item">
+                    <div class="bar-label">
+                        <span>Potential Impact</span>
+                        <span class="bar-value" th:text="${#numbers.formatDecimal(potentialCo2, 1, 1)} + ' kg CO₂'">0 kg</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill info" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-World Comparisons -->
+        <div class="comparisons-section">
+            <h3>🌐 Real-World Impact Comparisons</h3>
+            <div class="comparisons-grid">
+                <div class="comparison-card">
+                    <div class="comparison-icon">✈️</div>
+                    <h4>Air Travel</h4>
+                    <div class="comparison-value">
+                        <span th:text="${#numbers.formatDecimal(totalCo2 / 90, 1, 1)}">0</span>
+                        <small>flights saved</small>
+                    </div>
+                    <p>London to Paris (90kg CO₂ each)</p>
+                </div>
+
+                <div class="comparison-card">
+                    <div class="comparison-icon">🏠</div>
+                    <h4>Home Energy</h4>
+                    <div class="comparison-value">
+                        <span th:text="${#numbers.formatDecimal(totalCo2 / 400, 1, 1)}">0</span>
+                        <small>months of electricity</small>
+                    </div>
+                    <p>For an average household</p>
+                </div>
+
+                <div class="comparison-card">
+                    <div class="comparison-icon">🌊</div>
+                    <h4>Ocean Cleanup</h4>
+                    <div class="comparison-value">
+                        <span th:text="${#numbers.formatDecimal(totalPlastic / 8000, 1, 2)}">0</span>
+                        <small>kg removed</small>
+                    </div>
+                    <p>From potential ocean pollution</p>
+                </div>
+
+                <div class="comparison-card">
+                    <div class="comparison-icon">🌳</div>
+                    <h4>Forest Conservation</h4>
+                    <div class="comparison-value">
+                        <span th:text="${#numbers.formatDecimal((totalPlastic / 1000) * 1000 / 50, 1, 0)}">0</span>
+                        <small>trees worth</small>
+                    </div>
+                    <p>Of water conservation</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Platform Goals -->
+        <div class="goals-section">
+            <h3>🎯 Platform Goals</h3>
+            <div class="goals-grid">
+                <div class="goal-card large">
+                    <h4>Annual CO₂ Goal: 10,000 kg</h4>
+                    <div class="goal-progress-bar">
+                        <div class="progress-bar large">
+                            <div class="progress-fill" th:style="'width: ' + ${(totalCo2 / 10000.0 * 100)} + '%;'">
+                                <span class="progress-label" th:text="${#numbers.formatDecimal(totalCo2 / 10000.0 * 100, 1, 1)} + '%'">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="goal-stats">
+                        <div class="goal-stat">
+                            <span class="label">Achieved</span>
+                            <span class="value" th:text="${#numbers.formatDecimal(totalCo2, 1, 1)} + ' kg'">0 kg</span>
+                        </div>
+                        <div class="goal-stat">
+                            <span class="label">Remaining</span>
+                            <span class="value" th:text="${#numbers.formatDecimal(10000 - totalCo2, 1, 1)} + ' kg'">10000 kg</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="goal-card large">
+                    <h4>User Growth: 10,000 Members</h4>
+                    <div class="goal-progress-bar">
+                        <div class="progress-bar large">
+                            <div class="progress-fill" th:style="'width: ' + ${(totalCustomers / 10000.0 * 100)} + '%;'">
+                                <span class="progress-label" th:text="${#numbers.formatDecimal(totalCustomers / 10000.0 * 100, 1, 1)} + '%'">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="goal-stats">
+                        <div class="goal-stat">
+                            <span class="label">Members</span>
+                            <span class="value" th:text="${totalCustomers}">0</span>
+                        </div>
+                        <div class="goal-stat">
+                            <span class="label">To Goal</span>
+                            <span class="value" th:text="${10000 - totalCustomers}">10000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="cta-section">
+            <div class="cta-content">
+                <h3>📢 Spread the Impact</h3>
+                <p>Share these amazing statistics with the community to inspire more sustainable choices!</p>
+                <div class="cta-buttons">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-download"></i> Download Report
+                    </button>
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-share"></i> Share Impact
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div layout:fragment="scripts">
+        <script th:src="@{/js/impact.js}" defer></script>
+    </div>
+</body>
+</html>

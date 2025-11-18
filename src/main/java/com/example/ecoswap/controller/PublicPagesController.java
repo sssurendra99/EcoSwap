@@ -1,11 +1,17 @@
 package com.example.ecoswap.controller;
 
 import com.example.ecoswap.model.Product;
+import com.example.ecoswap.model.Review;
+import com.example.ecoswap.model.User;
 import com.example.ecoswap.services.CategoryService;
 import com.example.ecoswap.services.ProductService;
+import com.example.ecoswap.services.ReviewService;
+import com.example.ecoswap.services.UserService;
+import com.example.ecoswap.services.WishlistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +29,15 @@ public class PublicPagesController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private ReviewService reviewService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private WishlistService wishlistService;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -71,7 +86,7 @@ public class PublicPagesController {
     }
 
     @GetMapping("/product/{id}")
-    public String productDetail(@PathVariable Long id, Model model) {
+    public String productDetail(@PathVariable Long id, Model model, Authentication authentication) {
         Product product = productService.getProductById(id)
             .orElseThrow(() -> new RuntimeException("Product not found"));
 
@@ -84,6 +99,27 @@ public class PublicPagesController {
         ).getContent();
 
         model.addAttribute("relatedProducts", relatedProducts);
+
+        // Get product reviews
+        List<Review> reviews = reviewService.getProductReviews(id);
+        model.addAttribute("reviews", reviews);
+        model.addAttribute("reviewCount", reviews.size());
+
+        // Check if user has already reviewed this product and wishlist status
+        if (authentication != null && authentication.isAuthenticated()) {
+            String email = authentication.getName();
+            User user = userService.getUserByEmail(email).orElse(null);
+            if (user != null) {
+                boolean hasReviewed = reviewService.hasCustomerReviewedProduct(user.getId(), id);
+                boolean isInWishlist = wishlistService.isInWishlist(user.getId(), id);
+                model.addAttribute("hasReviewed", hasReviewed);
+                model.addAttribute("isInWishlist", isInWishlist);
+                model.addAttribute("currentUser", user);
+            }
+        } else {
+            model.addAttribute("hasReviewed", false);
+            model.addAttribute("isInWishlist", false);
+        }
 
         return "public/product-detail";
     }

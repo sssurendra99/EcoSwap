@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/dashboard_layout}">
+      layout:decorate="~{layout/checkout_layout}">
 <head>
     <title>Shopping Cart - EcoSwap</title>
     <link th:href="@{/css/cart.css}" rel="stylesheet"/>
@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<div layout:fragment="content" class="cart-page">
+<div layout:fragment="content" class="cart-page" th:with="showProgress=${true}, currentStep='cart'">
     <!-- Flash Messages -->
     <div th:if="${successMessage}" class="flash-message success">
         <i class="fas fa-check-circle"></i>

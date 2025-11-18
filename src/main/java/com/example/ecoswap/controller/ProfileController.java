@@ -37,52 +37,43 @@ public class ProfileController {
     private SellerProfileRepository sellerProfileRepository;
 
     /**
-     * View profile
+     * View profile - Redirects to role-specific settings page
      */
     @GetMapping
-    public String viewProfile(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String viewProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         User user = userDetails.getUser();
 
-        model.addAttribute("user", user);
-        model.addAttribute("pageTitle", "My Profile");
-        model.addAttribute("userName", user.getFullName());
-        model.addAttribute("userRole", user.getRole().getDisplayName());
-
-        // Add seller profile if user is a seller
-        if (user.getRole() == Role.SELLER) {
-            Optional<SellerProfile> sellerProfile = sellerProfileRepository.findByUserId(user.getId());
-            model.addAttribute("sellerProfile", sellerProfile.orElse(null));
+        // Redirect to role-specific settings page which includes profile section
+        switch (user.getRole()) {
+            case ADMIN:
+                return "redirect:/admin/settings";
+            case SELLER:
+                return "redirect:/seller/settings";
+            case CUSTOMER:
+                return "redirect:/customer/settings";
+            default:
+                return "redirect:/";
         }
-
-        // Add order history for customers
-        if (user.getRole() == Role.CUSTOMER) {
-            Page<Order> orders = orderService.getOrdersByCustomer(user.getId(), 0, 5);
-            model.addAttribute("recentOrders", orders.getContent());
-            model.addAttribute("totalOrders", orders.getTotalElements());
-        }
-
-        return "profile/view";
     }
 
     /**
-     * Show edit profile form
+     * Show edit profile form - Redirects to role-specific settings page
      */
     @GetMapping("/edit")
-    public String showEditForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String showEditForm(@AuthenticationPrincipal CustomUserDetails userDetails) {
         User user = userDetails.getUser();
 
-        model.addAttribute("user", user);
-        model.addAttribute("pageTitle", "Edit Profile");
-        model.addAttribute("userName", user.getFullName());
-        model.addAttribute("userRole", user.getRole().getDisplayName());
-
-        // Add seller profile if user is a seller
-        if (user.getRole() == Role.SELLER) {
-            Optional<SellerProfile> sellerProfile = sellerProfileRepository.findByUserId(user.getId());
-            model.addAttribute("sellerProfile", sellerProfile.orElse(new SellerProfile()));
+        // Redirect to role-specific settings page
+        switch (user.getRole()) {
+            case ADMIN:
+                return "redirect:/admin/settings";
+            case SELLER:
+                return "redirect:/seller/settings";
+            case CUSTOMER:
+                return "redirect:/customer/settings";
+            default:
+                return "redirect:/";
         }
-
-        return "profile/edit";
     }
 
     /**
@@ -112,7 +103,17 @@ public class ProfileController {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating profile: " + e.getMessage());
         }
 
-        return "redirect:/profile";
+        // Redirect to role-specific settings page
+        switch (user.getRole()) {
+            case ADMIN:
+                return "redirect:/admin/settings";
+            case SELLER:
+                return "redirect:/seller/settings";
+            case CUSTOMER:
+                return "redirect:/customer/settings";
+            default:
+                return "redirect:/";
+        }
     }
 
     /**
@@ -133,7 +134,7 @@ public class ProfileController {
 
         if (user.getRole() != Role.SELLER) {
             redirectAttributes.addFlashAttribute("errorMessage", "Only sellers can update business profile");
-            return "redirect:/profile";
+            return "redirect:/seller/settings";
         }
 
         try {
@@ -162,21 +163,27 @@ public class ProfileController {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating business profile: " + e.getMessage());
         }
 
-        return "redirect:/profile";
+        return "redirect:/seller/settings";
     }
 
     /**
-     * Show change password form
+     * Show change password form - Redirects to role-specific settings page
      */
     @GetMapping("/change-password")
-    public String showChangePasswordForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String showChangePasswordForm(@AuthenticationPrincipal CustomUserDetails userDetails) {
         User user = userDetails.getUser();
 
-        model.addAttribute("pageTitle", "Change Password");
-        model.addAttribute("userName", user.getFullName());
-        model.addAttribute("userRole", user.getRole().getDisplayName());
-
-        return "profile/change-password";
+        // Redirect to role-specific settings page where password change should be available
+        switch (user.getRole()) {
+            case ADMIN:
+                return "redirect:/admin/settings";
+            case SELLER:
+                return "redirect:/seller/settings";
+            case CUSTOMER:
+                return "redirect:/customer/settings";
+            default:
+                return "redirect:/";
+        }
     }
 
     /**
@@ -192,23 +199,25 @@ public class ProfileController {
     ) {
         User user = userDetails.getUser();
 
+        String settingsUrl = getSettingsUrlForRole(user.getRole());
+
         try {
             // Verify current password
             if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Current password is incorrect");
-                return "redirect:/profile/change-password";
+                return "redirect:" + settingsUrl;
             }
 
             // Verify new passwords match
             if (!newPassword.equals(confirmPassword)) {
                 redirectAttributes.addFlashAttribute("errorMessage", "New passwords do not match");
-                return "redirect:/profile/change-password";
+                return "redirect:" + settingsUrl;
             }
 
             // Verify password strength
             if (newPassword.length() < 6) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Password must be at least 6 characters long");
-                return "redirect:/profile/change-password";
+                return "redirect:" + settingsUrl;
             }
 
             // Update password
@@ -216,36 +225,36 @@ public class ProfileController {
             userService.updateUser(user);
 
             redirectAttributes.addFlashAttribute("successMessage", "Password changed successfully!");
-            return "redirect:/profile";
+            return "redirect:" + settingsUrl;
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error changing password: " + e.getMessage());
-            return "redirect:/profile/change-password";
+            return "redirect:" + settingsUrl;
         }
     }
 
     /**
-     * View order history (for customers)
+     * Helper method to get settings URL for role
+     */
+    private String getSettingsUrlForRole(Role role) {
+        switch (role) {
+            case ADMIN:
+                return "/admin/settings";
+            case SELLER:
+                return "/seller/settings";
+            case CUSTOMER:
+                return "/customer/settings";
+            default:
+                return "/";
+        }
+    }
+
+    /**
+     * View order history (for customers) - Redirects to dashboard orders
      */
     @GetMapping("/orders")
-    public String viewOrderHistory(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            Model model
-    ) {
-        User user = userDetails.getUser();
-
-        Page<Order> orders = orderService.getOrdersByCustomer(user.getId(), page, size);
-
-        model.addAttribute("orders", orders.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", orders.getTotalPages());
-        model.addAttribute("totalItems", orders.getTotalElements());
-        model.addAttribute("pageTitle", "My Orders");
-        model.addAttribute("userName", user.getFullName());
-        model.addAttribute("userRole", user.getRole().getDisplayName());
-
-        return "profile/orders";
+    public String viewOrderHistory(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        // Redirect to dashboard orders page
+        return "redirect:/dashboard/orders";
     }
 }

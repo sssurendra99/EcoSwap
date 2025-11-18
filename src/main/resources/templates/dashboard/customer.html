@@ -1,132 +1,400 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
+      layout:decorate="~{layout/dashboard_layout}">
 <head>
-    <title>Customer Dashboard</title>
+    <title>Customer Dashboard - EcoSwap</title>
+    <link th:href="@{/css/sellerpage.css}" rel="stylesheet"/>
 </head>
 <body>
 
 <div layout:fragment="content">
-    <div class="container-fluid">
-        <h3 class="mb-3">Welcome to EcoSwap Dashboard</h3>
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Welcome Back!</h1>
+        <p class="subtitle">Your sustainable shopping journey at a glance</p>
+    </div>
 
-        <!-- Small Boxes -->
-        <div class="row">
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-info">
-                    <div class="inner">
-                        <h3>150</h3>
-                        <p>Products</p>
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <!-- Total Orders Card -->
+        <div class="stat-card orders">
+            <div class="stat-icon">
+                <i class="fas fa-shopping-bag"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Orders</h3>
+                <p class="stat-value" th:text="${totalOrders ?: 0}">0</p>
+                <span class="stat-change">
+                    <i class="fas fa-check-circle"></i> All time purchases
+                </span>
+            </div>
+        </div>
+
+        <!-- Active Orders Card -->
+        <div class="stat-card products">
+            <div class="stat-icon">
+                <i class="fas fa-truck"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Active Orders</h3>
+                <p class="stat-value" th:text="${activeOrders ?: 0}">0</p>
+                <span class="stat-change" th:classappend="${activeOrders > 0 ? 'positive' : ''}">
+                    <i class="fas fa-clock"></i> In progress
+                </span>
+            </div>
+        </div>
+
+        <!-- Wishlist Card -->
+        <div class="stat-card users">
+            <div class="stat-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Wishlist Items</h3>
+                <p class="stat-value" th:text="${wishlistItems ?: 0}">0</p>
+                <span class="stat-change">
+                    <i class="fas fa-star"></i> Saved for later
+                </span>
+            </div>
+        </div>
+
+        <!-- CO2 Saved Card -->
+        <div class="stat-card revenue">
+            <div class="stat-icon">
+                <i class="fas fa-leaf"></i>
+            </div>
+            <div class="stat-content">
+                <h3>CO₂ Saved</h3>
+                <p class="stat-value"><span th:text="${#numbers.formatDecimal(co2Saved ?: 0, 1, 2)}">0.00</span> <span style="font-size: 1rem;">kg</span></p>
+                <span class="stat-change positive">
+                    <i class="fas fa-check-circle"></i> Making impact!
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Environmental Impact Section -->
+    <div class="impact-section">
+        <div class="section-header">
+            <h2>🌿 Your Environmental Impact</h2>
+            <span class="eco-badge">Eco Warrior</span>
+        </div>
+        <div class="impact-grid">
+            <div class="impact-card">
+                <div class="impact-icon green">
+                    <i class="fas fa-globe-americas"></i>
+                </div>
+                <h3>Carbon Footprint</h3>
+                <p class="impact-value"><span th:text="${#numbers.formatDecimal(co2Saved ?: 0, 1, 2)}">0.00</span> kg</p>
+                <p class="impact-desc">CO₂ emissions saved through your purchases</p>
+            </div>
+            <div class="impact-card">
+                <div class="impact-icon blue">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <h3>Items Purchased</h3>
+                <p class="impact-value" th:text="${itemsPurchased ?: 0}">0</p>
+                <p class="impact-desc">Sustainable products bought</p>
+            </div>
+            <div class="impact-card">
+                <div class="impact-icon emerald">
+                    <i class="fas fa-recycle"></i>
+                </div>
+                <h3>Plastic Saved</h3>
+                <p class="impact-value"><span th:text="${#numbers.formatDecimal(plasticSaved ?: 0, 1, 2)}">0.00</span> kg</p>
+                <p class="impact-desc">Plastic waste prevented</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Data Section -->
+    <div class="charts-section">
+        <!-- Order History Chart -->
+        <div class="chart-card large">
+            <div class="chart-header">
+                <h2>Order History</h2>
+                <select class="period-selector">
+                    <option>Last 6 Months</option>
+                    <option>Last Year</option>
+                    <option>All Time</option>
+                </select>
+            </div>
+            <div class="chart-body" style="position: relative; height: 300px;">
+                <canvas id="orderHistoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="chart-card small">
+            <div class="chart-header">
+                <h2>Shopping Stats</h2>
+            </div>
+            <div class="quick-stats-list">
+                <div class="quick-stat-item">
+                    <div class="quick-stat-info">
+                        <i class="fas fa-dollar-sign" style="color: #1dbf73;"></i>
+                        <div>
+                            <p class="stat-label">Total Spent</p>
+                            <p class="stat-number">$<span th:text="${#numbers.formatDecimal(totalSpent ?: 0, 1, 2)}">0.00</span></p>
+                        </div>
                     </div>
-                    <div class="icon">
-                        <i class="fas fa-box"></i>
+                </div>
+                <div class="quick-stat-item">
+                    <div class="quick-stat-info">
+                        <i class="fas fa-chart-line" style="color: #3b82f6;"></i>
+                        <div>
+                            <p class="stat-label">Avg. Order Value</p>
+                            <p class="stat-number">$<span th:text="${#numbers.formatDecimal(avgOrderValue ?: 0, 1, 2)}">0.00</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="quick-stat-item">
+                    <div class="quick-stat-info">
+                        <i class="fas fa-calendar" style="color: #f59e0b;"></i>
+                        <div>
+                            <p class="stat-label">Member Since</p>
+                            <p class="stat-number" th:text="${#temporals.format(memberSince, 'MMM yyyy')}">Jan 2024</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="quick-stat-item">
+                    <div class="quick-stat-info">
+                        <i class="fas fa-star" style="color: #ef4444;"></i>
+                        <div>
+                            <p class="stat-label">Loyalty Points</p>
+                            <p class="stat-number" th:text="${loyaltyPoints ?: 0}">0</p>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-success">
-                    <div class="inner">
-                        <h3>53</h3>
-                        <p>Users</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                </div>
+    <!-- Data Cards Section -->
+    <div class="data-cards-section">
+        <!-- Recent Orders -->
+        <div class="data-card">
+            <div class="data-card-header">
+                <h3><i class="fas fa-shopping-bag"></i> Recent Orders</h3>
+                <a th:href="@{/dashboard/orders}" class="view-all-link">View All →</a>
             </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-warning">
-                    <div class="inner">
-                        <h3>120</h3>
-                        <p>Orders</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
+            <div class="data-card-body">
+                <div th:if="${recentOrders == null || recentOrders.isEmpty()}" style="text-align: center; padding: 30px; color: #6b7280;">
+                    <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                    <p>No orders yet</p>
+                    <a th:href="@{/shop}" class="view-all-link" style="margin-top: 10px; display: inline-block;">Start Shopping →</a>
                 </div>
-            </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-danger">
-                    <div class="inner">
-                        <h3>35</h3>
-                        <p>CO₂ Saved</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-leaf"></i>
+                <div th:if="${recentOrders != null && !recentOrders.isEmpty()}" class="user-list">
+                    <div class="user-item" th:each="order, iterStat : ${recentOrders}" th:if="${iterStat.index < 3}">
+                        <div class="user-avatar" style="background: #1dbf73; color: white; display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 50%; font-weight: bold;">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="user-info">
+                            <h4 th:text="${order.orderNumber}">ORD-123</h4>
+                            <p>
+                                <span th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</span> -
+                                $<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span>
+                            </p>
+                        </div>
+                        <div class="user-badge"
+                             th:classappend="${order.status.name() == 'PENDING' ? 'warning' : (order.status.name() == 'DELIVERED' ? 'success' : '')}">
+                            <span th:text="${order.status.displayName}">Pending</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Cards -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Recent Products</h3>
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>EcoBag - 20 units sold</li>
-                            <li>Reusable Bottle - 35 units sold</li>
-                            <li>Second-hand Laptop - 5 units sold</li>
-                        </ul>
-                    </div>
-                </div>
+        <!-- Wishlist Items -->
+        <div class="data-card">
+            <div class="data-card-header">
+                <h3><i class="fas fa-heart"></i> Wishlist</h3>
+                <a th:href="@{/customer/wishlist}" class="view-all-link">View All →</a>
             </div>
-
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Top Users</h3>
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>John Doe - 25 purchases</li>
-                            <li>Jane Smith - 18 purchases</li>
-                        </ul>
-                    </div>
+            <div class="data-card-body">
+                <div th:if="${wishlistProducts == null || wishlistProducts.isEmpty()}" style="text-align: center; padding: 30px; color: #6b7280;">
+                    <i class="fas fa-heart" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                    <p>No items in wishlist</p>
+                    <a th:href="@{/shop}" class="view-all-link" style="margin-top: 10px; display: inline-block;">Browse Products →</a>
                 </div>
-            </div>
-        </div>
-
-        <!-- Chart -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Monthly Transactions</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="transactionsChart" style="height:250px;"></canvas>
+                <div th:if="${wishlistProducts != null && !wishlistProducts.isEmpty()}" class="product-list">
+                    <div class="product-item" th:each="product, iterStat : ${wishlistProducts}" th:if="${iterStat.index < 3}">
+                        <div class="product-info">
+                            <div class="product-icon eco">
+                                <i class="fas fa-leaf"></i>
+                            </div>
+                            <div class="product-details">
+                                <h4 th:text="${product.name}">Product Name</h4>
+                                <p>$<span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span></p>
+                            </div>
+                        </div>
+                        <div class="product-badge success">
+                            <i class="fas fa-check-circle"></i>
+                            <span th:if="${product.stock > 0}">In Stock</span>
+                            <span th:if="${product.stock == 0}">Out of Stock</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="actions-grid">
+            <a th:href="@{/shop}" class="action-card">
+                <div class="action-icon">🛍️</div>
+                <h3>Browse Shop</h3>
+                <p>Discover sustainable products</p>
+            </a>
+            <a th:href="@{/dashboard/orders}" class="action-card">
+                <div class="action-icon">📦</div>
+                <h3>My Orders</h3>
+                <p>Track your purchases</p>
+            </a>
+            <a th:href="@{/customer/wishlist}" class="action-card">
+                <div class="action-icon">❤️</div>
+                <h3>My Wishlist</h3>
+                <p>View saved items</p>
+            </a>
+            <a th:href="@{/customer/profile}" class="action-card">
+                <div class="action-icon">👤</div>
+                <h3>My Profile</h3>
+                <p>Update your information</p>
+            </a>
+        </div>
     </div>
 </div>
 
-<script th:src="@{/adminlte/plugins/chart.js/Chart.min.js}"></script>
-<script th:inline="javascript">
-    const ctx = document.getElementById('transactionsChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Jan','Feb','Mar','Apr','May'],
-            datasets: [{
-                label: 'Orders',
-                data: [10, 20, 15, 25, 30],
-                backgroundColor: 'rgba(54, 162, 235, 0.6)'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
+<!-- Chart.js Script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Customer Dashboard: DOM loaded, initializing chart...');
+
+        // Check if Chart.js is loaded
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js not loaded!');
+            document.getElementById('orderHistoryChart').parentElement.innerHTML =
+                '<div style="text-align: center; padding: 50px; color: #999;">Chart library failed to load. Please refresh the page.</div>';
+            return;
+        }
+
+        // Order History Chart
+        const ctx = document.getElementById('orderHistoryChart');
+
+        if (!ctx) {
+            console.error('Canvas element not found');
+            return;
+        }
+
+        console.log('Creating order history chart...');
+
+        try {
+            const myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+                    datasets: [{
+                        label: 'Orders Placed',
+                        data: [2, 4, 3, 5, 7, 6],
+                        backgroundColor: 'rgba(29, 191, 115, 0.1)',
+                        borderColor: '#1dbf73',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#1dbf73',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        pointHoverBackgroundColor: '#17a05d',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                                    weight: '500'
+                                },
+                                color: '#333'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + ' orders';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    size: 12
+                                },
+                                padding: 10,
+                                stepSize: 1
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    size: 12
+                                },
+                                padding: 10
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+
+            console.log('✅ Order history chart initialized successfully:', myChart);
+        } catch (error) {
+            console.error('❌ Error creating chart:', error);
+            ctx.parentElement.innerHTML =
+                '<div style="text-align: center; padding: 50px; color: #ef4444;">Error loading chart. Please check console.</div>';
         }
     });
 </script>

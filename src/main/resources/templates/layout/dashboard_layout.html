@@ -24,58 +24,107 @@
 
             <nav class="sidebar-nav">
                 <ul class="nav-list">
+                    <!-- Dashboard - All Roles -->
                     <li class="nav-item active">
-                        <a th:href="@{/seller/dashboard}" class="nav-link">
+                        <a th:href="@{${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/dashboard' : (#authorization.expression('hasRole(''SELLER'')') ? '/seller/dashboard' : '/customer/dashboard')}}" class="nav-link">
                             <i class="fas fa-home"></i>
                             <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
-                    <li class="nav-item">
+
+                    <!-- Products - Admin & Seller -->
+                    <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'SELLER')">
                         <a th:href="@{/dashboard/products}" class="nav-link">
                             <i class="fas fa-box"></i>
-                            <span class="nav-text">Products</span>
+                            <span class="nav-text" sec:authorize="hasRole('ADMIN')">All Products</span>
+                            <span class="nav-text" sec:authorize="hasRole('SELLER')">My Products</span>
                             <span class="badge" th:text="${productCount}">24</span>
                         </a>
                     </li>
+
+                    <!-- Orders - All Roles -->
                     <li class="nav-item">
                         <a th:href="@{/dashboard/orders}" class="nav-link">
                             <i class="fas fa-shopping-cart"></i>
-                            <span class="nav-text">Orders</span>
-                            <span class="badge badge-warning" th:text="${pendingOrders}">5</span>
+                            <span class="nav-text" sec:authorize="hasAnyRole('ADMIN', 'SELLER')">Orders</span>
+                            <span class="nav-text" sec:authorize="hasRole('CUSTOMER')">My Orders</span>
+                            <span class="badge badge-warning" th:text="${pendingOrders}" sec:authorize="hasAnyRole('ADMIN', 'SELLER')">5</span>
                         </a>
                     </li>
-                    <li class="nav-item">
+
+                    <!-- Wishlist - Customer Only -->
+                    <li class="nav-item" sec:authorize="hasRole('CUSTOMER')">
+                        <a th:href="@{/customer/wishlist}" class="nav-link">
+                            <i class="fas fa-heart"></i>
+                            <span class="nav-text">My Wishlist</span>
+                        </a>
+                    </li>
+
+                    <!-- Reviews - Customer Only -->
+                    <li class="nav-item" sec:authorize="hasRole('CUSTOMER')">
+                        <a th:href="@{/customer/reviews}" class="nav-link">
+                            <i class="fas fa-star"></i>
+                            <span class="nav-text">My Reviews</span>
+                        </a>
+                    </li>
+
+                    <!-- Customers - Admin Only -->
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                         <a th:href="@{/dashboard/customers}" class="nav-link">
                             <i class="fas fa-users"></i>
                             <span class="nav-text">Customers</span>
                         </a>
                     </li>
-                    <li class="nav-item">
+
+                    <!-- Categories - Admin & Seller -->
+                    <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'SELLER')">
                         <a th:href="@{/dashboard/categories}" class="nav-link">
                             <i class="fas fa-tags"></i>
                             <span class="nav-text">Categories</span>
                         </a>
                     </li>
-                    <li class="nav-item">
+
+                    <!-- Analytics - Admin & Seller -->
+                    <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'SELLER')">
                         <a th:href="@{/dashboard/analytics}" class="nav-link">
                             <i class="fas fa-chart-line"></i>
                             <span class="nav-text">Analytics</span>
                         </a>
                     </li>
+
+                    <!-- Impact Tracker - All Roles -->
                     <li class="nav-item">
-                        <a th:href="@{/dashboard/impact}" class="nav-link">
+                        <a th:href="@{${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/impact' : (#authorization.expression('hasRole(''SELLER'')') ? '/seller/impact' : '/customer/impact')}}" class="nav-link">
                             <i class="fas fa-seedling"></i>
                             <span class="nav-text">Impact Tracker</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a th:href="@{/dashboard/reviews}" class="nav-link">
+
+                    <!-- Reviews - Seller Only -->
+                    <li class="nav-item" sec:authorize="hasRole('SELLER')">
+                        <a th:href="@{/seller/reviews}" class="nav-link">
                             <i class="fas fa-star"></i>
-                            <span class="nav-text">Reviews</span>
+                            <span class="nav-text">Product Reviews</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a th:href="@{/dashboard/settings}" class="nav-link">
+
+                    <!-- Profile & Settings - Admin -->
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{/admin/settings}" class="nav-link">
+                            <i class="fas fa-cog"></i>
+                            <span class="nav-text">Settings</span>
+                        </a>
+                    </li>
+                    <!-- Profile & Settings - Seller -->
+                    <li class="nav-item" sec:authorize="hasRole('SELLER')">
+                        <a th:href="@{/seller/settings}" class="nav-link">
+                            <i class="fas fa-cog"></i>
+                            <span class="nav-text">Settings</span>
+                        </a>
+                    </li>
+                    <!-- Profile & Settings - Customer -->
+                    <li class="nav-item" sec:authorize="hasRole('CUSTOMER')">
+                        <a th:href="@{/customer/settings}" class="nav-link">
                             <i class="fas fa-cog"></i>
                             <span class="nav-text">Settings</span>
                         </a>
@@ -129,45 +178,38 @@
 
                     <!-- Notifications -->
                     <div class="notification-dropdown">
-                        <button class="header-btn notification-btn">
+                        <button class="header-btn notification-btn" id="notificationBtn">
                             <i class="fas fa-bell"></i>
-                            <span class="notification-badge" th:text="${notificationCount}">3</span>
+                            <span class="notification-badge" th:text="${notificationCount}" th:if="${notificationCount > 0}">0</span>
                         </button>
-                        <div class="notification-menu">
+                        <div class="notification-menu" id="notificationMenu">
                             <div class="notification-header">
                                 <h3>Notifications</h3>
-                                <a href="#" class="mark-read">Mark all as read</a>
+                                <a href="#" class="mark-read" id="markAllRead">Mark all as read</a>
                             </div>
-                            <div class="notification-list">
-                                <a href="#" class="notification-item unread">
-                                    <div class="notification-icon success">
-                                        <i class="fas fa-shopping-cart"></i>
+                            <div class="notification-list" id="notificationList">
+                                <div th:if="${#lists.isEmpty(recentNotifications)}" class="empty-notifications">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <p>No notifications yet</p>
+                                </div>
+                                <a th:each="notification : ${recentNotifications}"
+                                   th:href="${notification.link != null ? notification.link : '#'}"
+                                   th:classappend="${!notification.isRead} ? 'unread' : ''"
+                                   th:data-notification-id="${notification.id}"
+                                   class="notification-item">
+                                    <div th:class="'notification-icon ' + ${notification.type.toLowerCase()}">
+                                        <i th:class="${notification.icon != null ? notification.icon : 'fas fa-bell'}"></i>
                                     </div>
                                     <div class="notification-content">
-                                        <p><strong>New Order #ECO-234</strong></p>
-                                        <small>2 minutes ago</small>
-                                    </div>
-                                </a>
-                                <a href="#" class="notification-item">
-                                    <div class="notification-icon info">
-                                        <i class="fas fa-star"></i>
-                                    </div>
-                                    <div class="notification-content">
-                                        <p>New review on Bamboo Toothbrush</p>
-                                        <small>1 hour ago</small>
-                                    </div>
-                                </a>
-                                <a href="#" class="notification-item">
-                                    <div class="notification-icon warning">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                    </div>
-                                    <div class="notification-content">
-                                        <p>Low stock alert: 3 products</p>
-                                        <small>3 hours ago</small>
+                                        <p><strong th:text="${notification.title}">Title</strong></p>
+                                        <small th:text="${notification.message}">Message</small>
+                                        <small class="notification-time" th:text="${#temporals.format(notification.createdAt, 'MMM dd, HH:mm')}">Time</small>
                                     </div>
                                 </a>
                             </div>
-                            <a href="#" class="notification-footer">View all notifications</a>
+                            <div th:if="${!#lists.isEmpty(recentNotifications)}" class="notification-footer">
+                                <span class="view-all">Showing recent notifications</span>
+                            </div>
                         </div>
                     </div>
 
@@ -184,18 +226,34 @@
                             <i class="fas fa-chevron-down"></i>
                         </button>
                         <div class="user-menu">
-                            <a th:href="@{/dashboard/profile}" class="user-menu-item">
-                                <i class="fas fa-user"></i>
-                                <span>My Profile</span>
-                            </a>
-                            <a th:href="@{/dashboard/settings}" class="user-menu-item">
+                            <!-- Profile & Settings - Role Based -->
+                            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/settings}" class="user-menu-item">
                                 <i class="fas fa-cog"></i>
                                 <span>Settings</span>
                             </a>
-                            <a th:href="@{/dashboard/help}" class="user-menu-item">
-                                <i class="fas fa-question-circle"></i>
-                                <span>Help & Support</span>
+                            <a sec:authorize="hasRole('SELLER')" th:href="@{/seller/settings}" class="user-menu-item">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
                             </a>
+                            <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/customer/settings}" class="user-menu-item">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+
+                            <!-- Dashboard Link -->
+                            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/dashboard}" class="user-menu-item">
+                                <i class="fas fa-home"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <a sec:authorize="hasRole('SELLER')" th:href="@{/seller/dashboard}" class="user-menu-item">
+                                <i class="fas fa-home"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/customer/dashboard}" class="user-menu-item">
+                                <i class="fas fa-home"></i>
+                                <span>Dashboard</span>
+                            </a>
+
                             <div class="user-menu-divider"></div>
                             <form th:action="@{/logout}" method="post" style="margin: 0;">
                                 <button type="submit" class="user-menu-item logout-btn">

@@ -269,6 +269,19 @@
     color: #f59e0b;
 }
 
+.product-badge.danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.product-icon.warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+}
+
+.product-icon.danger {
+    background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+}
+
 /* User List */
 .user-list {
     display: flex;
@@ -342,15 +355,99 @@
     color: #333;
 }
 
+.user-badge.success {
+    background: rgba(29, 191, 115, 0.1);
+    color: #1dbf73;
+}
+
+.user-badge.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+/* Quick Actions Section */
+.quick-actions {
+    margin-bottom: 30px;
+}
+
+.quick-actions h2 {
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.action-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px 25px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(29, 191, 115, 0.15);
+    border-color: #1dbf73;
+}
+
+.action-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    display: inline-block;
+    filter: grayscale(0.3);
+    transition: all 0.3s ease;
+}
+
+.action-card:hover .action-icon {
+    filter: grayscale(0);
+    transform: scale(1.1);
+}
+
+.action-card h3 {
+    color: #333;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.action-card p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     .charts-section {
         grid-template-columns: 1fr;
     }
+
+    .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
     .data-cards-section {
+        grid-template-columns: 1fr;
+    }
+
+    .actions-grid {
         grid-template-columns: 1fr;
     }
 }

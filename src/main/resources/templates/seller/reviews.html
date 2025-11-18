@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Reviews - EcoSwap</title>
+    <link th:href="@{/css/reviews.css}" rel="stylesheet"/>
+</head>
+<body>
+    <main layout:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Product Reviews</h1>
+                <p class="page-description">Manage and respond to customer reviews</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-card">
+                    <i class="fas fa-star"></i>
+                    <div>
+                        <span class="stat-value" th:text="${totalReviews}">0</span>
+                        <span class="stat-label">Total Reviews</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <span class="stat-value" th:text="${approvedReviews}">0</span>
+                        <span class="stat-label">Approved</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <span class="stat-value" th:text="${pendingReviews}">0</span>
+                        <span class="stat-label">Pending</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-star-half-alt"></i>
+                    <div>
+                        <span class="stat-value" th:text="${averageRating}">0.0</span>
+                        <span class="stat-label">Avg Rating</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${success}">Success message</span>
+        </div>
+        <div th:if="${error}" class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span th:text="${error}">Error message</span>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button class="tab-btn active" data-filter="all">All Reviews</button>
+            <button class="tab-btn" data-filter="approved">Approved</button>
+            <button class="tab-btn" data-filter="pending">Pending Approval</button>
+            <button class="tab-btn" data-filter="verified">Verified Purchases</button>
+        </div>
+
+        <!-- Reviews List -->
+        <div class="reviews-container">
+            <div th:if="${#lists.isEmpty(reviews)}" class="empty-state">
+                <i class="fas fa-star-half-alt"></i>
+                <h3>No Reviews Yet</h3>
+                <p>Your products haven't received any reviews yet. Encourage customers to share their feedback!</p>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(reviews)}" class="reviews-list">
+                <div th:each="review : ${reviews}"
+                     class="review-card"
+                     th:data-status="${review.approved ? 'approved' : 'pending'}"
+                     th:data-verified="${review.verified}">
+                    <div class="review-header">
+                        <div class="product-info">
+                            <img th:src="@{${review.product.image}}"
+                                 th:alt="${review.product.name}"
+                                 class="product-image">
+                            <div>
+                                <h3 class="product-name" th:text="${review.product.name}">Product Name</h3>
+                                <div class="review-meta">
+                                    <span class="customer-name">
+                                        <i class="fas fa-user"></i>
+                                        <span th:text="${review.customer.fullName}">Customer Name</span>
+                                    </span>
+                                    <span class="review-date" th:text="${#temporals.format(review.createdAt, 'MMM dd, yyyy')}">Jan 1, 2025</span>
+                                    <span th:if="${review.verified}" class="verified-badge">
+                                        <i class="fas fa-check-circle"></i> Verified Purchase
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="review-actions">
+                            <button th:unless="${review.approved}"
+                                    class="btn btn-success btn-sm approve-btn"
+                                    th:data-review-id="${review.id}"
+                                    title="Approve Review">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button th:if="${review.approved}"
+                                    class="btn btn-warning btn-sm reject-btn"
+                                    th:data-review-id="${review.id}"
+                                    title="Reject Review">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="review-body">
+                        <div class="rating-stars">
+                            <i th:each="i : ${#numbers.sequence(1, 5)}"
+                               th:class="${i <= review.rating} ? 'fas fa-star' : 'far fa-star'"></i>
+                            <span class="rating-text" th:text="${review.rating} + '.0'">5.0</span>
+                        </div>
+                        <h4 th:if="${review.title}" class="review-title" th:text="${review.title}">Review Title</h4>
+                        <p th:if="${review.comment}" class="review-comment" th:text="${review.comment}">Review comment goes here...</p>
+
+                        <div class="review-status">
+                            <span th:if="${review.approved}" class="status-badge status-approved">
+                                <i class="fas fa-check"></i> Approved
+                            </span>
+                            <span th:unless="${review.approved}" class="status-badge status-pending">
+                                <i class="fas fa-clock"></i> Pending Approval
+                            </span>
+                            <span th:if="${review.helpfulCount > 0}" class="helpful-count">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span th:text="${review.helpfulCount}">0</span> found this helpful
+                            </span>
+                            <span th:if="${review.updatedAt}" class="updated-badge">
+                                <i class="fas fa-edit"></i> Edited
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approve Review Form (Hidden) -->
+        <form id="approveReviewForm" th:action="@{/reviews/seller/approve/0}" method="post" style="display: none;"></form>
+
+        <!-- Reject Review Form (Hidden) -->
+        <form id="rejectReviewForm" th:action="@{/reviews/seller/reject/0}" method="post" style="display: none;"></form>
+    </main>
+
+    <div layout:fragment="scripts">
+        <script th:src="@{/js/seller-reviews.js}" defer></script>
+    </div>
+</body>
+</html>

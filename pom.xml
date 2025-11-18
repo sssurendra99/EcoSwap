@@ -79,6 +79,11 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Email Support -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
         <!-- REMOVED: javax.persistence dependency - NOT NEEDED for Spring Boot 3.x -->
     </dependencies>
     

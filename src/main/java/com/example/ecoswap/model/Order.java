@@ -123,6 +123,11 @@ public class Order {
         this.subtotal = orderItems.stream()
             .map(OrderItem::getLineTotal)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
-        this.totalAmount = subtotal.add(shippingCost).add(tax);
+
+        // Null safety for shipping cost and tax
+        BigDecimal shipping = (this.shippingCost != null) ? this.shippingCost : BigDecimal.ZERO;
+        BigDecimal taxAmount = (this.tax != null) ? this.tax : BigDecimal.ZERO;
+
+        this.totalAmount = this.subtotal.add(shipping).add(taxAmount);
     }
 }

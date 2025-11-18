@@ -26,8 +26,8 @@
 
                 <!-- Auth Actions -->
                 <div class="nav-actions">
-                    <!-- Cart Icon (for authenticated users) -->
-                    <a th:href="@{/cart}" class="cart-btn" sec:authorize="isAuthenticated()">
+                    <!-- Cart Icon (visible to all users) -->
+                    <a th:href="@{/cart}" class="cart-btn">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="9" cy="21" r="1"></circle>
                             <circle cx="20" cy="21" r="1"></circle>
@@ -39,7 +39,7 @@
                     <!-- Guest Actions -->
                     <div sec:authorize="!isAuthenticated()" class="auth-buttons">
                         <a th:href="@{/login}" class="btn-login">Login</a>
-                        <a th:href="@{/register}" class="btn-register">Sign Up</a>
+                        <a th:href="@{/register-seller}" class="btn-register">Sign Up</a>
                     </div>
 
                     <!-- Authenticated User Menu -->

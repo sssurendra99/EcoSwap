@@ -137,16 +137,29 @@ document.addEventListener('DOMContentLoaded', function() {
     if (ecoScore) {
         updateEcoDisplay(ecoScore.value);
     }
-});
 
-// Form validation
-document.querySelector('.product-form').addEventListener('submit', function(e) {
-    const price = parseFloat(document.getElementById('price').value);
-    const originalPrice = parseFloat(document.getElementById('originalPrice').value);
-    
-    if (originalPrice && originalPrice < price) {
-        e.preventDefault();
-        alert('Original price cannot be less than selling price');
-        return false;
+    // Form validation
+    const productForm = document.querySelector('.product-form');
+    if (productForm) {
+        productForm.addEventListener('submit', function(e) {
+            const price = parseFloat(document.getElementById('price').value);
+            const originalPrice = parseFloat(document.getElementById('originalPrice').value);
+
+            if (originalPrice && originalPrice < price) {
+                e.preventDefault();
+                alert('Original price cannot be less than selling price');
+                return false;
+            }
+        });
     }
+
+    // Debug: Log checkbox states on change
+    const checkboxes = document.querySelectorAll('.checkbox-label input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        console.log('Checkbox found:', checkbox.name, 'Checked:', checkbox.checked);
+
+        checkbox.addEventListener('change', function() {
+            console.log('Checkbox changed:', this.name, 'Checked:', this.checked);
+        });
+    });
 });
