@@ -1,10 +1,13 @@
 package com.example.ecoswap.controller;
 
+import com.example.ecoswap.model.User;
 import com.example.ecoswap.model.enums.Role;
+import com.example.ecoswap.repository.UserRepository;
 import com.example.ecoswap.services.OrderService;
 import com.example.ecoswap.services.ProductService;
 import com.example.ecoswap.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,9 +24,18 @@ public class DashboardController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping("/admin/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(Authentication authentication, Model model) {
+        // Get current user
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email).orElseThrow();
+
         model.addAttribute("title", "Admin Dashboard");
+        model.addAttribute("userName", user.getFullName());
+        model.addAttribute("userRole", user.getRole().getDisplayName());
 
         // User statistics
         Long totalUsers = userService.getTotalUserCount();

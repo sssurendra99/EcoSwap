@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import com.example.ecoswap.model.Order;
 import com.example.ecoswap.model.Product;
+import com.example.ecoswap.model.Review;
 import com.example.ecoswap.model.User;
 import com.example.ecoswap.security.CustomUserDetails;
 import com.example.ecoswap.services.OrderService;
 import com.example.ecoswap.services.ProductService;
+import com.example.ecoswap.services.ReviewService;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,6 +29,9 @@ public class SellerController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private ReviewService reviewService;
 
     @GetMapping("/seller/dashboard")
     public String sellerDashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
@@ -79,5 +84,38 @@ public class SellerController {
         model.addAttribute("itemsRecycled", orderStats.get("totalItemsSold"));
 
         return "dashboard/seller";
+    }
+
+    @GetMapping("/seller/reviews")
+    public String sellerReviews(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        model.addAttribute("title", "Product Reviews");
+
+        User user = userDetails.getUser();
+        Long sellerId = user.getId();
+
+        // Get all reviews for seller's products
+        List<Review> reviews = reviewService.getSellerProductReviews(sellerId);
+
+        // Calculate statistics
+        long totalReviews = reviews.size();
+        long approvedReviews = reviews.stream().filter(Review::getApproved).count();
+        long pendingReviews = reviews.stream().filter(r -> !r.getApproved()).count();
+
+        double averageRating = reviews.stream()
+            .filter(Review::getApproved)
+            .mapToInt(Review::getRating)
+            .average()
+            .orElse(0.0);
+
+        // Add attributes to model
+        model.addAttribute("userName", user.getFullName());
+        model.addAttribute("userRole", user.getRole().getDisplayName());
+        model.addAttribute("reviews", reviews);
+        model.addAttribute("totalReviews", totalReviews);
+        model.addAttribute("approvedReviews", approvedReviews);
+        model.addAttribute("pendingReviews", pendingReviews);
+        model.addAttribute("averageRating", String.format("%.1f", averageRating));
+
+        return "seller/reviews";
     }
 }

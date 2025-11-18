@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/dashboard_layout}">
 <head>
     <title>Order Details - EcoSwap</title>
@@ -457,71 +458,62 @@
         <!-- Right Column: Actions -->
         <div>
             <!-- Status Update (Seller/Admin Only) -->
-            <div class="order-card" th:if="${userRole == 'Seller' or userRole == 'Admin'}">
-                <h2>Update Order Status</h2>
+            <div class="order-card" sec:authorize="hasAnyRole('SELLER', 'ADMIN')">
+                <h2>
+                    <i class="fas fa-edit"></i> Manage Order Status
+                </h2>
 
-                <!-- Status Timeline -->
-                <div class="order-timeline">
-                    <div class="timeline-item" th:classappend="${order.status == T(com.example.ecoswap.model.enums.OrderStatus).PENDING ? '' : 'inactive'}">
-                        <div class="timeline-content">
-                            <h4>Pending</h4>
-                            <p th:if="${order.status == T(com.example.ecoswap.model.enums.OrderStatus).PENDING}">
-                                Current Status
-                            </p>
-                        </div>
-                    </div>
-                    <div class="timeline-item" th:classappend="${order.status.ordinal() >= T(com.example.ecoswap.model.enums.OrderStatus).CONFIRMED.ordinal() ? '' : 'inactive'}">
-                        <div class="timeline-content">
-                            <h4>Confirmed</h4>
-                        </div>
-                    </div>
-                    <div class="timeline-item" th:classappend="${order.status.ordinal() >= T(com.example.ecoswap.model.enums.OrderStatus).PROCESSING.ordinal() ? '' : 'inactive'}">
-                        <div class="timeline-content">
-                            <h4>Processing</h4>
-                        </div>
-                    </div>
-                    <div class="timeline-item" th:classappend="${order.status.ordinal() >= T(com.example.ecoswap.model.enums.OrderStatus).SHIPPED.ordinal() ? '' : 'inactive'}">
-                        <div class="timeline-content">
-                            <h4>Shipped</h4>
-                            <p th:if="${order.shippedAt}" th:text="${#temporals.format(order.shippedAt, 'MMM dd, yyyy HH:mm')}"></p>
-                        </div>
-                    </div>
-                    <div class="timeline-item" th:classappend="${order.status == T(com.example.ecoswap.model.enums.OrderStatus).DELIVERED ? '' : 'inactive'}">
-                        <div class="timeline-content">
-                            <h4>Delivered</h4>
-                            <p th:if="${order.deliveredAt}" th:text="${#temporals.format(order.deliveredAt, 'MMM dd, yyyy HH:mm')}"></p>
-                        </div>
-                    </div>
+                <!-- Current Status Display -->
+                <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <p style="margin: 0 0 5px 0; color: #6b7280; font-size: 0.875rem;">Current Status:</p>
+                    <p style="margin: 0; font-size: 1.25rem; font-weight: 600; color: #1f2937;">
+                        <span th:class="'status-badge status-' + ${order.status}" th:text="${order.status.displayName}">Pending</span>
+                    </p>
                 </div>
 
-                <!-- Update Status Form -->
-                <div class="status-update-section" th:if="${order.status != T(com.example.ecoswap.model.enums.OrderStatus).CANCELLED && order.status != T(com.example.ecoswap.model.enums.OrderStatus).DELIVERED}">
-                    <h3>Change Status</h3>
+                <!-- Update Status Form (Only for non-completed orders) -->
+                <div th:unless="${order.status.name() == 'DELIVERED' or order.status.name() == 'CANCELLED' or order.status.name() == 'REFUNDED'}">
+                    <h3 style="font-size: 1rem; margin-bottom: 15px; color: #374151;">
+                        <i class="fas fa-arrow-right"></i> Change Status To:
+                    </h3>
+
                     <form th:action="@{/dashboard/orders/{id}/status(id=${order.id})}" method="post">
-                        <select name="status" class="status-select">
+                        <select name="status" class="status-select" required
+                                style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; margin-bottom: 15px;">
                             <option th:each="status : ${orderStatuses}"
                                     th:value="${status}"
                                     th:text="${status.displayName}"
                                     th:selected="${status == order.status}">
                             </option>
                         </select>
-                        <button type="submit" class="update-btn">
-                            <i class="fas fa-check"></i> Update Status
+                        <button type="submit" class="update-btn"
+                                style="width: 100%; padding: 12px; background: #1dbf73; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
+                            <i class="fas fa-check"></i> Update Order Status
                         </button>
                     </form>
 
-                    <!-- Cancel Order -->
+                    <!-- Cancel Order Button -->
                     <form th:action="@{/dashboard/orders/{id}/cancel(id=${order.id})}" method="post"
-                          th:if="${order.status != T(com.example.ecoswap.model.enums.OrderStatus).CANCELLED && order.status != T(com.example.ecoswap.model.enums.OrderStatus).DELIVERED}"
+                          style="margin-top: 15px;"
                           onsubmit="return confirm('Are you sure you want to cancel this order?');">
-                        <button type="submit" class="cancel-btn">
+                        <button type="submit" class="cancel-btn"
+                                style="width: 100%; padding: 12px; background: #ef4444; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
                             <i class="fas fa-times"></i> Cancel Order
                         </button>
                     </form>
                 </div>
 
+                <!-- Message for Completed/Cancelled Orders -->
+                <div th:if="${order.status.name() == 'DELIVERED' or order.status.name() == 'CANCELLED' or order.status.name() == 'REFUNDED'}"
+                     style="background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center;">
+                    <i class="fas fa-info-circle" style="color: #6b7280; font-size: 2rem; margin-bottom: 10px;"></i>
+                    <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">
+                        This order is <strong th:text="${order.status.displayName}">completed</strong> and cannot be modified.
+                    </p>
+                </div>
+
                 <!-- Tracking Number -->
-                <div class="tracking-section" th:if="${order.status.ordinal() >= T(com.example.ecoswap.model.enums.OrderStatus).PROCESSING.ordinal()}">
+                <div class="tracking-section" th:if="${order.status.isAtOrAfter(T(com.example.ecoswap.model.enums.OrderStatus).PROCESSING)}">
                     <h3>
                         <i class="fas fa-shipping-fast"></i> Tracking Information
                     </h3>

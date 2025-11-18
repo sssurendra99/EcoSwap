@@ -39,6 +39,8 @@ public class CustomerSettingsController {
 
         model.addAttribute("user", user);
         model.addAttribute("customerProfile", customerProfile);
+        model.addAttribute("userName", user.getFullName());
+        model.addAttribute("userRole", user.getRole().getDisplayName());
         model.addAttribute("pageTitle", "Settings");
         return "customer/settings";
     }

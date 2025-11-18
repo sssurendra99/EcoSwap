@@ -1,9 +1,11 @@
 package com.example.ecoswap.config;
 
+import com.example.ecoswap.model.Notification;
 import com.example.ecoswap.model.Settings;
 import com.example.ecoswap.model.User;
 import com.example.ecoswap.security.CustomUserDetails;
 import com.example.ecoswap.services.CartService;
+import com.example.ecoswap.services.NotificationService;
 import com.example.ecoswap.services.SettingsService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +15,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import java.util.List;
+
 /**
- * Global controller advice to make settings and cart count available to all templates
+ * Global controller advice to make settings, cart count, and notifications available to all templates
  */
 @ControllerAdvice
 public class GlobalControllerAdvice {
@@ -26,6 +30,9 @@ public class GlobalControllerAdvice {
 
     @Autowired
     private CartService cartService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     /**
      * Add site settings to all models
@@ -76,5 +83,37 @@ public class GlobalControllerAdvice {
         return cart.stream()
             .mapToInt(com.example.ecoswap.model.CartItem::getQuantity)
             .sum();
+    }
+
+    /**
+     * Add notification count to all pages for authenticated users
+     */
+    @ModelAttribute("notificationCount")
+    public Long addNotificationCount() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
+            CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+            User user = userDetails.getUser();
+            return notificationService.countUnreadNotifications(user);
+        }
+
+        return 0L;
+    }
+
+    /**
+     * Add recent notifications to all pages for authenticated users
+     */
+    @ModelAttribute("recentNotifications")
+    public List<Notification> addRecentNotifications() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
+            CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+            User user = userDetails.getUser();
+            return notificationService.getRecentNotifications(user);
+        }
+
+        return List.of();
     }
 }

@@ -4,7 +4,18 @@ function switchView(view) {
     const tableView = document.getElementById('tableView');
     const gridBtn = document.getElementById('gridViewBtn');
     const tableBtn = document.getElementById('tableViewBtn');
-    
+
+    // Add null checks to prevent errors
+    if (!gridView || !tableView || !gridBtn || !tableBtn) {
+        console.error('View elements not found:', {
+            gridView: !!gridView,
+            tableView: !!tableView,
+            gridBtn: !!gridBtn,
+            tableBtn: !!tableBtn
+        });
+        return;
+    }
+
     if (view === 'grid') {
         gridView.style.display = 'grid';
         tableView.style.display = 'none';
@@ -20,6 +31,9 @@ function switchView(view) {
     }
 }
 
+// Make switchView available globally
+window.switchView = switchView;
+
 // Restore view preference
 document.addEventListener('DOMContentLoaded', function() {
     const savedView = localStorage.getItem('productView');
@@ -29,14 +43,19 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Search functionality
-document.getElementById('productSearch').addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    filterProducts();
-});
+document.addEventListener('DOMContentLoaded', function() {
+    const productSearch = document.getElementById('productSearch');
+    if (productSearch) {
+        productSearch.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            filterProducts();
+        });
+    }
 
-// Filter functionality
-document.querySelectorAll('.filter-select').forEach(select => {
-    select.addEventListener('change', filterProducts);
+    // Filter functionality
+    document.querySelectorAll('.filter-select').forEach(select => {
+        select.addEventListener('change', filterProducts);
+    });
 });
 
 function filterProducts() {
@@ -50,10 +69,15 @@ function filterProducts() {
 }
 
 function resetFilters() {
-    document.getElementById('productSearch').value = '';
-    document.getElementById('categoryFilter').value = '';
-    document.getElementById('statusFilter').value = '';
-    document.getElementById('ecoRatingFilter').value = '';
+    const productSearch = document.getElementById('productSearch');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const ecoRatingFilter = document.getElementById('ecoRatingFilter');
+
+    if (productSearch) productSearch.value = '';
+    if (categoryFilter) categoryFilter.value = '';
+    if (statusFilter) statusFilter.value = '';
+    if (ecoRatingFilter) ecoRatingFilter.value = '';
     filterProducts();
 }
 
@@ -88,11 +112,20 @@ function deleteProduct(id, name) {
 function toggleSelectAll() {
     const selectAll = document.getElementById('selectAll');
     const checkboxes = document.querySelectorAll('.product-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = selectAll.checked;
-    });
-    updateBulkActions();
+    if (selectAll) {
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAll.checked;
+        });
+        updateBulkActions();
+    }
 }
+
+// Make functions globally available
+window.resetFilters = resetFilters;
+window.viewProduct = viewProduct;
+window.editProduct = editProduct;
+window.deleteProduct = deleteProduct;
+window.toggleSelectAll = toggleSelectAll;
 
 // Update bulk actions visibility
 document.addEventListener('DOMContentLoaded', function() {
@@ -105,12 +138,14 @@ function updateBulkActions() {
     const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
     const bulkActions = document.getElementById('bulkActions');
     const selectedCount = document.getElementById('selectedCount');
-    
-    if (checkedBoxes.length > 0) {
-        bulkActions.style.display = 'flex';
-        selectedCount.textContent = checkedBoxes.length;
-    } else {
-        bulkActions.style.display = 'none';
+
+    if (bulkActions && selectedCount) {
+        if (checkedBoxes.length > 0) {
+            bulkActions.style.display = 'flex';
+            selectedCount.textContent = checkedBoxes.length;
+        } else {
+            bulkActions.style.display = 'none';
+        }
     }
 }
 
@@ -118,7 +153,8 @@ function clearSelection() {
     document.querySelectorAll('.product-checkbox').forEach(checkbox => {
         checkbox.checked = false;
     });
-    document.getElementById('selectAll').checked = false;
+    const selectAll = document.getElementById('selectAll');
+    if (selectAll) selectAll.checked = false;
     updateBulkActions();
 }
 
@@ -126,7 +162,7 @@ function clearSelection() {
 function bulkActivate() {
     const selected = getSelectedIds();
     if (selected.length === 0) return;
-    
+
     // Add AJAX call here
     console.log('Activating products:', selected);
 }
@@ -134,7 +170,7 @@ function bulkActivate() {
 function bulkDeactivate() {
     const selected = getSelectedIds();
     if (selected.length === 0) return;
-    
+
     // Add AJAX call here
     console.log('Deactivating products:', selected);
 }
@@ -142,7 +178,7 @@ function bulkDeactivate() {
 function bulkDelete() {
     const selected = getSelectedIds();
     if (selected.length === 0) return;
-    
+
     if (confirm('Are you sure you want to delete ' + selected.length + ' products? This action cannot be undone.')) {
         // Add AJAX call here
         console.log('Deleting products:', selected);
@@ -158,3 +194,11 @@ function getSelectedIds() {
 function changePage(page) {
     window.location.href = '/dashboard/products?page=' + page;
 }
+
+// Make all functions globally available
+window.updateBulkActions = updateBulkActions;
+window.clearSelection = clearSelection;
+window.bulkActivate = bulkActivate;
+window.bulkDeactivate = bulkDeactivate;
+window.bulkDelete = bulkDelete;
+window.changePage = changePage;

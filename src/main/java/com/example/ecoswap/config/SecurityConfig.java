@@ -40,6 +40,9 @@ public class SecurityConfig {
                 .requestMatchers("/cart", "/cart/add", "/cart/add-ajax", "/cart/count").permitAll() // Allow guest cart
                 .requestMatchers("/cart/checkout", "/cart/place-order").authenticated() // Require login for checkout
                 .requestMatchers("/cart/**").authenticated() // Other cart operations need login
+                .requestMatchers("/reviews/submit", "/reviews/update/**", "/reviews/delete/**", "/reviews/helpful/**").authenticated() // Review operations require login
+                .requestMatchers("/reviews/seller/**").hasRole("SELLER") // Seller review moderation
+                .requestMatchers("/dashboard/orders/**").hasAnyRole("ADMIN", "SELLER", "CUSTOMER") // Dashboard orders for all roles
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/seller/**").hasRole("SELLER")
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")

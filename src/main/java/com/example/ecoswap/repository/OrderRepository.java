@@ -78,4 +78,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // Find orders by seller within date range
     @Query("SELECT DISTINCT o FROM Order o JOIN o.orderItems oi WHERE oi.seller.id = :sellerId AND o.createdAt BETWEEN :startDate AND :endDate ORDER BY o.createdAt DESC")
     List<Order> findOrdersBySellerAndDateRange(@Param("sellerId") Long sellerId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    // Check if customer has ordered a specific product (for review verification)
+    @Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM Order o JOIN o.orderItems oi WHERE o.customer.id = :customerId AND oi.product.id = :productId")
+    boolean existsByCustomerIdAndOrderItems_ProductId(@Param("customerId") Long customerId, @Param("productId") Long productId);
 }

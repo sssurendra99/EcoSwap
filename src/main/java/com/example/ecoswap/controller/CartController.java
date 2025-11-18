@@ -414,8 +414,12 @@ public class CartController {
             order.setPaymentMethod(paymentMethod);
             order.setOrderNotes(orderNotes);
 
-            // Calculate totals
+            // Calculate totals with null safety
             BigDecimal subtotal = cart.getTotal();
+            if (subtotal == null) {
+                subtotal = BigDecimal.ZERO;
+            }
+
             BigDecimal shippingCost = new BigDecimal("10.00"); // Fixed shipping for now
             BigDecimal tax = subtotal.multiply(new BigDecimal("0.10")); // 10% tax
 
@@ -426,22 +430,36 @@ public class CartController {
 
             // Create order items from cart items
             for (CartItem cartItem : cart.getCartItems()) {
+                Product product = cartItem.getProduct();
+
+                // Skip if product is null or invalid
+                if (product == null) {
+                    continue;
+                }
+
                 OrderItem orderItem = new OrderItem();
                 orderItem.setOrder(order);
-                orderItem.setProduct(cartItem.getProduct());
-                orderItem.setSeller(cartItem.getProduct().getSeller());
+                orderItem.setProduct(product);
+                orderItem.setSeller(product.getSeller());
                 orderItem.setQuantity(cartItem.getQuantity());
-                orderItem.setPrice(cartItem.getProduct().getPrice());
-                orderItem.setProductName(cartItem.getProduct().getName());
-                orderItem.setProductSku(cartItem.getProduct().getSku());
-                orderItem.setProductImage(cartItem.getProduct().getImage());
+
+                // Set price with null safety
+                BigDecimal itemPrice = product.getPrice();
+                if (itemPrice == null) {
+                    itemPrice = BigDecimal.ZERO;
+                }
+                orderItem.setPrice(itemPrice);
+
+                orderItem.setProductName(product.getName() != null ? product.getName() : "Unknown Product");
+                orderItem.setProductSku(product.getSku() != null ? product.getSku() : "N/A");
+                orderItem.setProductImage(product.getImage());
 
                 order.addOrderItem(orderItem);
 
                 // Update product stock
-                cartItem.getProduct().setStock(
-                    cartItem.getProduct().getStock() - cartItem.getQuantity()
-                );
+                int currentStock = product.getStock() != null ? product.getStock() : 0;
+                int newStock = Math.max(0, currentStock - cartItem.getQuantity());
+                product.setStock(newStock);
             }
 
             // Save order

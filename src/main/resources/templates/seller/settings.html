@@ -158,11 +158,14 @@
 
                         <div class="info-box">
                             <strong>Account Status:</strong>
-                            <span th:if="${sellerProfile.approved}" style="color: #059669;">
+                            <span th:if="${sellerProfile.status == 'APPROVED'}" style="color: #059669;">
                                 ✓ Approved
                             </span>
-                            <span th:unless="${sellerProfile.approved}" style="color: #f59e0b;">
+                            <span th:if="${sellerProfile.status == 'PENDING'}" style="color: #f59e0b;">
                                 ⏳ Pending Approval
+                            </span>
+                            <span th:if="${sellerProfile.status == 'REJECTED'}" style="color: #dc2626;">
+                                ✗ Rejected
                             </span>
                         </div>
 

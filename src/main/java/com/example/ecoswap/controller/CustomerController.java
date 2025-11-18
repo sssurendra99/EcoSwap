@@ -1,10 +1,14 @@
 package com.example.ecoswap.controller;
 
 import com.example.ecoswap.model.Order;
+import com.example.ecoswap.model.Product;
+import com.example.ecoswap.model.Review;
 import com.example.ecoswap.model.User;
 import com.example.ecoswap.model.enums.OrderStatus;
 import com.example.ecoswap.repository.OrderRepository;
 import com.example.ecoswap.repository.UserRepository;
+import com.example.ecoswap.services.ReviewService;
+import com.example.ecoswap.services.WishlistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -22,6 +26,12 @@ public class CustomerController {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private ReviewService reviewService;
+
+    @Autowired
+    private WishlistService wishlistService;
 
     @GetMapping("/customer/dashboard")
     public String customerDashboard(Authentication authentication, Model model) {
@@ -83,14 +93,16 @@ public class CustomerController {
                 .limit(3)
                 .toList();
 
-        // TODO: Implement wishlist functionality
-        int wishlistItems = 0;
-        List<?> wishlistProducts = List.of(); // Empty for now
+        // Wishlist functionality
+        int wishlistItems = wishlistService.getWishlistItemCount(user.getId());
+        List<Product> wishlistProducts = wishlistService.getWishlistProducts(user.getId());
 
         // Loyalty points (placeholder for future implementation)
         int loyaltyPoints = totalOrders * 10; // 10 points per order
 
         // Add attributes to model
+        model.addAttribute("userName", user.getFullName());
+        model.addAttribute("userRole", user.getRole().getDisplayName());
         model.addAttribute("title", "Customer Dashboard");
         model.addAttribute("pageTitle", "Dashboard");
         model.addAttribute("totalOrders", totalOrders);
@@ -107,5 +119,25 @@ public class CustomerController {
         model.addAttribute("wishlistProducts", wishlistProducts);
 
         return "dashboard/customer";
+    }
+
+    @GetMapping("/customer/reviews")
+    public String customerReviews(Authentication authentication, Model model) {
+        // Get current user
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email).orElseThrow();
+
+        // Get customer's reviews
+        List<Review> reviews = reviewService.getCustomerReviews(user.getId());
+
+        // Add attributes to model
+        model.addAttribute("userName", user.getFullName());
+        model.addAttribute("userRole", user.getRole().getDisplayName());
+        model.addAttribute("title", "My Reviews");
+        model.addAttribute("pageTitle", "My Reviews");
+        model.addAttribute("reviews", reviews);
+        model.addAttribute("totalReviews", reviews.size());
+
+        return "customer/reviews";
     }
 }

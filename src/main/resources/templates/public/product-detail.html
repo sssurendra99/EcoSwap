@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${product.name} + ' | EcoSwap'">Product | EcoSwap</title>
     <link th:href="@{/css/product-detail.css}" rel="stylesheet"/>
+    <script th:src="@{/js/product-detail.js}" defer></script>
 </head>
 
 <body>
@@ -145,6 +146,20 @@
                             </div>
                         </form>
 
+                        <!-- Wishlist Button -->
+                        <div class="wishlist-action" sec:authorize="isAuthenticated()">
+                            <form th:if="${!isInWishlist}" th:action="@{/customer/wishlist/add-ajax}" method="post" class="wishlist-form" id="wishlistForm">
+                                <input type="hidden" name="productId" th:value="${product.id}"/>
+                                <button type="submit" class="btn btn-wishlist">
+                                    <i class="far fa-heart"></i> Add to Wishlist
+                                </button>
+                            </form>
+                            <div th:if="${isInWishlist}" class="wishlist-status">
+                                <i class="fas fa-heart"></i> In your wishlist
+                                <a th:href="@{/customer/wishlist}" class="view-wishlist-link">View Wishlist</a>
+                            </div>
+                        </div>
+
                         <!-- Seller Info -->
                         <div class="seller-info">
                             <h3>Sold By</h3>
@@ -155,6 +170,129 @@
                                        th:text="${product.seller.sellerProfile.businessName}">Business Name</p>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reviews Section -->
+        <section class="reviews-section">
+            <div class="container">
+                <div class="reviews-header">
+                    <h2 class="section-title">Customer Reviews</h2>
+                    <div class="reviews-summary">
+                        <div class="rating-overview">
+                            <div class="average-rating">
+                                <span class="rating-number" th:text="${product.rating != null ? #numbers.formatDecimal(product.rating, 1, 1) : '0.0'}">0.0</span>
+                                <div class="stars">
+                                    <i th:each="i : ${#numbers.sequence(1, 5)}"
+                                       th:class="${i <= (product.rating ?: 0)} ? 'fas fa-star' : 'far fa-star'"></i>
+                                </div>
+                                <span class="review-count" th:text="${reviewCount} + ' reviews'">0 reviews</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Write Review Button (Only for logged-in users who haven't reviewed) -->
+                <div sec:authorize="isAuthenticated()" th:if="${!hasReviewed}" class="write-review-section">
+                    <button class="btn btn-primary" id="writeReviewBtn">
+                        <i class="fas fa-star"></i> Write a Review
+                    </button>
+                </div>
+
+                <!-- Already Reviewed Message -->
+                <div sec:authorize="isAuthenticated()" th:if="${hasReviewed}" class="already-reviewed-message">
+                    <i class="fas fa-check-circle"></i>
+                    <span>You have already reviewed this product. You can manage your reviews in your <a th:href="@{/customer/reviews}">dashboard</a>.</span>
+                </div>
+
+                <!-- Login Required Message -->
+                <div sec:authorize="!isAuthenticated()" class="login-required-message">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Please <a th:href="@{/login}">login</a> to write a review.</span>
+                </div>
+
+                <!-- Write Review Form (Hidden by default) -->
+                <div id="reviewFormContainer" class="review-form-container" style="display: none;">
+                    <h3>Write Your Review</h3>
+                    <form th:action="@{/reviews/submit}" method="post" class="review-form">
+                        <input type="hidden" name="productId" th:value="${product.id}"/>
+
+                        <div class="form-group">
+                            <label>Rating <span class="required">*</span></label>
+                            <div class="star-rating-input">
+                                <input type="radio" name="rating" value="5" id="star5" required>
+                                <label for="star5"><i class="fas fa-star"></i></label>
+                                <input type="radio" name="rating" value="4" id="star4">
+                                <label for="star4"><i class="fas fa-star"></i></label>
+                                <input type="radio" name="rating" value="3" id="star3">
+                                <label for="star3"><i class="fas fa-star"></i></label>
+                                <input type="radio" name="rating" value="2" id="star2">
+                                <label for="star2"><i class="fas fa-star"></i></label>
+                                <input type="radio" name="rating" value="1" id="star1">
+                                <label for="star1"><i class="fas fa-star"></i></label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reviewTitle">Review Title (Optional)</label>
+                            <input type="text" id="reviewTitle" name="title" class="form-control" maxlength="100" placeholder="Sum up your experience">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reviewComment">Your Review (Optional)</label>
+                            <textarea id="reviewComment" name="comment" class="form-control" rows="4" maxlength="2000" placeholder="Share your thoughts about this product"></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="cancelReviewBtn">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Reviews List -->
+                <div class="reviews-list">
+                    <div th:if="${#lists.isEmpty(reviews)}" class="no-reviews">
+                        <i class="fas fa-star-half-alt"></i>
+                        <p>No reviews yet. Be the first to review this product!</p>
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(reviews)}" class="review-items">
+                        <div th:each="review : ${reviews}" class="review-item">
+                            <div class="review-header">
+                                <div class="reviewer-info">
+                                    <div class="reviewer-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="reviewer-name" th:text="${review.customer.fullName}">Customer Name</h4>
+                                        <span th:if="${review.verified}" class="verified-badge">
+                                            <i class="fas fa-check-circle"></i> Verified Purchase
+                                        </span>
+                                    </div>
+                                </div>
+                                <span class="review-date" th:text="${#temporals.format(review.createdAt, 'MMM dd, yyyy')}">Jan 1, 2025</span>
+                            </div>
+
+                            <div class="review-rating">
+                                <i th:each="i : ${#numbers.sequence(1, 5)}"
+                                   th:class="${i <= review.rating} ? 'fas fa-star' : 'far fa-star'"></i>
+                            </div>
+
+                            <h4 th:if="${review.title}" class="review-title" th:text="${review.title}">Review Title</h4>
+                            <p th:if="${review.comment}" class="review-text" th:text="${review.comment}">Review comment goes here...</p>
+
+                            <div th:if="${review.helpfulCount > 0}" class="review-helpful">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span th:text="${review.helpfulCount} + ' people found this helpful'">0 people found this helpful</span>
+                            </div>
+
+                            <button class="btn-helpful" th:data-review-id="${review.id}">
+                                <i class="fas fa-thumbs-up"></i> Helpful
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -174,7 +312,5 @@
             </div>
         </section>
     </main>
-
-    <script th:src="@{/js/product-detail.js}" defer></script>
 </body>
 </html>

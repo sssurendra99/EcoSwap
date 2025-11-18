@@ -37,8 +37,19 @@ public class SellerSettingsController {
         User user = userRepository.findByEmail(email).orElseThrow();
         SellerProfile sellerProfile = user.getSellerProfile();
 
+        // Create seller profile if it doesn't exist
+        if (sellerProfile == null) {
+            sellerProfile = new SellerProfile();
+            sellerProfile.setUser(user);
+            sellerProfile.setStatus("APPROVED");
+            sellerProfile = sellerProfileRepository.save(sellerProfile);
+            user.setSellerProfile(sellerProfile);
+        }
+
         model.addAttribute("user", user);
         model.addAttribute("sellerProfile", sellerProfile);
+        model.addAttribute("userName", user.getFullName());
+        model.addAttribute("userRole", user.getRole().getDisplayName());
         model.addAttribute("pageTitle", "Settings");
         return "seller/settings";
     }
@@ -60,6 +71,13 @@ public class SellerSettingsController {
             String email = authentication.getName();
             User user = userRepository.findByEmail(email).orElseThrow();
             SellerProfile sellerProfile = user.getSellerProfile();
+
+            // Create seller profile if it doesn't exist
+            if (sellerProfile == null) {
+                sellerProfile = new SellerProfile();
+                sellerProfile.setUser(user);
+                sellerProfile.setStatus("APPROVED");
+            }
 
             sellerProfile.setBusinessName(businessName);
             sellerProfile.setBusinessAddress(businessAddress);

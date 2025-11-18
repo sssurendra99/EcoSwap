@@ -24,4 +24,18 @@ public enum OrderStatus {
     public String getDescription() {
         return description;
     }
+
+    /**
+     * Check if this status comes at or after another status in the order flow
+     */
+    public boolean isAtOrAfter(OrderStatus other) {
+        return this.ordinal() >= other.ordinal();
+    }
+
+    /**
+     * Check if order is in a completed state (delivered or cancelled)
+     */
+    public boolean isCompleted() {
+        return this == DELIVERED || this == CANCELLED || this == REFUNDED;
+    }
 }

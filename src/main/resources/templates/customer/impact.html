@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Environmental Impact - EcoSwap</title>
+    <link th:href="@{/css/impact.css}" rel="stylesheet"/>
+</head>
+<body>
+    <main layout:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">🌍 Your Environmental Impact</h1>
+                <p class="page-description">Track the positive difference you're making for our planet</p>
+            </div>
+        </div>
+
+        <!-- Impact Summary Cards -->
+        <div class="impact-summary">
+            <div class="impact-card primary">
+                <div class="impact-icon">🌍</div>
+                <div class="impact-content">
+                    <h3>CO₂ Emissions Saved</h3>
+                    <div class="impact-value">
+                        <span class="value" th:text="${#numbers.formatDecimal(totalCo2Saved, 1, 2)}">0</span>
+                        <span class="unit">kg</span>
+                    </div>
+                    <p class="impact-subtitle">Equivalent to <strong th:text="${#numbers.formatDecimal(treesEquivalent, 1, 1)}">0</strong> trees planted for a year</p>
+                </div>
+            </div>
+
+            <div class="impact-card success">
+                <div class="impact-icon">♻️</div>
+                <div class="impact-content">
+                    <h3>Plastic Waste Prevented</h3>
+                    <div class="impact-value">
+                        <span class="value" th:text="${#numbers.formatDecimal(totalPlasticSaved, 1, 2)}">0</span>
+                        <span class="unit">g</span>
+                    </div>
+                    <p class="impact-subtitle">That's <strong th:text="${#numbers.formatDecimal(totalPlasticSaved/28, 1, 0)}">0</strong> plastic bottles saved!</p>
+                </div>
+            </div>
+
+            <div class="impact-card info">
+                <div class="impact-icon">💧</div>
+                <div class="impact-content">
+                    <h3>Water Conserved</h3>
+                    <div class="impact-value">
+                        <span class="value" th:text="${#numbers.formatDecimal(waterSaved, 1, 2)}">0</span>
+                        <span class="unit">L</span>
+                    </div>
+                    <p class="impact-subtitle">Enough for <strong th:text="${#numbers.formatDecimal(waterSaved/200, 1, 0)}">0</strong> showers!</p>
+                </div>
+            </div>
+
+            <div class="impact-card warning">
+                <div class="impact-icon">🚗</div>
+                <div class="impact-content">
+                    <h3>Car Miles Offset</h3>
+                    <div class="impact-value">
+                        <span class="value" th:text="${#numbers.formatDecimal(carMilesEquivalent, 1, 0)}">0</span>
+                        <span class="unit">miles</span>
+                    </div>
+                    <p class="impact-subtitle">By choosing sustainable products</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-icon">📦</div>
+                <div class="stat-content">
+                    <span class="stat-value" th:text="${totalItems}">0</span>
+                    <span class="stat-label">Eco-Friendly Items</span>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon">🛍️</div>
+                <div class="stat-content">
+                    <span class="stat-value" th:text="${totalOrders}">0</span>
+                    <span class="stat-label">Green Orders</span>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon">📅</div>
+                <div class="stat-content">
+                    <span class="stat-value" th:text="${memberDays}">0</span>
+                    <span class="stat-label">Days as Member</span>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon">📈</div>
+                <div class="stat-content">
+                    <span class="stat-value" th:text="${#numbers.formatDecimal(dailyAvgCo2, 1, 2)}">0</span>
+                    <span class="stat-label">Avg kg CO₂/day</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="chart-container">
+                <h3>Monthly Impact Trend</h3>
+                <div class="monthly-comparison">
+                    <div class="comparison-item">
+                        <span class="comparison-label">This Month</span>
+                        <div class="comparison-bar">
+                            <div class="bar-fill co2" style="width: 100%;">
+                                <span th:text="${#numbers.formatDecimal(monthlyCo2, 1, 1)}">0</span> kg CO₂
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comparison-item">
+                        <span class="comparison-label">Plastic Saved</span>
+                        <div class="comparison-bar">
+                            <div class="bar-fill plastic" th:style="'width: ' + ${monthlyPlastic > 0 ? (monthlyPlastic / monthlyCo2 * 100) : 0} + '%;'">
+                                <span th:text="${#numbers.formatDecimal(monthlyPlastic, 1, 1)}">0</span> g
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Impact by Category</h3>
+                <div class="category-chart">
+                    <div th:if="${co2ByCategory.isEmpty()}" class="empty-chart">
+                        <p>No data available yet. Start shopping to see your impact!</p>
+                    </div>
+                    <div th:unless="${co2ByCategory.isEmpty()}" class="category-list">
+                        <div th:each="entry : ${co2ByCategory}" class="category-item">
+                            <div class="category-header">
+                                <span class="category-name" th:text="${entry.key}">Category</span>
+                                <span class="category-value" th:text="${#numbers.formatDecimal(entry.value, 1, 1)} + ' kg'">0 kg</span>
+                            </div>
+                            <div class="category-bar">
+                                <div class="bar-fill" th:style="'width: ' + ${(entry.value / totalCo2Saved * 100)} + '%;'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievements Section -->
+        <div class="achievements-section">
+            <h3>🏆 Your Achievements</h3>
+            <div class="achievements-grid">
+                <div th:each="achievement : ${achievements}"
+                     class="achievement-card"
+                     th:classappend="${achievement.unlocked ? 'unlocked' : 'locked'}">
+                    <div class="achievement-icon" th:text="${achievement.icon}">🌱</div>
+                    <h4 th:text="${achievement.title}">Achievement</h4>
+                    <p th:text="${achievement.description}">Description</p>
+                    <div th:if="${achievement.unlocked}" class="achievement-badge">
+                        <i class="fas fa-check-circle"></i> Unlocked
+                    </div>
+                </div>
+
+                <!-- Future achievements -->
+                <div th:if="${totalItems < 50}" class="achievement-card locked">
+                    <div class="achievement-icon">🌟</div>
+                    <h4>Eco Champion</h4>
+                    <p>Purchase 50+ sustainable products</p>
+                    <div class="achievement-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" th:style="'width: ' + ${(totalItems / 50.0 * 100)} + '%;'"></div>
+                        </div>
+                        <span class="progress-text" th:text="${totalItems} + ' / 50'">0 / 50</span>
+                    </div>
+                </div>
+
+                <div th:if="${totalCo2Saved < 500}" class="achievement-card locked">
+                    <div class="achievement-icon">🌲</div>
+                    <h4>Forest Saver</h4>
+                    <p>Save 500kg+ of CO₂ emissions</p>
+                    <div class="achievement-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" th:style="'width: ' + ${(totalCo2Saved / 500.0 * 100)} + '%;'"></div>
+                        </div>
+                        <span class="progress-text" th:text="${#numbers.formatDecimal(totalCo2Saved, 1, 0)} + ' / 500 kg'">0 / 500 kg</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips Section -->
+        <div class="tips-section">
+            <h3>💡 Keep Making a Difference</h3>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <div class="tip-icon">🌿</div>
+                    <h4>Choose Sustainable</h4>
+                    <p>Look for products with higher eco-scores to maximize your impact</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">📢</div>
+                    <h4>Spread the Word</h4>
+                    <p>Share your environmental journey with friends and family</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🔄</div>
+                    <h4>Make it Routine</h4>
+                    <p>Consistent eco-friendly choices create lasting impact</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div layout:fragment="scripts">
+        <script th:src="@{/js/impact.js}" defer></script>
+    </div>
+</body>
+</html>

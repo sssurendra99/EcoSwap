@@ -294,6 +294,56 @@ textarea.form-control {
     font-size: 0.85rem;
 }
 
+/* Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    line-height: 1;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #1dbf73 0%, #17a05d 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #17a05d 0%, #138f51 100%);
+}
+
+.btn-secondary {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+}
+
+.btn i {
+    color: inherit;
+    font-size: 1rem;
+}
+
+.btn-primary i,
+.btn-secondary i {
+    color: white;
+}
+
 /* Form Actions */
 .form-actions {
     display: flex;
@@ -308,6 +358,33 @@ textarea.form-control {
 .btn-large {
     padding: 15px 40px;
     font-size: 1.1rem;
+}
+
+/* Page Header Styles */
+.page-header {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-header h1 {
+    color: #333;
+    font-size: 1.8rem;
+    margin: 0 0 5px 0;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 0.95rem;
+    margin: 0;
 }
 
 /* File Upload Styles */

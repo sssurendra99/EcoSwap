@@ -5,6 +5,7 @@ import com.example.ecoswap.model.User;
 import com.example.ecoswap.model.enums.OrderStatus;
 import com.example.ecoswap.model.enums.Role;
 import com.example.ecoswap.security.CustomUserDetails;
+import com.example.ecoswap.services.NotificationService;
 import com.example.ecoswap.services.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,9 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     /**
      * List all orders with pagination and filtering
@@ -112,11 +116,16 @@ public class OrderController {
             return "redirect:/dashboard/orders";
         }
 
+        // Check if order status can be updated (not completed/cancelled)
+        boolean canUpdateStatus = order.getStatus() != OrderStatus.CANCELLED
+            && order.getStatus() != OrderStatus.DELIVERED;
+
         model.addAttribute("order", order);
         model.addAttribute("pageTitle", "Order #" + order.getOrderNumber());
         model.addAttribute("userName", user.getFullName());
         model.addAttribute("userRole", user.getRole().getDisplayName());
         model.addAttribute("orderStatuses", OrderStatus.values());
+        model.addAttribute("canUpdateStatus", canUpdateStatus);
 
         return "dashboard/order-details";
     }
@@ -140,7 +149,88 @@ public class OrderController {
                 return "redirect:/dashboard/orders/" + id;
             }
 
+            // Get the order
+            Order order = orderService.getOrderById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+            // Additional check for sellers: verify they have items in this order
+            if (user.getRole() == Role.SELLER) {
+                boolean hasItemsInOrder = order.getOrderItems().stream()
+                    .anyMatch(item -> item.getSeller().getId().equals(user.getId()));
+
+                if (!hasItemsInOrder) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "You don't have permission to update this order");
+                    return "redirect:/dashboard/orders";
+                }
+            }
+
+            // Store old status for comparison
+            OrderStatus oldStatus = order.getStatus();
+
             orderService.updateOrderStatus(id, status);
+
+            // Create notification for customer based on the new status
+            User customer = order.getCustomer();
+            String notificationTitle = "";
+            String notificationMessage = "";
+            String notificationType = "INFO";
+            String notificationIcon = "fas fa-info-circle";
+            String notificationLink = "/dashboard/orders/" + id;
+
+            switch (status) {
+                case CONFIRMED:
+                    notificationTitle = "Order Confirmed";
+                    notificationMessage = "Your order #" + order.getOrderNumber() + " has been confirmed and is being prepared for shipment.";
+                    notificationType = "SUCCESS";
+                    notificationIcon = "fas fa-check-circle";
+                    break;
+                case PROCESSING:
+                    notificationTitle = "Order Processing";
+                    notificationMessage = "Your order #" + order.getOrderNumber() + " is now being processed.";
+                    notificationType = "INFO";
+                    notificationIcon = "fas fa-cog";
+                    break;
+                case SHIPPED:
+                    notificationTitle = "Order Shipped";
+                    notificationMessage = "Good news! Your order #" + order.getOrderNumber() + " has been shipped and is on its way.";
+                    notificationType = "SUCCESS";
+                    notificationIcon = "fas fa-shipping-fast";
+                    break;
+                case DELIVERED:
+                    notificationTitle = "Order Delivered";
+                    notificationMessage = "Your order #" + order.getOrderNumber() + " has been delivered. We hope you enjoy your sustainable purchase!";
+                    notificationType = "SUCCESS";
+                    notificationIcon = "fas fa-box-check";
+                    break;
+                case CANCELLED:
+                    notificationTitle = "Order Cancelled";
+                    notificationMessage = "Your order #" + order.getOrderNumber() + " has been cancelled.";
+                    notificationType = "WARNING";
+                    notificationIcon = "fas fa-times-circle";
+                    break;
+                case REFUNDED:
+                    notificationTitle = "Order Refunded";
+                    notificationMessage = "Your order #" + order.getOrderNumber() + " has been refunded. The amount will be credited to your account.";
+                    notificationType = "INFO";
+                    notificationIcon = "fas fa-undo";
+                    break;
+                default:
+                    // Don't create notification for other statuses or if status hasn't changed
+                    break;
+            }
+
+            // Only create notification if status actually changed and we have a message
+            if (!status.equals(oldStatus) && !notificationMessage.isEmpty()) {
+                notificationService.createNotification(
+                    customer,
+                    notificationTitle,
+                    notificationMessage,
+                    notificationType,
+                    notificationIcon,
+                    notificationLink
+                );
+            }
+
             redirectAttributes.addFlashAttribute("successMessage", "Order status updated to " + status.getDisplayName());
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating order status: " + e.getMessage());
@@ -165,6 +255,21 @@ public class OrderController {
             if (user.getRole() != Role.SELLER && user.getRole() != Role.ADMIN) {
                 redirectAttributes.addFlashAttribute("errorMessage", "You don't have permission to update tracking number");
                 return "redirect:/dashboard/orders/" + id;
+            }
+
+            // Get the order
+            Order order = orderService.getOrderById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+            // Additional check for sellers: verify they have items in this order
+            if (user.getRole() == Role.SELLER) {
+                boolean hasItemsInOrder = order.getOrderItems().stream()
+                    .anyMatch(item -> item.getSeller().getId().equals(user.getId()));
+
+                if (!hasItemsInOrder) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "You don't have permission to update this order");
+                    return "redirect:/dashboard/orders";
+                }
             }
 
             orderService.updateTrackingNumber(id, trackingNumber);

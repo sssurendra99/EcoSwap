@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title>My Wishlist - EcoSwap</title>
+    <link th:href="@{/css/wishlist.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<div layout:fragment="content" class="wishlist-page">
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1><i class="fas fa-heart"></i> My Wishlist</h1>
+        <p class="subtitle" th:text="${wishlistCount} + ' items'">0 items</p>
+    </div>
+
+    <!-- Empty Wishlist -->
+    <div th:if="${#lists.isEmpty(wishlistProducts)}" class="empty-wishlist">
+        <div class="empty-icon">
+            <i class="fas fa-heart-broken"></i>
+        </div>
+        <h2>Your wishlist is empty</h2>
+        <p>Start adding products you love to your wishlist!</p>
+        <a th:href="@{/shop}" class="btn btn-primary">
+            <i class="fas fa-store"></i> Browse Products
+        </a>
+    </div>
+
+    <!-- Wishlist Items -->
+    <div th:if="${!#lists.isEmpty(wishlistProducts)}" class="wishlist-content">
+        <div class="wishlist-actions">
+            <form th:action="@{/customer/wishlist/clear}" method="post"
+                  onsubmit="return confirm('Are you sure you want to clear your wishlist?');">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-trash"></i> Clear Wishlist
+                </button>
+            </form>
+        </div>
+
+        <div class="wishlist-grid">
+            <div th:each="product : ${wishlistProducts}" class="wishlist-item">
+                <div class="product-image">
+                    <a th:href="@{/product/{id}(id=${product.id})}">
+                        <img th:src="${product.image != null and product.image != ''} ? ${product.image} : 'https://via.placeholder.com/300x300/11998e/ffffff?text=No+Image'"
+                             th:alt="${product.name}"
+                             onerror="this.onerror=null; this.src='https://via.placeholder.com/300x300/11998e/ffffff?text=No+Image'"/>
+                    </a>
+                    <form th:action="@{/customer/wishlist/remove/{id}(id=${product.id})}"
+                          method="post" class="remove-form">
+                        <button type="submit" class="btn-remove" title="Remove from wishlist">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="product-details">
+                    <div class="product-category" th:text="${product.category.name}">Category</div>
+                    <h3 class="product-name">
+                        <a th:href="@{/product/{id}(id=${product.id})}" th:text="${product.name}">Product Name</a>
+                    </h3>
+
+                    <div class="product-rating" th:if="${product.rating != null and product.rating > 0}">
+                        <div class="stars">
+                            <i th:each="i : ${#numbers.sequence(1, 5)}"
+                               th:class="${i <= product.rating} ? 'fas fa-star' : 'far fa-star'"></i>
+                        </div>
+                        <span class="rating-value" th:text="${#numbers.formatDecimal(product.rating, 1, 1)}">0.0</span>
+                    </div>
+
+                    <div class="product-price">
+                        <span class="current-price">
+                            $<span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span>
+                        </span>
+                        <span th:if="${product.originalPrice != null and product.originalPrice > product.price}"
+                              class="original-price">
+                            $<span th:text="${#numbers.formatDecimal(product.originalPrice, 1, 2)}">0.00</span>
+                        </span>
+                    </div>
+
+                    <div class="product-stock">
+                        <span th:if="${product.stock > 0}" class="in-stock">
+                            <i class="fas fa-check-circle"></i> In Stock
+                        </span>
+                        <span th:if="${product.stock <= 0}" class="out-of-stock">
+                            <i class="fas fa-times-circle"></i> Out of Stock
+                        </span>
+                    </div>
+
+                    <div class="product-actions">
+                        <form th:action="@{/cart/add}" method="post" class="add-to-cart-form">
+                            <input type="hidden" name="productId" th:value="${product.id}"/>
+                            <input type="hidden" name="quantity" value="1"/>
+                            <button type="submit"
+                                    class="btn btn-primary"
+                                    th:disabled="${product.stock <= 0}">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span th:if="${product.stock > 0}">Add to Cart</span>
+                                <span th:if="${product.stock <= 0}">Out of Stock</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

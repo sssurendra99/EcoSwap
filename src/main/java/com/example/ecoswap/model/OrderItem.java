@@ -53,8 +53,25 @@ public class OrderItem {
     @PrePersist
     @PreUpdate
     public void calculateLineTotal() {
-        if (price != null && quantity != null) {
-            this.lineTotal = price.multiply(BigDecimal.valueOf(quantity));
+        // Ensure price is never null
+        if (this.price == null) {
+            this.price = BigDecimal.ZERO;
         }
+
+        // Ensure quantity is never null
+        if (this.quantity == null) {
+            this.quantity = 1;
+        }
+
+        // Calculate line total
+        this.lineTotal = this.price.multiply(BigDecimal.valueOf(this.quantity));
+    }
+
+    // Getter for lineTotal with null safety
+    public BigDecimal getLineTotal() {
+        if (this.lineTotal == null) {
+            calculateLineTotal();
+        }
+        return this.lineTotal;
     }
 }
