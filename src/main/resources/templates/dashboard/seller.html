@@ -38,7 +38,7 @@
             </div>
             <div class="stat-content">
                 <h3>Total Revenue</h3>
-                <p class="stat-value">$<span th:text="${#numbers.formatDecimal(totalRevenue, 1, 2)}">0.00</span></p>
+                <p class="stat-value"><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(totalRevenue, 1, 2)}">0.00</span></p>
                 <span class="stat-change positive">
                     <i class="fas fa-arrow-up"></i> Lifetime earnings
                 </span>
@@ -224,7 +224,7 @@
                             <h4 th:text="${order.orderNumber}">ORD-123</h4>
                             <p>
                                 <span th:text="${order.customer.fullName}">Customer</span> -
-                                $<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span>
+                                <span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span>
                             </p>
                         </div>
                         <div class="user-badge" th:classappend="${order.status.name() == 'PENDING' ? 'warning' : (order.status.name() == 'DELIVERED' ? 'success' : '')}">

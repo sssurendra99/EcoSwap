@@ -1,135 +1,279 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
+      layout:decorate="~{layout/dashboard_layout}">
 <head>
-    <title>Admin Dashboard</title>
+    <title>Admin Dashboard - EcoSwap</title>
+    <link th:href="@{/css/admin-dashboard.css}" rel="stylesheet"/>
 </head>
 <body>
 
 <div layout:fragment="content">
-    <div class="container-fluid">
-        <h3 class="mb-3">Welcome to EcoSwap Dashboard</h3>
-
-        <!-- Small Boxes -->
-        <div class="row">
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-info">
-                    <div class="inner">
-                        <h3>150</h3>
-                        <p>Products</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-box"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-success">
-                    <div class="inner">
-                        <h3>53</h3>
-                        <p>Users</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-warning">
-                    <div class="inner">
-                        <h3>120</h3>
-                        <p>Orders</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-danger">
-                    <div class="inner">
-                        <h3>35</h3>
-                        <p>CO₂ Saved</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-leaf"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Cards -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Recent Products</h3>
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>EcoBag - 20 units sold</li>
-                            <li>Reusable Bottle - 35 units sold</li>
-                            <li>Second-hand Laptop - 5 units sold</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Top Users</h3>
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>John Doe - 25 purchases</li>
-                            <li>Jane Smith - 18 purchases</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chart -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Monthly Transactions</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="transactionsChart" style="height:250px;"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Admin Dashboard</h1>
+        <p class="subtitle">Platform-wide overview and management</p>
     </div>
-</div>
 
-<script th:src="@{/adminlte/plugins/chart.js/Chart.min.js}"></script>
-<script th:inline="javascript">
-    const ctx = document.getElementById('transactionsChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Jan','Feb','Mar','Apr','May'],
-            datasets: [{
-                label: 'Orders',
-                data: [10, 20, 15, 25, 30],
-                backgroundColor: 'rgba(54, 162, 235, 0.6)'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-</script>
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <!-- Total Users Card -->
+        <div class="stat-card users">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Users</h3>
+                <p class="stat-value" th:text="${totalUsers}">0</p>
+                <span class="stat-change">
+                    <i class="fas fa-user"></i> <span th:text="${totalCustomers}">0</span> customers, <span th:text="${totalSellers}">0</span> sellers
+                </span>
+            </div>
+        </div>
+
+        <!-- Total Products Card -->
+        <div class="stat-card products">
+            <div class="stat-icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Products</h3>
+                <p class="stat-value" th:text="${totalProducts}">0</p>
+                <span class="stat-change positive">
+                    <i class="fas fa-check-circle"></i> <span th:text="${activeProducts}">0</span> active
+                </span>
+            </div>
+        </div>
+
+        <!-- Total Orders Card -->
+        <div class="stat-card orders">
+            <div class="stat-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Orders</h3>
+                <p class="stat-value" th:text="${totalOrders}">0</p>
+                <span class="stat-change" th:classappend="${pendingOrders > 0 ? 'warning' : ''}">
+                    <i class="fas fa-clock"></i> <span th:text="${pendingOrders}">0</span> pending
+                </span>
+            </div>
+        </div>
+
+        <!-- Total Revenue Card -->
+        <div class="stat-card revenue">
+            <div class="stat-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Revenue</h3>
+                <p class="stat-value"><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(totalRevenue, 1, 2)}">0.00</span></p>
+                <span class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> <span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(monthlyRevenue, 1, 2)}">0</span> this month
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts Section -->
+    <div class="alerts-section" th:if="${pendingSellerApprovals > 0 or outOfStockProducts > 0}">
+        <div class="alert alert-warning" th:if="${pendingSellerApprovals > 0}">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>You have <strong th:text="${pendingSellerApprovals}">0</strong> pending seller approval(s). <a th:href="@{/admin/users/seller-approvals}">Review now</a></span>
+        </div>
+        <div class="alert alert-info" th:if="${outOfStockProducts > 0}">
+            <i class="fas fa-info-circle"></i>
+            <span><strong th:text="${outOfStockProducts}">0</strong> products are out of stock.</span>
+        </div>
+    </div>
+
+    <!-- Environmental Impact Section -->
+    <div class="impact-section">
+        <div class="section-header">
+            <h2>🌿 Platform Environmental Impact</h2>
+            <span class="eco-badge">Sustainability Metrics</span>
+        </div>
+        <div class="impact-grid">
+            <div class="impact-card">
+                <div class="impact-icon green">
+                    <i class="fas fa-globe-americas"></i>
+                </div>
+                <h3>CO₂ Saved</h3>
+                <p class="impact-value"><span th:text="${#numbers.formatDecimal(totalCo2Saved, 1, 2)}">0.00</span> kg</p>
+                <p class="impact-desc">Total carbon emissions saved</p>
+            </div>
+            <div class="impact-card">
+                <div class="impact-icon blue">
+                    <i class="fas fa-recycle"></i>
+                </div>
+                <h3>Plastic Saved</h3>
+                <p class="impact-value"><span th:text="${#numbers.formatDecimal(totalPlasticSaved, 1, 2)}">0.00</span> kg</p>
+                <p class="impact-desc">Total plastic waste prevented</p>
+            </div>
+            <div class="impact-card">
+                <div class="impact-icon emerald">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h3>Avg Eco Score</h3>
+                <p class="impact-value"><span th:text="${#numbers.formatDecimal(averageEcoScore, 1, 1)}">0.0</span>/5</p>
+                <p class="impact-desc">Platform average eco rating</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="charts-section">
+        <!-- Order Status Breakdown -->
+        <div class="chart-card medium">
+            <div class="chart-header">
+                <h2>Order Status Breakdown</h2>
+            </div>
+            <div class="status-breakdown">
+                <div class="status-item">
+                    <div class="status-bar-container">
+                        <div class="status-label">
+                            <span>Pending</span>
+                            <span class="status-count" th:text="${pendingOrders}">0</span>
+                        </div>
+                        <div class="status-bar">
+                            <div class="status-bar-fill pending"
+                                 th:style="'width: ' + ${totalOrders > 0 ? (pendingOrders * 100.0 / totalOrders) : 0} + '%'"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <div class="status-bar-container">
+                        <div class="status-label">
+                            <span>Processing</span>
+                            <span class="status-count" th:text="${processingOrders}">0</span>
+                        </div>
+                        <div class="status-bar">
+                            <div class="status-bar-fill processing"
+                                 th:style="'width: ' + ${totalOrders > 0 ? (processingOrders * 100.0 / totalOrders) : 0} + '%'"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <div class="status-bar-container">
+                        <div class="status-label">
+                            <span>Shipped</span>
+                            <span class="status-count" th:text="${shippedOrders}">0</span>
+                        </div>
+                        <div class="status-bar">
+                            <div class="status-bar-fill shipped"
+                                 th:style="'width: ' + ${totalOrders > 0 ? (shippedOrders * 100.0 / totalOrders) : 0} + '%'"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <div class="status-bar-container">
+                        <div class="status-label">
+                            <span>Delivered</span>
+                            <span class="status-count" th:text="${deliveredOrders}">0</span>
+                        </div>
+                        <div class="status-bar">
+                            <div class="status-bar-fill delivered"
+                                 th:style="'width: ' + ${totalOrders > 0 ? (deliveredOrders * 100.0 / totalOrders) : 0} + '%'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="chart-card small">
+            <div class="chart-header">
+                <h2>Quick Actions</h2>
+            </div>
+            <div class="quick-actions-list">
+                <a th:href="@{/admin/users}" class="quick-action-item">
+                    <i class="fas fa-users"></i>
+                    <div>
+                        <p class="action-label">Manage Users</p>
+                        <p class="action-desc">View and manage all users</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a th:href="@{/admin/users/seller-approvals}" class="quick-action-item" th:if="${pendingSellerApprovals > 0}">
+                    <i class="fas fa-user-check"></i>
+                    <div>
+                        <p class="action-label">Seller Approvals</p>
+                        <p class="action-desc"><span th:text="${pendingSellerApprovals}">0</span> pending</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a th:href="@{/dashboard/products}" class="quick-action-item">
+                    <i class="fas fa-box"></i>
+                    <div>
+                        <p class="action-label">View Products</p>
+                        <p class="action-desc">Browse all products</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a th:href="@{/dashboard/orders}" class="quick-action-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <div>
+                        <p class="action-label">View Orders</p>
+                        <p class="action-desc">Monitor all orders</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a th:href="@{/admin/settings}" class="quick-action-item">
+                    <i class="fas fa-cog"></i>
+                    <div>
+                        <p class="action-label">Settings</p>
+                        <p class="action-desc">Configure platform</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders Table -->
+    <div class="recent-orders-section">
+        <div class="section-header">
+            <h2>Recent Orders</h2>
+            <a th:href="@{/dashboard/orders}" class="btn-view-all">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="table-responsive">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order Number</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order : ${recentOrders}">
+                        <td><strong th:text="${order.orderNumber}">ORD-123</strong></td>
+                        <td th:text="${order.customer.fullName}">John Doe</td>
+                        <td th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</td>
+                        <td th:text="${order.orderItems.size()}">3</td>
+                        <td><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span></td>
+                        <td>
+                            <span class="order-status" th:classappend="${'status-' + order.status.name()}"
+                                  th:text="${order.status.displayName}">Pending</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/dashboard/orders/{id}(id=${order.id})}" class="btn-action">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(recentOrders)}">
+                        <td colspan="7" class="text-center">No orders found</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
 
 </body>
 </html>

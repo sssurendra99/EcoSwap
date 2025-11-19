@@ -136,7 +136,7 @@
                         <i class="fas fa-dollar-sign" style="color: #1dbf73;"></i>
                         <div>
                             <p class="stat-label">Total Spent</p>
-                            <p class="stat-number">$<span th:text="${#numbers.formatDecimal(totalSpent ?: 0, 1, 2)}">0.00</span></p>
+                            <p class="stat-number"><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(totalSpent ?: 0, 1, 2)}">0.00</span></p>
                         </div>
                     </div>
                 </div>
@@ -145,7 +145,7 @@
                         <i class="fas fa-chart-line" style="color: #3b82f6;"></i>
                         <div>
                             <p class="stat-label">Avg. Order Value</p>
-                            <p class="stat-number">$<span th:text="${#numbers.formatDecimal(avgOrderValue ?: 0, 1, 2)}">0.00</span></p>
+                            <p class="stat-number"><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(avgOrderValue ?: 0, 1, 2)}">0.00</span></p>
                         </div>
                     </div>
                 </div>
@@ -194,7 +194,7 @@
                             <h4 th:text="${order.orderNumber}">ORD-123</h4>
                             <p>
                                 <span th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</span> -
-                                $<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span>
+                                <span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span>
                             </p>
                         </div>
                         <div class="user-badge"
@@ -226,7 +226,7 @@
                             </div>
                             <div class="product-details">
                                 <h4 th:text="${product.name}">Product Name</h4>
-                                <p>$<span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span></p>
+                                <p><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span></p>
                             </div>
                         </div>
                         <div class="product-badge success">

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/dashboard_layout}">
+<head>
+    <title>Sellers Management - EcoSwap</title>
+</head>
+<body>
+
+<!-- Page-specific CSS -->
+<th:block layout:fragment="stylesheets">
+    <link th:href="@{/css/admin-users.css}" rel="stylesheet"/>
+</th:block>
+
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1>Sellers Management</h1>
+                <p class="subtitle">Manage all sellers on the platform</p>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <a th:href="@{/admin/users/seller-approvals}" class="btn btn-warning">
+                    <i class="fas fa-clock"></i> Pending Approvals
+                    <span th:if="${pendingSellers != null and pendingSellers > 0}" class="badge" th:text="${pendingSellers}">0</span>
+                </a>
+                <a th:href="@{/admin/users}" class="btn btn-secondary">
+                    <i class="fas fa-users"></i> All Users
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon sellers">
+                <i class="fas fa-store"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Total Sellers</span>
+                <span class="stat-value" th:text="${totalSellers}">0</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon approved">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Approved Sellers</span>
+                <span class="stat-value" th:text="${approvedSellers}">0</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon pending">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Pending Approvals</span>
+                <span class="stat-value" th:text="${pendingSellers}">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-card">
+        <form th:action="@{/admin/users/sellers}" method="get" class="filters-form">
+            <div class="search-box-large">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" th:value="${searchQuery}" placeholder="Search by name, email, or business...">
+                <button type="submit" class="btn-search">Search</button>
+            </div>
+            <a th:href="@{/admin/users/sellers}" class="btn-reset">
+                <i class="fas fa-redo"></i> Reset
+            </a>
+        </form>
+    </div>
+
+    <!-- Sellers Table -->
+    <div class="users-table-card">
+        <div class="table-header">
+            <h3><i class="fas fa-store"></i> Sellers List</h3>
+            <span class="record-count" th:text="'Showing ' + ${sellers.size()} + ' of ' + ${totalItems} + ' sellers'">Showing 15 of 50 sellers</span>
+        </div>
+        <div class="table-wrapper">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Seller Info</th>
+                        <th>Business Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="seller : ${sellers}">
+                        <td>
+                            <div class="user-info-cell">
+                                <div class="user-avatar-small">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                <div>
+                                    <strong th:text="${seller.fullName}">Seller Name</strong>
+                                    <small th:if="${seller.sellerProfile != null}" th:text="'ID: ' + ${seller.id}">ID: 123</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:if="${seller.sellerProfile != null}" th:text="${seller.sellerProfile.businessName}">Business Name</span>
+                            <span th:unless="${seller.sellerProfile != null}" class="text-muted">-</span>
+                        </td>
+                        <td th:text="${seller.email}">email@example.com</td>
+                        <td>
+                            <span th:if="${seller.phoneNumber != null}" th:text="${seller.phoneNumber}">Phone</span>
+                            <span th:unless="${seller.phoneNumber != null}" class="text-muted">-</span>
+                        </td>
+                        <td>
+                            <span class="status-badge" th:classappend="${seller.enabled} ? 'active' : 'inactive'"
+                                  th:text="${seller.enabled ? 'Active' : 'Disabled'}">Active</span>
+                        </td>
+                        <td th:text="${#temporals.format(seller.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a th:href="@{/admin/users/{id}(id=${seller.id})}" class="btn-action btn-view" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <form th:action="@{/admin/users/{id}/toggle-status(id=${seller.id})}" method="post" style="display: inline;">
+                                    <button type="submit" class="btn-action btn-toggle" th:title="${seller.enabled ? 'Disable' : 'Enable'}">
+                                        <i th:class="${seller.enabled ? 'fas fa-ban' : 'fas fa-check'}"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(sellers)}">
+                        <td colspan="7" class="text-center empty-state">
+                            <i class="fas fa-store"></i>
+                            <p>No sellers found</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:href="@{/admin/users/sellers(page=${currentPage - 1}, search=${searchQuery})}"
+               th:classappend="${currentPage == 0} ? 'disabled' : ''"
+               class="page-btn">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+
+            <div class="page-numbers">
+                <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                   th:if="${i >= currentPage - 2 and i <= currentPage + 2}"
+                   th:href="@{/admin/users/sellers(page=${i}, search=${searchQuery})}"
+                   th:text="${i + 1}"
+                   th:classappend="${i == currentPage} ? 'active' : ''"
+                   class="page-number">1</a>
+            </div>
+
+            <a th:href="@{/admin/users/sellers(page=${currentPage + 1}, search=${searchQuery})}"
+               th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''"
+               class="page-btn">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

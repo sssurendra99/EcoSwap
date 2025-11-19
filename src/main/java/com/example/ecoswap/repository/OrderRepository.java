@@ -82,4 +82,17 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // Check if customer has ordered a specific product (for review verification)
     @Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM Order o JOIN o.orderItems oi WHERE o.customer.id = :customerId AND oi.product.id = :productId")
     boolean existsByCustomerIdAndOrderItems_ProductId(@Param("customerId") Long customerId, @Param("productId") Long productId);
+
+    // ============ ADMIN/PLATFORM-WIDE QUERIES ============
+
+    // Count orders by status (platform-wide)
+    Long countByStatus(OrderStatus status);
+
+    // Calculate total platform revenue by statuses
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN :statuses")
+    BigDecimal calculateTotalRevenueByStatuses(@Param("statuses") List<OrderStatus> statuses);
+
+    // Calculate platform revenue by date range and statuses
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN :statuses AND o.createdAt BETWEEN :startDate AND :endDate")
+    BigDecimal calculateRevenueByDateRangeAndStatuses(@Param("statuses") List<OrderStatus> statuses, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

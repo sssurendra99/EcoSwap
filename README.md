@@ -5,10 +5,17 @@
 1. Clone the project
 
 ```bash
-https://github.com/sssurendra99/EcoSwap.git
+git clone https://github.com/sssurendra99/EcoSwap.git
 ```
 
-2. Run the project with maven.
+2. Go into the Project folder
+
+```bash
+cd EcoSwap
+```
+
+
+3. Run the project with maven.
 
 ```bash
 ./mvnw spring-boot:run # on Linux or mac

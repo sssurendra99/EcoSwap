@@ -227,4 +227,83 @@ public class OrderService {
     public void deleteOrder(Long orderId) {
         orderRepository.deleteById(orderId);
     }
+
+    // ============ ADMIN/PLATFORM-WIDE STATISTICS ============
+
+    /**
+     * Get total order count across the entire platform
+     */
+    public Long getTotalOrderCount() {
+        return orderRepository.count();
+    }
+
+    /**
+     * Get total platform revenue (all delivered and confirmed orders)
+     */
+    public BigDecimal calculateTotalPlatformRevenue() {
+        List<OrderStatus> completedStatuses = Arrays.asList(
+            OrderStatus.DELIVERED,
+            OrderStatus.CONFIRMED
+        );
+        BigDecimal revenue = orderRepository.calculateTotalRevenueByStatuses(completedStatuses);
+        return revenue != null ? revenue : BigDecimal.ZERO;
+    }
+
+    /**
+     * Get platform revenue for current month
+     */
+    public BigDecimal calculateMonthlyPlatformRevenue() {
+        LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime endOfMonth = startOfMonth.plusMonths(1);
+
+        List<OrderStatus> completedStatuses = Arrays.asList(
+            OrderStatus.DELIVERED,
+            OrderStatus.CONFIRMED
+        );
+        BigDecimal revenue = orderRepository.calculateRevenueByDateRangeAndStatuses(completedStatuses, startOfMonth, endOfMonth);
+        return revenue != null ? revenue : BigDecimal.ZERO;
+    }
+
+    /**
+     * Count orders by status (platform-wide)
+     */
+    public Long countOrdersByStatus(OrderStatus status) {
+        return orderRepository.countByStatus(status);
+    }
+
+    /**
+     * Get recent orders across the platform
+     */
+    public List<Order> getRecentOrders(int limit) {
+        Pageable pageable = PageRequest.of(0, limit, Sort.by("createdAt").descending());
+        return orderRepository.findAll(pageable).getContent();
+    }
+
+    /**
+     * Get comprehensive platform statistics for admin dashboard
+     */
+    public Map<String, Object> getPlatformStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+
+        // Total orders
+        Long totalOrders = getTotalOrderCount();
+        stats.put("totalOrders", totalOrders);
+
+        // Orders by status
+        stats.put("pendingOrders", countOrdersByStatus(OrderStatus.PENDING));
+        stats.put("processingOrders", countOrdersByStatus(OrderStatus.PROCESSING));
+        stats.put("shippedOrders", countOrdersByStatus(OrderStatus.SHIPPED));
+        stats.put("deliveredOrders", countOrdersByStatus(OrderStatus.DELIVERED));
+        stats.put("cancelledOrders", countOrdersByStatus(OrderStatus.CANCELLED));
+
+        // Revenue
+        stats.put("totalRevenue", calculateTotalPlatformRevenue());
+        stats.put("monthlyRevenue", calculateMonthlyPlatformRevenue());
+
+        // Recent orders
+        List<Order> recentOrders = getRecentOrders(10);
+        stats.put("recentOrders", recentOrders);
+
+        return stats;
+    }
 }

@@ -146,6 +146,90 @@ public class AdminUserController {
     }
 
     /**
+     * List all sellers
+     */
+    @GetMapping("/sellers")
+    public String listSellers(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(required = false) String search,
+            Model model
+    ) {
+        User currentUser = userDetails.getUser();
+
+        Page<User> sellerPage;
+
+        if (search != null && !search.isEmpty()) {
+            List<User> searchResults = userService.searchUsers(search).stream()
+                .filter(user -> user.getRole() == Role.SELLER)
+                .collect(java.util.stream.Collectors.toList());
+            model.addAttribute("sellers", searchResults);
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 1);
+            model.addAttribute("totalItems", searchResults.size());
+        } else {
+            sellerPage = userService.getUsersByRole(Role.SELLER, page, size);
+            model.addAttribute("sellers", sellerPage.getContent());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", sellerPage.getTotalPages());
+            model.addAttribute("totalItems", sellerPage.getTotalElements());
+        }
+
+        model.addAttribute("totalSellers", userService.countUsersByRole(Role.SELLER));
+        model.addAttribute("approvedSellers", userService.getAllSellerProfiles().stream()
+            .filter(p -> p.getStatus().equals("APPROVED")).count());
+        model.addAttribute("pendingSellers", userService.getPendingSellerApprovals().size());
+
+        model.addAttribute("searchQuery", search);
+        model.addAttribute("pageTitle", "Sellers Management");
+        model.addAttribute("userName", currentUser.getFullName());
+        model.addAttribute("userRole", currentUser.getRole().getDisplayName());
+
+        return "admin/users/sellers";
+    }
+
+    /**
+     * List all customers
+     */
+    @GetMapping("/customers")
+    public String listCustomers(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(required = false) String search,
+            Model model
+    ) {
+        User currentUser = userDetails.getUser();
+
+        Page<User> customerPage;
+
+        if (search != null && !search.isEmpty()) {
+            List<User> searchResults = userService.searchUsers(search).stream()
+                .filter(user -> user.getRole() == Role.CUSTOMER)
+                .collect(java.util.stream.Collectors.toList());
+            model.addAttribute("customers", searchResults);
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 1);
+            model.addAttribute("totalItems", searchResults.size());
+        } else {
+            customerPage = userService.getUsersByRole(Role.CUSTOMER, page, size);
+            model.addAttribute("customers", customerPage.getContent());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", customerPage.getTotalPages());
+            model.addAttribute("totalItems", customerPage.getTotalElements());
+        }
+
+        model.addAttribute("totalCustomers", userService.countUsersByRole(Role.CUSTOMER));
+        model.addAttribute("searchQuery", search);
+        model.addAttribute("pageTitle", "Customers Management");
+        model.addAttribute("userName", currentUser.getFullName());
+        model.addAttribute("userRole", currentUser.getRole().getDisplayName());
+
+        return "admin/users/customers";
+    }
+
+    /**
      * Seller approvals page
      */
     @GetMapping("/seller-approvals")

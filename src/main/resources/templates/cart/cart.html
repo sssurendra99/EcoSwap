@@ -51,7 +51,7 @@
                             Eco Score: <span th:text="${item.product.ecoScore}">5</span>/5
                         </span>
                     </p>
-                    <p>Price: $<span th:text="${#numbers.formatDecimal(item.product.price, 1, 2)}">0.00</span></p>
+                    <p>Price: <span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(item.product.price, 1, 2)}">0.00</span></p>
                     <p th:if="${item.product.stock < item.quantity}" class="stock-warning">
                         <i class="fas fa-exclamation-triangle"></i> Only <span th:text="${item.product.stock}">0</span> left in stock
                     </p>
@@ -60,7 +60,7 @@
 
                 <div class="cart-item-actions">
                     <div class="cart-item-price">
-                        $<span th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)}">0.00</span>
+                        <span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)}">0.00</span>
                     </div>
 
                     <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post" class="quantity-control">
@@ -86,7 +86,7 @@
 
             <div class="summary-row">
                 <span>Subtotal (<span th:text="${cartItemCount}">0</span> items):</span>
-                <span>$<span th:text="${#numbers.formatDecimal(cartTotal, 1, 2)}">0.00</span></span>
+                <span><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(cartTotal, 1, 2)}">0.00</span></span>
             </div>
 
             <div class="summary-row">
@@ -101,7 +101,7 @@
 
             <div class="summary-row total">
                 <span>Total:</span>
-                <span>$<span th:text="${#numbers.formatDecimal(cartTotal, 1, 2)}">0.00</span></span>
+                <span><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(cartTotal, 1, 2)}">0.00</span></span>
             </div>
 
             <a th:href="@{/cart/checkout}" class="checkout-btn">
