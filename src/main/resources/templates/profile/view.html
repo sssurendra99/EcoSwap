@@ -155,7 +155,7 @@
                         </div>
                         <div class="order-details">
                             <span class="order-items" th:text="${order.orderItems.size()} + ' items'">3 items</span>
-                            <span class="order-total">$<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span></span>
+                            <span class="order-total"><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span></span>
                         </div>
                         <a th:href="@{/dashboard/orders/{id}(id=${order.id})}" class="btn-view-order">View Details</a>
                     </div>

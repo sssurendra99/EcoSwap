@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${pageTitle} ?: 'Dashboard - EcoSwap'">Dashboard - EcoSwap</title>
     <link th:href="@{/css/dashboard-layout.css}" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Page-specific CSS -->
+    <th:block layout:fragment="stylesheets"></th:block>
 </head>
 <body>
     <div class="dashboard-wrapper">
@@ -68,11 +71,41 @@
                         </a>
                     </li>
 
+                    <!-- Admin Section Separator -->
+                    <li class="nav-divider" sec:authorize="hasRole('ADMIN')">
+                        <span>User Management</span>
+                    </li>
+
+                    <!-- Users - Admin Only -->
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{/admin/users}" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span class="nav-text">All Users</span>
+                        </a>
+                    </li>
+
+                    <!-- Sellers - Admin Only -->
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{/admin/users/sellers}" class="nav-link">
+                            <i class="fas fa-store"></i>
+                            <span class="nav-text">Sellers</span>
+                        </a>
+                    </li>
+
                     <!-- Customers - Admin Only -->
                     <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                        <a th:href="@{/dashboard/customers}" class="nav-link">
-                            <i class="fas fa-users"></i>
+                        <a th:href="@{/admin/users/customers}" class="nav-link">
+                            <i class="fas fa-user"></i>
                             <span class="nav-text">Customers</span>
+                        </a>
+                    </li>
+
+                    <!-- Seller Approvals - Admin Only -->
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{/admin/users/seller-approvals}" class="nav-link">
+                            <i class="fas fa-user-check"></i>
+                            <span class="nav-text">Seller Approvals</span>
+                            <span class="badge badge-warning" th:if="${pendingSellerApprovals != null and pendingSellerApprovals > 0}" th:text="${pendingSellerApprovals}">0</span>
                         </a>
                     </li>
 

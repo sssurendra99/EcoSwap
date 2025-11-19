@@ -213,6 +213,21 @@ body {
     background: var(--warning-color);
 }
 
+/* Navigation Divider */
+.nav-divider {
+    padding: 20px 20px 10px 20px;
+    margin-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-divider span {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
 /* Sidebar Footer */
 .sidebar-footer {
     padding: 20px;

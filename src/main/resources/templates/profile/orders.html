@@ -61,7 +61,7 @@
                             <span th:text="${order.orderItems.size()} + ' items'">3 items</span>
                         </div>
                         <div class="order-col">
-                            <span class="order-amount">$<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span></span>
+                            <span class="order-amount"><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span></span>
                         </div>
                         <div class="order-col">
                             <span class="order-status"

@@ -70,7 +70,7 @@
             <!-- Product Footer (Price & Stock) -->
             <div class="product-footer">
                 <span class="product-price">
-                    $<span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span>
+                    <span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span>
                 </span>
 
                 <span th:if="${product.stock != null and product.stock > 0}"

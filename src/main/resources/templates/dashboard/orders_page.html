@@ -282,7 +282,7 @@
         </div>
         <div class="stat-card">
             <h3>Total Revenue</h3>
-            <p class="stat-value">$<span th:text="${#numbers.formatDecimal(stats.totalRevenue, 1, 2)}">0.00</span></p>
+            <p class="stat-value"><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(stats.totalRevenue, 1, 2)}">0.00</span></p>
         </div>
     </div>
 
@@ -344,7 +344,7 @@
                     </td>
                     <td th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</td>
                     <td th:text="${order.orderItems.size()}">3</td>
-                    <td>$<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span></td>
+                    <td><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span></td>
                     <td>
                         <span class="order-status" th:classappend="${'status-' + order.status.name()}"
                               th:text="${order.status.displayName}">Pending</span>

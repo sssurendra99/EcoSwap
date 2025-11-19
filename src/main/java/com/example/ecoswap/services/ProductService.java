@@ -153,11 +153,18 @@ public class ProductService {
     public Long getActiveProductCount(Long sellerId) {
         return productRepository.countBySellerIdAndStatus(sellerId, "ACTIVE");
     }
-    
+
+    /**
+     * Count products by status (platform-wide)
+     */
+    public Long countByStatus(String status) {
+        return productRepository.countByStatus(status);
+    }
+
     public List<Product> getLowStockProducts(Long sellerId) {
         return productRepository.findLowStockProducts(sellerId);
     }
-    
+
     // FIXED: Changed method name
     public Long getOutOfStockProductCount() {
         return productRepository.countByStock(0);
@@ -165,5 +172,31 @@ public class ProductService {
     
     public List<Product> getTopRatedProducts(int limit) {
         return productRepository.findTopRatedProducts(PageRequest.of(0, limit));
+    }
+
+    // ============ ENVIRONMENTAL IMPACT CALCULATIONS ============
+
+    /**
+     * Calculate total CO2 saved across all products
+     */
+    public Double calculateTotalCo2Saved() {
+        Double total = productRepository.sumCo2Saved();
+        return total != null ? total : 0.0;
+    }
+
+    /**
+     * Calculate total plastic saved across all products
+     */
+    public Double calculateTotalPlasticSaved() {
+        Double total = productRepository.sumPlasticSaved();
+        return total != null ? total : 0.0;
+    }
+
+    /**
+     * Get average eco score across all products
+     */
+    public Double getAverageEcoScore() {
+        Double avg = productRepository.averageEcoScore();
+        return avg != null ? avg : 0.0;
     }
 }

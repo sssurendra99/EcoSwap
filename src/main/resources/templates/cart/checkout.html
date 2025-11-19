@@ -148,7 +148,7 @@
                         <h4 th:text="${item.product.name}">Product Name</h4>
                         <p>Qty: <span th:text="${item.quantity}">1</span></p>
                         <p class="order-item-price">
-                            $<span th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)}">0.00</span>
+                            <span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)}">0.00</span>
                         </p>
                     </div>
                 </div>
@@ -158,22 +158,22 @@
             <div style="border-top: 1px solid #e5e7eb; padding-top: 15px;">
                 <div class="summary-row">
                     <span>Subtotal:</span>
-                    <span>$<span th:text="${#numbers.formatDecimal(subtotal, 1, 2)}">0.00</span></span>
+                    <span><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(subtotal, 1, 2)}">0.00</span></span>
                 </div>
 
                 <div class="summary-row">
                     <span>Shipping:</span>
-                    <span>$10.00</span>
+                    <span><span th:text="${siteSettings.currencySymbol}">$</span>10.00</span>
                 </div>
 
                 <div class="summary-row">
                     <span>Tax (10%):</span>
-                    <span>$<span th:text="${#numbers.formatDecimal(subtotal * 0.1, 1, 2)}">0.00</span></span>
+                    <span><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(subtotal * 0.1, 1, 2)}">0.00</span></span>
                 </div>
 
                 <div class="summary-row total">
                     <span>Total:</span>
-                    <span>$<span th:text="${#numbers.formatDecimal(subtotal + 10 + (subtotal * 0.1), 1, 2)}">0.00</span></span>
+                    <span><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(subtotal + 10 + (subtotal * 0.1), 1, 2)}">0.00</span></span>
                 </div>
             </div>
 

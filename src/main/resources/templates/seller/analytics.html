@@ -24,7 +24,7 @@
                 <div class="stat-icon">💰</div>
                 <div class="stat-details">
                     <h3>Total Revenue</h3>
-                    <p class="stat-value">$<span th:text="${#numbers.formatDecimal(totalRevenue, 1, 2)}">0.00</span></p>
+                    <p class="stat-value"><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(totalRevenue, 1, 2)}">0.00</span></p>
                     <small>All time earnings</small>
                 </div>
             </div>
@@ -33,7 +33,7 @@
                 <div class="stat-icon">📅</div>
                 <div class="stat-details">
                     <h3>Monthly Revenue</h3>
-                    <p class="stat-value">$<span th:text="${#numbers.formatDecimal(monthlyRevenue, 1, 2)}">0.00</span></p>
+                    <p class="stat-value"><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(monthlyRevenue, 1, 2)}">0.00</span></p>
                     <small>Last 30 days</small>
                 </div>
             </div>
@@ -42,7 +42,7 @@
                 <div class="stat-icon">📈</div>
                 <div class="stat-details">
                     <h3>Weekly Revenue</h3>
-                    <p class="stat-value">$<span th:text="${#numbers.formatDecimal(weeklyRevenue, 1, 2)}">0.00</span></p>
+                    <p class="stat-value"><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(weeklyRevenue, 1, 2)}">0.00</span></p>
                     <small>Last 7 days</small>
                 </div>
             </div>
@@ -51,7 +51,7 @@
                 <div class="stat-icon">📊</div>
                 <div class="stat-details">
                     <h3>Avg Order Value</h3>
-                    <p class="stat-value">$<span th:text="${#numbers.formatDecimal(avgOrderValue, 1, 2)}">0.00</span></p>
+                    <p class="stat-value"><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(avgOrderValue, 1, 2)}">0.00</span></p>
                     <small>Per delivered order</small>
                 </div>
             </div>
@@ -126,7 +126,7 @@
                     </div>
                     <div class="overview-item">
                         <span class="overview-label">Daily Avg Revenue</span>
-                        <span class="overview-value">$<span th:text="${#numbers.formatDecimal(dailyAvgRevenue, 1, 2)}">0.00</span></span>
+                        <span class="overview-value"><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(dailyAvgRevenue, 1, 2)}">0.00</span></span>
                     </div>
                 </div>
             </div>
@@ -208,7 +208,7 @@
                                 <span class="badge badge-info" th:text="${product.unitsSold} + ' units'">0 units</span>
                             </td>
                             <td class="revenue">
-                                <span class="revenue-value">$<span th:text="${#numbers.formatDecimal(product.revenue, 1, 2)}">0.00</span></span>
+                                <span class="revenue-value"><span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(product.revenue, 1, 2)}">0.00</span></span>
                             </td>
                         </tr>
                     </tbody>

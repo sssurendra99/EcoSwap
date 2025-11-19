@@ -58,11 +58,11 @@
                         <div class="product-price-section">
                             <div class="price-wrapper">
                                 <span class="current-price">
-                                    $<span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span>
+                                    <span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span>
                                 </span>
                                 <span th:if="${product.originalPrice != null and product.originalPrice > product.price}"
                                       class="original-price">
-                                    $<span th:text="${#numbers.formatDecimal(product.originalPrice, 1, 2)}">0.00</span>
+                                    <span th:text="${siteSettings.currencySymbol}">$</span><span th:text="${#numbers.formatDecimal(product.originalPrice, 1, 2)}">0.00</span>
                                 </span>
                                 <span th:if="${product.originalPrice != null and product.originalPrice > product.price}"
                                       class="discount-badge">

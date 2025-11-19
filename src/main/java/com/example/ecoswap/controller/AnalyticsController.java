@@ -269,7 +269,7 @@ public class AnalyticsController {
     }
 
     /**
-     * Admin Analytics Dashboard (can be added later if needed)
+     * Admin Analytics Dashboard
      */
     @GetMapping("/dashboard/analytics")
     public String dashboardAnalytics(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
@@ -284,11 +284,152 @@ public class AnalyticsController {
         if (user.getRole().name().equals("SELLER")) {
             return "redirect:/seller/analytics";
         } else if (user.getRole().name().equals("ADMIN")) {
-            // For now, redirect to seller analytics
-            // Later can create separate admin analytics
-            return "redirect:/seller/analytics";
+            return adminAnalytics(userDetails, model);
         }
 
         return "redirect:/";
+    }
+
+    /**
+     * Admin Platform Analytics
+     */
+    public String adminAnalytics(CustomUserDetails userDetails, Model model) {
+        User user = userDetails.getUser();
+
+        // Get all orders (platform-wide)
+        List<Order> allOrders = orderRepository.findAll();
+
+        // Filter by status
+        List<Order> deliveredOrders = allOrders.stream()
+            .filter(o -> o.getStatus() == OrderStatus.DELIVERED)
+            .collect(Collectors.toList());
+
+        List<Order> pendingOrders = allOrders.stream()
+            .filter(o -> o.getStatus() == OrderStatus.PENDING)
+            .collect(Collectors.toList());
+
+        List<Order> processingOrders = allOrders.stream()
+            .filter(o -> o.getStatus() == OrderStatus.PROCESSING)
+            .collect(Collectors.toList());
+
+        List<Order> shippedOrders = allOrders.stream()
+            .filter(o -> o.getStatus() == OrderStatus.SHIPPED)
+            .collect(Collectors.toList());
+
+        List<Order> cancelledOrders = allOrders.stream()
+            .filter(o -> o.getStatus() == OrderStatus.CANCELLED)
+            .collect(Collectors.toList());
+
+        // Calculate revenue statistics (platform-wide)
+        BigDecimal totalRevenue = deliveredOrders.stream()
+            .map(Order::getTotalAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Monthly revenue (last 30 days)
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minus(30, ChronoUnit.DAYS);
+        BigDecimal monthlyRevenue = deliveredOrders.stream()
+            .filter(o -> o.getCreatedAt().isAfter(thirtyDaysAgo))
+            .map(Order::getTotalAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Weekly revenue (last 7 days)
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minus(7, ChronoUnit.DAYS);
+        BigDecimal weeklyRevenue = deliveredOrders.stream()
+            .filter(o -> o.getCreatedAt().isAfter(sevenDaysAgo))
+            .map(Order::getTotalAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Average order value
+        BigDecimal avgOrderValue = deliveredOrders.isEmpty()
+            ? BigDecimal.ZERO
+            : totalRevenue.divide(BigDecimal.valueOf(deliveredOrders.size()), 2, BigDecimal.ROUND_HALF_UP);
+
+        // Total products and sellers
+        long totalProducts = productRepository.count();
+        long activeProducts = productRepository.countByStatus("ACTIVE");
+        long outOfStock = productRepository.countByStock(0);
+
+        // User statistics
+        long totalUsers = userRepository.count();
+        long totalCustomers = userRepository.countByRole(com.example.ecoswap.model.enums.Role.CUSTOMER);
+        long totalSellers = userRepository.countByRole(com.example.ecoswap.model.enums.Role.SELLER);
+
+        // Monthly data for charts (last 6 months)
+        LocalDateTime sixMonthsAgo = LocalDateTime.now().minus(6, ChronoUnit.MONTHS);
+        Map<String, BigDecimal> monthlyData = new LinkedHashMap<>();
+        Map<String, Long> monthlyOrderCounts = new LinkedHashMap<>();
+        DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MMM yyyy");
+
+        for (int i = 5; i >= 0; i--) {
+            LocalDateTime monthStart = LocalDateTime.now().minusMonths(i).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+            LocalDateTime monthEnd = monthStart.plusMonths(1);
+            String monthKey = monthStart.format(monthFormatter);
+
+            BigDecimal monthRevenue = deliveredOrders.stream()
+                .filter(o -> o.getCreatedAt().isAfter(monthStart) && o.getCreatedAt().isBefore(monthEnd))
+                .map(Order::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            long monthOrderCount = deliveredOrders.stream()
+                .filter(o -> o.getCreatedAt().isAfter(monthStart) && o.getCreatedAt().isBefore(monthEnd))
+                .count();
+
+            monthlyData.put(monthKey, monthRevenue);
+            monthlyOrderCounts.put(monthKey, monthOrderCount);
+        }
+
+        // Top selling products
+        List<Map<String, Object>> topProducts = deliveredOrders.stream()
+            .flatMap(order -> order.getOrderItems().stream())
+            .collect(Collectors.groupingBy(
+                item -> item.getProduct(),
+                Collectors.summingInt(OrderItem::getQuantity)
+            ))
+            .entrySet().stream()
+            .sorted(Map.Entry.<Product, Integer>comparingByValue().reversed())
+            .limit(5)
+            .map(entry -> {
+                Map<String, Object> productData = new HashMap<>();
+                productData.put("name", entry.getKey().getName());
+                productData.put("unitsSold", entry.getValue());
+                BigDecimal revenue = deliveredOrders.stream()
+                    .flatMap(o -> o.getOrderItems().stream())
+                    .filter(item -> item.getProduct().getId().equals(entry.getKey().getId()))
+                    .map(OrderItem::getLineTotal)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+                productData.put("revenue", revenue);
+                return productData;
+            })
+            .collect(Collectors.toList());
+
+        // Add attributes to model
+        model.addAttribute("totalOrders", allOrders.size());
+        model.addAttribute("totalRevenue", totalRevenue);
+        model.addAttribute("monthlyRevenue", monthlyRevenue);
+        model.addAttribute("weeklyRevenue", weeklyRevenue);
+        model.addAttribute("avgOrderValue", avgOrderValue);
+
+        model.addAttribute("totalProducts", totalProducts);
+        model.addAttribute("activeProducts", activeProducts);
+        model.addAttribute("outOfStock", outOfStock);
+
+        model.addAttribute("totalUsers", totalUsers);
+        model.addAttribute("totalCustomers", totalCustomers);
+        model.addAttribute("totalSellers", totalSellers);
+
+        model.addAttribute("pendingOrders", pendingOrders.size());
+        model.addAttribute("processingOrders", processingOrders.size());
+        model.addAttribute("shippedOrders", shippedOrders.size());
+        model.addAttribute("deliveredOrders", deliveredOrders.size());
+
+        model.addAttribute("monthlyData", monthlyData);
+        model.addAttribute("monthlyOrderCounts", monthlyOrderCounts);
+        model.addAttribute("topProducts", topProducts);
+
+        model.addAttribute("pageTitle", "Platform Analytics");
+        model.addAttribute("userName", user.getFullName());
+        model.addAttribute("userRole", user.getRole().getDisplayName());
+
+        return "admin/analytics";
     }
 }

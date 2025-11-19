@@ -84,4 +84,18 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     
     // Products on sale
     List<Product> findByOnSaleTrue();
+
+    // ============ ENVIRONMENTAL IMPACT QUERIES ============
+
+    // Sum of CO2 saved across all products
+    @Query("SELECT SUM(p.co2Saved) FROM Product p WHERE p.co2Saved IS NOT NULL")
+    Double sumCo2Saved();
+
+    // Sum of plastic saved across all products
+    @Query("SELECT SUM(p.plasticSaved) FROM Product p WHERE p.plasticSaved IS NOT NULL")
+    Double sumPlasticSaved();
+
+    // Average eco score across all products
+    @Query("SELECT AVG(p.ecoScore) FROM Product p WHERE p.ecoScore IS NOT NULL")
+    Double averageEcoScore();
 }
