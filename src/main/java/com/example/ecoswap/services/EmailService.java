@@ -259,4 +259,117 @@ public class EmailService {
         html.append("</div></div></body></html>");
         return html.toString();
     }
+
+    /**
+     * Send password reset email with reset link
+     */
+    public void sendPasswordResetEmail(String toEmail, String fullName, String resetToken, String baseUrl) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail, fromName);
+            helper.setTo(toEmail);
+            helper.setSubject("Password Reset Request - EcoSwap");
+
+            String resetUrl = baseUrl + "/reset-password?token=" + resetToken;
+            String htmlContent = buildPasswordResetEmail(fullName, resetUrl);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            System.out.println("Password reset email sent successfully to: " + toEmail);
+
+        } catch (Exception e) {
+            System.err.println("Failed to send password reset email: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to send password reset email", e);
+        }
+    }
+
+    /**
+     * Build HTML email content for password reset
+     */
+    private String buildPasswordResetEmail(String fullName, String resetUrl) {
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html>");
+        html.append("<html>");
+        html.append("<head>");
+        html.append("<meta charset='UTF-8'>");
+        html.append("<meta name='viewport' content='width=device-width, initial-scale=1.0'>");
+        html.append("<style>");
+        html.append("body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }");
+        html.append(".email-container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }");
+        html.append(".header { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 30px; text-align: center; }");
+        html.append(".header h1 { margin: 0; font-size: 28px; }");
+        html.append(".header p { margin: 10px 0 0 0; opacity: 0.9; }");
+        html.append(".content { padding: 30px; }");
+        html.append(".reset-button { display: inline-block; padding: 14px 32px; background: #11998e; color: white !important; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: 600; font-size: 16px; }");
+        html.append(".reset-button:hover { background: #0e7c6f; }");
+        html.append(".warning-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }");
+        html.append(".footer { background: #f9fafb; padding: 20px; text-align: center; color: #6b7280; font-size: 14px; }");
+        html.append(".divider { height: 1px; background: #e5e7eb; margin: 20px 0; }");
+        html.append("</style>");
+        html.append("</head>");
+        html.append("<body>");
+        html.append("<div class='email-container'>");
+
+        // Header
+        html.append("<div class='header'>");
+        html.append("<h1>🔐 Password Reset Request</h1>");
+        html.append("<p>Reset your EcoSwap account password</p>");
+        html.append("</div>");
+
+        // Content
+        html.append("<div class='content'>");
+        html.append("<p>Hi ").append(fullName).append(",</p>");
+        html.append("<p>We received a request to reset your password for your EcoSwap account. If you made this request, click the button below to reset your password:</p>");
+
+        // Reset Button
+        html.append("<div style='text-align: center; margin: 30px 0;'>");
+        html.append("<a href='").append(resetUrl).append("' class='reset-button'>Reset Your Password</a>");
+        html.append("</div>");
+
+        // Warning Box
+        html.append("<div class='warning-box'>");
+        html.append("<strong>⚠️ Important:</strong><br>");
+        html.append("This password reset link will expire in <strong>1 hour</strong> for security reasons.<br>");
+        html.append("If you didn't request a password reset, please ignore this email and your password will remain unchanged.");
+        html.append("</div>");
+
+        // Divider
+        html.append("<div class='divider'></div>");
+
+        // Alternate Link
+        html.append("<p style='font-size: 14px; color: #6b7280;'>If the button above doesn't work, copy and paste this link into your browser:</p>");
+        html.append("<p style='font-size: 12px; word-break: break-all; color: #6b7280; background: #f9fafb; padding: 10px; border-radius: 4px;'>")
+                .append(resetUrl).append("</p>");
+
+        // Security Tips
+        html.append("<div style='margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;'>");
+        html.append("<p style='font-size: 14px; color: #6b7280;'><strong>Security Tips:</strong></p>");
+        html.append("<ul style='font-size: 14px; color: #6b7280;'>");
+        html.append("<li>Never share your password with anyone</li>");
+        html.append("<li>Use a strong, unique password</li>");
+        html.append("<li>Enable two-factor authentication if available</li>");
+        html.append("</ul>");
+        html.append("</div>");
+
+        html.append("<p style='margin-top: 30px;'>Thank you for being part of our sustainable community! 🌍</p>");
+        html.append("<p style='margin-top: 20px;'>Best regards,<br><strong>The EcoSwap Team</strong></p>");
+
+        html.append("</div>");
+
+        // Footer
+        html.append("<div class='footer'>");
+        html.append("<p>This is an automated email. Please do not reply to this message.</p>");
+        html.append("<p>If you have any questions, please contact our support team.</p>");
+        html.append("<p>&copy; 2024 EcoSwap. All rights reserved.</p>");
+        html.append("</div>");
+
+        html.append("</div>");
+        html.append("</body>");
+        html.append("</html>");
+
+        return html.toString();
+    }
 }

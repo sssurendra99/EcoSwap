@@ -1,20 +1,25 @@
 package com.example.ecoswap.services;
 
 import com.example.ecoswap.model.User;
+import com.example.ecoswap.model.PasswordResetToken;
 import com.example.ecoswap.model.SellerProfile;
 import com.example.ecoswap.model.enums.Role;
 import com.example.ecoswap.repository.UserRepository;
+import com.example.ecoswap.repository.PasswordResetTokenRepository;
 import com.example.ecoswap.repository.SellerProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -24,6 +29,12 @@ public class UserService {
 
     @Autowired
     private SellerProfileRepository sellerProfileRepository;
+
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Get all users
     public List<User> getAllUsers() {
@@ -124,5 +135,91 @@ public class UserService {
     @Transactional
     public User updateUser(User user) {
         return userRepository.save(user);
+    }
+
+    // ==================== Password Reset Methods ====================
+
+    /**
+     * Create a password reset token for the user
+     * Token expires in 1 hour
+     */
+    @Transactional
+    public String createPasswordResetToken(User user) {
+        // Delete any existing tokens for this user
+        passwordResetTokenRepository.deleteByUser(user);
+
+        // Generate a unique token
+        String token = UUID.randomUUID().toString();
+
+        // Create token with 1 hour expiry
+        LocalDateTime expiryDate = LocalDateTime.now().plusHours(1);
+        PasswordResetToken resetToken = new PasswordResetToken(token, user, expiryDate);
+
+        passwordResetTokenRepository.save(resetToken);
+
+        return token;
+    }
+
+    /**
+     * Validate a password reset token
+     * Returns the user if token is valid, empty otherwise
+     */
+    public Optional<User> validatePasswordResetToken(String token) {
+        Optional<PasswordResetToken> resetToken = passwordResetTokenRepository.findByToken(token);
+
+        if (resetToken.isEmpty()) {
+            return Optional.empty();
+        }
+
+        PasswordResetToken passwordResetToken = resetToken.get();
+
+        // Check if token is valid (not expired and not used)
+        if (!passwordResetToken.isValid()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(passwordResetToken.getUser());
+    }
+
+    /**
+     * Reset user password using a valid token
+     */
+    @Transactional
+    public boolean resetPassword(String token, String newPassword) {
+        Optional<PasswordResetToken> resetTokenOpt = passwordResetTokenRepository.findByToken(token);
+
+        if (resetTokenOpt.isEmpty()) {
+            return false;
+        }
+
+        PasswordResetToken resetToken = resetTokenOpt.get();
+
+        // Validate token
+        if (!resetToken.isValid()) {
+            return false;
+        }
+
+        // Update user password
+        User user = resetToken.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Mark token as used
+        resetToken.setUsed(true);
+        passwordResetTokenRepository.save(resetToken);
+
+        // Delete all other tokens for this user
+        passwordResetTokenRepository.deleteByUser(user);
+
+        return true;
+    }
+
+    /**
+     * Clean up expired password reset tokens
+     * This can be called periodically or as part of maintenance
+     */
+    @Transactional
+    public void cleanupExpiredTokens() {
+        passwordResetTokenRepository.deleteExpiredTokens(LocalDateTime.now());
     }
 }

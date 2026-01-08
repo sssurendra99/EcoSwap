@@ -36,7 +36,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/css/**", "/js/**", "/adminlte/**", "/images/**", "/uploads/**", "/register**", "/login", "/", "/error", "/about", "/contactus", "/faq", "/shop", "/shop/**", "/product/**").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/adminlte/**", "/images/**", "/uploads/**", "/register**", "/login", "/forgot-password", "/reset-password", "/", "/error", "/about", "/contactus", "/faq", "/shop", "/shop/**", "/product/**").permitAll()
                 .requestMatchers("/cart", "/cart/add", "/cart/add-ajax", "/cart/count").permitAll() // Allow guest cart
                 .requestMatchers("/cart/checkout", "/cart/place-order").authenticated() // Require login for checkout
                 .requestMatchers("/cart/**").authenticated() // Other cart operations need login
