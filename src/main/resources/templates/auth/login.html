@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Login - EcoSwap</title>
-    <link th:href="@{/css/styles.css}" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
 </head>
 <body layout:fragment="content">
     <main>
@@ -22,23 +22,46 @@
                        required/>
                 
                 <label for="password">Password</label>
-                <input type="password" 
-                       id="password" 
-                       name="password" 
-                       placeholder="Enter your password" 
+                <input type="password"
+                       id="password"
+                       name="password"
+                       placeholder="Enter your password"
                        required/>
-                
-                <div th:if="${error}" 
-                     style="color: #dc3545; 
-                            background-color: #f8d7da; 
-                            border: 1px solid #f5c6cb; 
-                            padding: 12px; 
-                            border-radius: 6px; 
-                            margin-bottom: 20px; 
+
+                <!-- Success Message (for password reset confirmation) -->
+                <div th:if="${message}"
+                     style="color: #155724;
+                            background-color: #d4edda;
+                            border: 1px solid #c3e6cb;
+                            padding: 12px;
+                            border-radius: 6px;
+                            margin-bottom: 20px;
+                            text-align: center;">
+                    <span th:text="${message}"></span>
+                </div>
+
+                <div th:if="${error}"
+                     style="color: #dc3545;
+                            background-color: #f8d7da;
+                            border: 1px solid #f5c6cb;
+                            padding: 12px;
+                            border-radius: 6px;
+                            margin-bottom: 20px;
                             text-align: center;">
                     <span th:text="${error}"></span>
                 </div>
-                
+
+                <!-- Forgot Password Link -->
+                <div style="text-align: right; margin-bottom: 20px;">
+                    <a th:href="@{/forgot-password}"
+                       style="color: #1dbf73;
+                              text-decoration: none;
+                              font-size: 14px;
+                              font-weight: 500;">
+                        Forgot Password?
+                    </a>
+                </div>
+
                 <button type="submit">Sign In</button>
                 
                 <p style="margin-top: 30px; margin-bottom: 10px;">Don't have an account?</p>
